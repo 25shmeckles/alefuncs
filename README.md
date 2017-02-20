@@ -1,4 +1,4 @@
-# alefuncs
+# ale*funcs*
 ####A bunch of tools *easy to drink* ;)
 ![alt text](./alefuncs_logo.png "Logo Prova")
 *cheers!*
