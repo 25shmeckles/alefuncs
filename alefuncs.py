@@ -1,11 +1,3 @@
-### This is a collection of functions and classes I have initially wrote during my postdoc at the UMCU.
-### The following code is meant to be compatible with Python 2.7 and 3.x (minor modifications may be needed in case of Python 3)
-### If you use Python 2.7 please include "from __future__ import division, print_function" to your script
-### The imports are included in the functions' body for clarity.
-### If you need to call a function over and over then consider to move the imports at the beginning of your script.
-### This collection is meant to be used by "copy/paste" not as a module (mostly due to the imports),
-### altough you can use "from alefuncs import something", "from alefuncs import *", and "import alefuncs as ale", without problems.
-
 ### author:  alessio.marcozzi@gmail.com
 ### version: 2017_02
 
