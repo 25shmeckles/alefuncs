@@ -1,6 +1,6 @@
 ### author:  alessio.marcozzi@gmail.com
 ### version: 2017_02
-
+### licence: MIT
 
 def print_sbar(n,m,s='|#.|',size=30,message=''):
 	'''(int,int,string,int) => None
@@ -9,7 +9,7 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
 		range_limit = 1000
 		for n in range(range_limit):
 			print_sbar(n,m=range_limit)
-			time.sleep(0.1) 
+			time.sleep(0.1)
 	'''
 	import sys
 	#adjust to bar size
@@ -82,31 +82,6 @@ def get_exons_coord_by_gene_name(gene_name):
 		coordinates = (exon.contig, exon.start, exon.end)
 		table.update({exon_id:coordinates})
 	return table
-
-
-class Render(QWebPage):
-	from PyQt4.QtGui import * 
-	from PyQt4.QtCore import * 
-	from PyQt4.QtWebKit import *
-	def __init__(self, url):  
-		self.app = QApplication(sys.argv)  
-		QWebPage.__init__(self)  
-		self.loadFinished.connect(self._loadFinished)  
-		self.mainFrame().load(QUrl(url))  
-		self.app.exec_()  
-
-	def _loadFinished(self, result):  
-		self.frame = self.mainFrame()  
-		self.app.quit()
-
-
-def get_html(str_url):
-	'''url => html
-	Return a PyQt4-rendered html page.
-	It requires the Render class'''
-	r_html = Render(str_url)  
-	html = r_html.frame.toHtml()
-	return html
 
 
 def get_exons_coord_by_gene_name(gene_name):
@@ -423,7 +398,6 @@ def compare(dict_A,dict_B):
 					   '3250000-3260000',
 					   '6850000-6860000',
 					   ...])}
-	
 	'''
 	chrms = [str(x) for x in range(1,23)] + ['X','Y']
 	
@@ -528,77 +502,9 @@ def gc_content(sequence,percent=True):
 ##Flexibility calculator##  
 #requires stabflex3.py
 
-#result handler
-class myResultHandler(SFResult):
-	
-	def report(self,verbose=True):
-		self.result = []
-		if verbose:
-			print("# data description : {}".format(self.description))
-			print("# window size : {}".format(self.size))
-			print("# window step : {}".format(self.step))
-		for i in range(len(self.x)):
-			self.result.append(('{}-{}'.format(round(self.x[i]-self.size/2),
-											   round(self.x[i]+self.size/2)),
-								round(self.y[i],2)))
-		if verbose:
-			print("# bins examined : {}".format(len(self.result)))
-			print("# max flexibility : {}".format(max([v for i,v in self.result])))
-		return self.result
 
-			
-#main algorithm            
-class myFlex(SFAlgorithm): #in line version of the pyflex3.py main class
 
-	def __init__(self, sequence, window_size, step_zize):
-		self.size = window_size
-		self.step = step_zize
-		self.seq = sequence
-				
-	def analyse(self, data, verbose=False):
-		seq = self.seq
-		length = len(seq)
 
-		if verbose:
-			print("Using {} data from {}".format(data.description, data.source))
-			print("Running ...")
-
-		# start timer
-		start = time.clock()
-
-		offset = self.size/2
-
-		i = 0
-		x = array.array('f')
-		y = array.array('f')
-		finished = False
-		while not finished:
-			try:
-				sum = 0
-				for j in range(self.size):
-					a = seq[i + j]
-					b = seq[i + j + 1]
-					sum += data.get(a,b) 
-				x.append(offset + i)
-				y.append(sum / self.size)
-				i += self.step
-			except IndexError:
-				finished = True
-
-		# stop timer
-		end = time.clock()
-
-		elapsed = end - start
-		
-		if verbose:
-			print("Finished, elapsed time {} seconds ({} bases/sec)".format(round(elapsed,2),length/elapsed))
-
-		return myResultHandler(self.seq, data, x, y, self.step, self.size,
-							   description = data.description,
-							   label = data.label,
-							   source = data.source)
-
-		
 #Endpoint function to calculate the flexibility of a given sequence
 def dna_flex(sequence,window_size=500,step_zize=100,verbose=False):
 	'''(str,int,int,bool) => list_of_tuples
@@ -684,23 +590,6 @@ def parse_RepeatMasker(infile="RepeatMasker.txt",rep_type='class'):
 					result[chromosome][bin_].add(repeat)
 				
 	return result
-
-with open(hotspots_by_threshold,'rb') as f:
-	hotspots_A = pickle.load(f)
-if type(hotspots_A) == list:
-	tmp = OrderedDict()
-	for c,h,t in hotspots_A:
-		if c not in tmp:
-			tmp.update({c:[h]})
-		else:
-			tmp[c] += [h]
-	hotspots_A = tmp
-
-print(len(hotspots_A)) # 24      
-		
-with open(hotspots_top5percent,'rb') as f:
-	hotspots_B = pickle.load(f)
-print(len(hotspots_B)) # 23 since 1000G does not have chrY
 
 
 def next_day(d='2012-12-04'):
@@ -903,11 +792,11 @@ def find_shortest_path(graph, start, end, path=[]):
 
 # ##
 # graph = {'A': ['B', 'C'],
-# 		 'B': ['C', 'D'],
-# 		 'C': ['D'],
-# 		 'D': ['C'],
-# 		 'E': ['F'],
-# 		 'F': ['C']}
+#        'B': ['C', 'D'],
+#        'C': ['D'],
+#        'D': ['C'],
+#        'E': ['F'],
+#        'F': ['C']}
 
 # >>> find_path(graph, 'A', 'D')
 #     ['A', 'B', 'C', 'D']
@@ -1038,7 +927,7 @@ def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@stu
 						'NC_000021.8','NC_000022.10','NC_000023.10','NC_000024.9'}
 	
 
-	CHR_LENGTHS_GRCh37 = {	'1':249250621,'2' :243199373,'3' :198022430,'4' :191154276,
+	CHR_LENGTHS_GRCh37 = {  '1':249250621,'2' :243199373,'3' :198022430,'4' :191154276,
 							'5' :180915260,'6' :171115067,'7' :159138663,'8' :146364022,
 							'9' :141213431,'10':135534747,'11':135006516,'12':133851895,
 							'13':115169878,'14':107349540,'15':102531392,'16':90354753,
@@ -1077,7 +966,7 @@ def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@stu
 			print('ValueError: no sequence found in NCBI')
 
 		with open('sequence_{}.txt'.format(target_chromosome), 'w') as f:
-			f.write(sequence)	
+			f.write(sequence)   
 
 
 def exponential_range(start=0,end=10000,base=10):
@@ -1238,8 +1127,8 @@ def extract_dgvMerged(infile, outfile):
 	Ad hoc function to extract deletions and losses out of the dgvMerged database.
 	Returns a file ready to be annotated with FusionGenes_Annotation.pl .
 	'''
-	#original_header = '##bin	chrom	chromStart	chromEnd	name	score	strand	thickStart	thickEnd	itemRgb	varType	reference	pubMedId	method	platform	mergedVariants	supportingVariants	sampleSize	observedGains	observedLosses	cohortDescription	genes	samples'
-					#	[0]		[1]		[2]			[3]			[4]		[5]		[6]		[7]			[8]			[9]		[10]	[11]		[12]		[13]	[14]		[15]			[16]				[17]		[18]			[19]			[20]				[21]	[22]
+	#original_header = '##bin   chrom   chromStart  chromEnd    name    score   strand  thickStart  thickEnd    itemRgb varType reference   pubMedId    method  platform    mergedVariants  supportingVariants  sampleSize  observedGains   observedLosses  cohortDescription   genes   samples'
+					#   [0]     [1]     [2]         [3]         [4]     [5]     [6]     [7]         [8]         [9]     [10]    [11]        [12]        [13]    [14]        [15]            [16]                [17]        [18]            [19]            [20]                [21]    [22]
 	raw_data = extract_data(infile, columns=[4,1,2,3,10], header='##', skip_lines_starting_with='#', data_separator='\t', verbose=False )
 
 	# Take only deletions and losses
@@ -1259,7 +1148,7 @@ def extract_dgvMerged(infile, outfile):
 				cnv_type = 'DELETION'
 				orientation = 'HT'
 			# elif item[-1] == 'deletion':
-			# 	orientation = 'TH'
+			#   orientation = 'TH'
 			else:
 				print('ERROR: unable to determine "Orientation"...')
 			list_ = [item[0],item[1][3:],item[2],item[2],item[1][3:],item[3],item[3],cnv_type,orientation]
@@ -1436,13 +1325,13 @@ def gen_controls(how_many,chromosome,GapTable_file,outfile):
 # chromosome='9'
 # GapTable_file='/Users/alec/Desktop/UMCU_Backup/Projects/Anne_Project/current_brkps_DB/out_ALL_gap.txt'
 # while threads < 100:
-# 	while running_threads >= max_simultaneous_threads:
-# 		time.sleep(1)
-# 	running_threads += 1
-# 	outfile = '/Users/alec/Desktop/UMCU_Backup/Projects/Anne_Project/current_brkps_DB/out_chr9_control_'+str(threads)+'.txt'
-# 	print('thread', threads, '|', 'running threads:',running_threads)
-# 	Thread(target=gen_controls, args=(how_many,chromosome,GapTable_file,outfile)).start()
-# 	threads += 1
+#   while running_threads >= max_simultaneous_threads:
+#       time.sleep(1)
+#   running_threads += 1
+#   outfile = '/Users/alec/Desktop/UMCU_Backup/Projects/Anne_Project/current_brkps_DB/out_chr9_control_'+str(threads)+'.txt'
+#   print('thread', threads, '|', 'running threads:',running_threads)
+#   Thread(target=gen_controls, args=(how_many,chromosome,GapTable_file,outfile)).start()
+#   threads += 1
 
 def gen_control_dataset(real_dataset,suffix='_control.txt'):# tested only for deletion/duplication
 	'''
@@ -1517,12 +1406,12 @@ def gen_gap_table(infile='/Users/amarcozzi/Desktop/All_breakpoints_HG19_final.tx
 		
 		# # Extract data from infile, chromosome by chromosome
 		# with open(infile, 'r') as f:
-		# 	lines = f.readlines()
-		# 	for line in lines: # yield_file(infile) can be used instead
-		# 		if line.startswith('chr'+Chr+':'):
-		# 			tmp = line.split(':')
-		# 			breakpoint = tmp[1].split('-')[0]
-		# 			breakpoint_list.append(int(breakpoint))
+		#   lines = f.readlines()
+		#   for line in lines: # yield_file(infile) can be used instead
+		#       if line.startswith('chr'+Chr+':'):
+		#           tmp = line.split(':')
+		#           breakpoint = tmp[1].split('-')[0]
+		#           breakpoint_list.append(int(breakpoint))
 		# print(len(breakpoint_list),'breakpoints found...')
 
 		with open(infile, 'r') as f:
@@ -1593,7 +1482,7 @@ def gen_multiple_controls(real_dataset,how_many):
 # ## Generate multiple controls of datasets found in a folder
 # folder = '/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test_datasets/random'
 # for item in list_of_files(folder,'txt'):
-# 	gen_multiple_controls(item,1000)
+#   gen_multiple_controls(item,1000)
 
 def gen_deletion_dataset_from_breaks(list_of_breaks, outfile, ID_already=False):
 	'''Genrates a proper deletion dataset file out of a list of breaks '''
@@ -1628,12 +1517,12 @@ def gen_deletion_dataset_from_breaks(list_of_breaks, outfile, ID_already=False):
 # gen_deletion_dataset_from_breaks(list_of_breaks, 'test_deletion_dataset.txt')
 # ## Generate (m) RANDOM datasets of different length (n)
 # for m in range(1000):
-# 	for n in [100,1000,10000,100000,1000000]:
-# 		outfile = 'rnd_dataset_'+ str(n)+'_'+str(m)+'.txt'
-# 		breaks = list()
-# 		for chromosome in CHROMOSOMES:	 	
-# 		 	breaks.extend(gen_rnd_breaks(how_many=500, chromosome=chromosome, min_distance=0, max_distance=n))
-# 		gen_deletion_dataset_from_breaks(breaks, outfile)
+#   for n in [100,1000,10000,100000,1000000]:
+#       outfile = 'rnd_dataset_'+ str(n)+'_'+str(m)+'.txt'
+#       breaks = list()
+#       for chromosome in CHROMOSOMES:      
+#           breaks.extend(gen_rnd_breaks(how_many=500, chromosome=chromosome, min_distance=0, max_distance=n))
+#       gen_deletion_dataset_from_breaks(breaks, outfile)
 
 def gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance=15000, GapTable_file='tables/gap.txt'):
 	'''Returns tuples containing 1)the chromosome, 2)first breakpoint, 3)second breakpoint
@@ -1712,7 +1601,7 @@ def gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance
 				else: are_points_ok = False
 			else: are_points_ok = False
 
-		if are_points_ok == True:			
+		if are_points_ok == True:           
 			list_of_breakpoints.append(('chr'+chromosome, start, end))
 	print('OK')
 	return list_of_breakpoints
@@ -1733,11 +1622,11 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
 	valid chromosomes inputs are "1" to "22" ; "Y" ; "X"
 	The chromosome length is based on the build GRCh37/hg19.
 	Prerequisites: The gap_list file is in the form:
-														##chrom	chromStart	chromEnd
-														chr1	0	10000
-														chr1	30000	40000
-														chr1	40000	50000
-														chr1	50000	60000
+														##chrom chromStart  chromEnd
+														chr1    0   10000
+														chr1    30000   40000
+														chr1    40000   50000
+														chr1    50000   60000
 	'''
 	import random
 	if verbose == True:
@@ -1770,15 +1659,15 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
 	merged_gaps = merge_gaps(chr_specific_gap)
 	# merged_gaps = []
 	# while len(chr_specific_gap) > 0:
-	# 	try:
-	# 		if chr_specific_gap[0][1] == chr_specific_gap[1][0]:
-	# 			tmp = (chr_specific_gap[0][0],chr_specific_gap[1][1])
-	# 			chr_specific_gap.pop(0)
-	# 			chr_specific_gap[0] = tmp
-	# 		else:
-	# 			merged_gaps.append(chr_specific_gap.pop(0))
-	# 	except:
-	# 		merged_gaps.append(chr_specific_gap.pop(0))
+	#   try:
+	#       if chr_specific_gap[0][1] == chr_specific_gap[1][0]:
+	#           tmp = (chr_specific_gap[0][0],chr_specific_gap[1][1])
+	#           chr_specific_gap.pop(0)
+	#           chr_specific_gap[0] = tmp
+	#       else:
+	#           merged_gaps.append(chr_specific_gap.pop(0))
+	#   except:
+	#       merged_gaps.append(chr_specific_gap.pop(0))
 
 	# Genrates breakpoint list
 	if verbose == True: print('generating', how_many, 'breakpoints in Chr', chromosome)
@@ -1808,7 +1697,7 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
 				are_points_ok = False
 				if verbose == True: print(start,'is in a gap and will be discarded')
 			
-		if are_points_ok == True:			
+		if are_points_ok == True:           
 			list_of_breakpoints.append((chromosome, start))
 			if verbose == True: print(start,'is OK',len(list_of_breakpoints),'good breaks generated out of',how_many)
 
@@ -1820,13 +1709,13 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
 # start = time.time()
 # breaks_on_1 = gen_rnd_single_break(how_many=19147,verbose=False)
 # for item in breaks_on_1:
-# 	print(str(item[0])+'\t'+str(item[1]))
+#   print(str(item[0])+'\t'+str(item[1]))
 # print('Done in', time.time()-start,'seconds..')
 # ## Generate a control file
 # list_brkps = gen_rnd_single_break(how_many=20873, chromosome='1', GapTable_file='/Users/amarcozzi/Desktop/current_brkps_DB/out_ALL_gap.txt', verbose=True)
 # with open('/Users/amarcozzi/Desktop/current_brkps_DB/out_chr1_control.txt','w') as f:
-# 	for item in list_brkps:
-# 		f.write(list_to_line(item,'\t')+'\n')
+#   for item in list_brkps:
+#       f.write(list_to_line(item,'\t')+'\n')
 # ## Generate multiple controls
 # import time
 # from threading import Thread
@@ -1839,20 +1728,20 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
 # infile = '/Users/amarcozzi/Desktop/Projects/Anne_Project/current_brkps_DB/out_chr'+chromosome+'.txt'
 # how_many = 0
 # for line in yield_file(infile):
-# 	if line.startswith(chromosome+'\t'):
-# 		how_many += 1
+#   if line.startswith(chromosome+'\t'):
+#       how_many += 1
 # print('found',how_many,'breakpoints in chromosome',chromosome)
 # while threads < 100:
-# 	while running_threads >= max_simultaneous_threads:
-# 		time.sleep(1)
-# 	running_threads += 1
-# 	outfile = '/Users/amarcozzi/Desktop/Projects/Anne_Project/current_brkps_DB/controls/out_chr'+chromosome+'_control_'+str(threads)+'.txt'
-# 	print('thread', threads, '|', 'running threads:',running_threads)
-# 	Thread(target=gen_controls, args=(how_many,chromosome,GapTable_file,outfile)).start()
-# 	threads += 1
+#   while running_threads >= max_simultaneous_threads:
+#       time.sleep(1)
+#   running_threads += 1
+#   outfile = '/Users/amarcozzi/Desktop/Projects/Anne_Project/current_brkps_DB/controls/out_chr'+chromosome+'_control_'+str(threads)+'.txt'
+#   print('thread', threads, '|', 'running threads:',running_threads)
+#   Thread(target=gen_controls, args=(how_many,chromosome,GapTable_file,outfile)).start()
+#   threads += 1
 # print('Waiting for threads to finish...')
 # while running_threads > 0:
-# 	time.sleep(1)
+#   time.sleep(1)
 # end_time = time.time()
 # print('\nDone in',(end_time-start_time)/60,'minutes')
 
@@ -1887,8 +1776,8 @@ def kmers_finder_with_mismatches(sequence, motif_length, max_mismatches, most_co
 	Input: A sequence and a pair of integers: motif_length (<=12) and max_mismatch (<= 3).
 	Output: An OrderedDict containing all k-mers with up to d mismatches in string.
 
-	Sample Input:	ACGTTGCATGTCGCATGATGCATGAGAGCT 4 1
-	Sample Output:	OrderedDict([('ATGC', 5), ('ATGT', 5), ('GATG', 5),...])
+	Sample Input:   ACGTTGCATGTCGCATGATGCATGAGAGCT 4 1
+	Sample Output:  OrderedDict([('ATGC', 5), ('ATGT', 5), ('GATG', 5),...])
 	'''
 	from collections import OrderedDict
 	from operator import itemgetter
@@ -1949,7 +1838,7 @@ def line_to_list(line, char):
 		if item != '': # skips empty 'cells'
 			list_.append(item)
 		n = index + 1
-	list_.append(line[n:].replace('\n','').replace('\r','')) # append the last item	
+	list_.append(line[n:].replace('\n','').replace('\r','')) # append the last item 
 	return list_
 # print(line_to_list('Makes a list of string out of a line. Splits the word at char.', ' '))
 
@@ -2209,7 +2098,7 @@ def process(real_dataset):
 #process('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/clinvarCnv-DeletionsOnly.txt')
 # folder = '/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test_datasets/random'
 # for item in list_of_files(folder,'txt'):
-# 	process(item)
+#   process(item)
 
 
 def query_encode(chromosome, start, end):
@@ -2392,7 +2281,7 @@ def sort_dataset(dataset_file, overwrite=False):
 	#checkpoint
 	if header == False or header_counter > 1:
 		print('Something is wrong with the header line...', header_counter, header)
-		return None		
+		return None     
 	# sort by the second element of the list i.e. 'ChrA'
 	text.sort(key=lambda x: sortby_chr(itemgetter(1)(x))) 
 	# Write output
@@ -2408,7 +2297,7 @@ def sort_dataset(dataset_file, overwrite=False):
 # sort_dataset('test_data.txt')
 # folder = '/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test_datasets/public'
 # for item in list_of_files(folder, 'txt'):
-# 	sort_dataset(item)
+#   sort_dataset(item)
 # sort_dataset('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test_datasets/public/annotated/dgvMerged-DeletionsOnly_annotated.txt')
 
 def split_fasta_file(infile): #beta
@@ -2445,7 +2334,7 @@ def split_fasta_file(infile): #beta
 		with open(outfile, 'w') as out:
 			for _ in lines:
 				out.write(_)
-		print('{} bases written'.format(length))	
+		print('{} bases written'.format(length))    
 
 def substract_datasets(infile_1, infile_2, outfile, header=True):
 	'''
@@ -2502,4 +2391,4 @@ def yield_file(filepath):
 		for line in f:
 			yield line
 # for line in yield_file('GRCh37_hg19_variants_2014-10-16.txt'):
-# 	print(line[:20])
+#   print(line[:20])
