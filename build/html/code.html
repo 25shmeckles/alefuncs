@@ -1,0 +1,790 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Code Overview &#8212; alefuncs a documentation</title>
+    
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to alefuncs’ documentation!" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to alefuncs’ documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">alefuncs a documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to alefuncs&#8217; documentation!</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/code.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-alefuncs">
+<span id="code-overview"></span><h1>Code Overview<a class="headerlink" href="#module-alefuncs" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="alefuncs.annotate_fusion_genes">
+<code class="descclassname">alefuncs.</code><code class="descname">annotate_fusion_genes</code><span class="sig-paren">(</span><em>dataset_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#annotate_fusion_genes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.annotate_fusion_genes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses FusionGenes_Annotation.pl to find fusion genes in the dataset.
+Generates a new file containing all the annotations.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.blastn">
+<code class="descclassname">alefuncs.</code><code class="descname">blastn</code><span class="sig-paren">(</span><em>input_fasta_file</em>, <em>db_path='/Users/amarcozzi/Desktop/BLAST_DB/'</em>, <em>db_name='human_genomic'</em>, <em>out_file='blastn_out.xml'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#blastn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.blastn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run blastn on the local machine using a local database.
+Requires NCBI BLAST+ to be installed. <a class="reference external" href="http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&amp;PAGE_TYPE=BlastDocs&amp;DOC_TYPE=Download">http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&amp;PAGE_TYPE=BlastDocs&amp;DOC_TYPE=Download</a>
+Takes a fasta file as input and writes the output in an XML file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.check_line">
+<code class="descclassname">alefuncs.</code><code class="descname">check_line</code><span class="sig-paren">(</span><em>line, unexpected_char=['\n', '', ' ', '#']</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#check_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.check_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the line starts with an unexpected character.
+If so, return False, else True</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.compare">
+<code class="descclassname">alefuncs.</code><code class="descname">compare</code><span class="sig-paren">(</span><em>dict_A</em>, <em>dict_B</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#compare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.compare" title="Permalink to this definition">¶</a></dt>
+<dd><p>(dict,dict) =&gt; dict, dict, dict
+Compares two dicts of bins.
+Returns the shared elements, the unique elements of A and the unique elements of B.
+The dicts shape is supposed to be like this:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>OrderedDict([(&#8216;1&#8217;,</dt>
+<dd><blockquote class="first">
+<div><dl class="docutils">
+<dt>[&#8216;23280000-23290000&#8217;,</dt>
+<dd>&#8216;24390000-24400000&#8217;,
+...]),</dd>
+</dl>
+</div></blockquote>
+<dl class="last docutils">
+<dt>(&#8216;2&#8217;,</dt>
+<dd><dl class="first last docutils">
+<dt>[&#8216;15970000-15980000&#8217;,</dt>
+<dd>&#8216;16020000-16030000&#8217;,
+...]),</dd>
+</dl>
+</dd>
+<dt>(&#8216;3&#8217;,</dt>
+<dd><dl class="first last docutils">
+<dt>[&#8216;610000-620000&#8217;,</dt>
+<dd>&#8216;3250000-3260000&#8217;,
+&#8216;6850000-6860000&#8217;,
+...])}</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.determine_average_breaks_distance">
+<code class="descclassname">alefuncs.</code><code class="descname">determine_average_breaks_distance</code><span class="sig-paren">(</span><em>dataset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#determine_average_breaks_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.determine_average_breaks_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the average distance among breaks in a dataset.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.dice_coefficient">
+<code class="descclassname">alefuncs.</code><code class="descname">dice_coefficient</code><span class="sig-paren">(</span><em>sequence_a</em>, <em>sequence_b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#dice_coefficient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.dice_coefficient" title="Permalink to this definition">¶</a></dt>
+<dd><p>(str, str) =&gt; float
+Return the dice cofficient of two sequences.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.dict_overview">
+<code class="descclassname">alefuncs.</code><code class="descname">dict_overview</code><span class="sig-paren">(</span><em>dictionary</em>, <em>how_many_keys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#dict_overview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.dict_overview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints out how_many_elements of the target dictionary.
+Useful to have a quick look at the structure of a dictionary.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.dna_flex">
+<code class="descclassname">alefuncs.</code><code class="descname">dna_flex</code><span class="sig-paren">(</span><em>sequence</em>, <em>window_size=500</em>, <em>step_zize=100</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#dna_flex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.dna_flex" title="Permalink to this definition">¶</a></dt>
+<dd><p>(str,int,int,bool) =&gt; list_of_tuples
+Calculate the flexibility index of a sequence.
+Return a list of tuples.
+Each tuple contains the bin&#8217;s coordinates
+and the calculated flexibility of that bin.
+Example:</p>
+<blockquote>
+<div>dna_flex(seq_a,500,100)</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[(</span><span class="s1">&#39;0-500&#39;</span><span class="p">,</span> <span class="mf">9.7</span><span class="p">),(</span><span class="s1">&#39;100-600&#39;</span><span class="p">,</span> <span class="mf">9.77</span><span class="p">),</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.download_human_genome">
+<code class="descclassname">alefuncs.</code><code class="descname">download_human_genome</code><span class="sig-paren">(</span><em>build='GRCh37'</em>, <em>entrez_usr_email='A.E.vanvlimmeren&#64;students.uu.nl'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#download_human_genome"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.download_human_genome" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download the Human genome from enterez.
+Save each chromosome in a separate txt file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.exponential_range">
+<code class="descclassname">alefuncs.</code><code class="descname">exponential_range</code><span class="sig-paren">(</span><em>start=0</em>, <em>end=10000</em>, <em>base=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#exponential_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.exponential_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a range of integer that grow exponentially.
+Example: list(exp_range(0,100000,2))
+Output :[0,</p>
+<blockquote>
+<div>2,
+4,
+8,
+16,
+32,
+64,
+128,
+256,
+512,
+1024,
+2048,
+4096,
+8192,
+16384,
+32768,
+65536]</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.extract_Decipher">
+<code class="descclassname">alefuncs.</code><code class="descname">extract_Decipher</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#extract_Decipher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.extract_Decipher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ad hoc function to extract deletions and duplications out of the Decipher Database.
+Returns a file ready to be annotated with FusionGenes_Annotation.pl .</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.extract_Toronto">
+<code class="descclassname">alefuncs.</code><code class="descname">extract_Toronto</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#extract_Toronto"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.extract_Toronto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ad hoc function to extract deletions and duplications out of the Toronto Genetic Variants Database.
+Returns a file ready to be annotated with FusionGenes_Annotation.pl .</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.extract_data">
+<code class="descclassname">alefuncs.</code><code class="descname">extract_data</code><span class="sig-paren">(</span><em>infile, columns=[3, 0, 1, 2, 5], header='##', skip_lines_starting_with='#', data_separator='\t', verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#extract_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.extract_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract data from a file. Returns a list of tuples. 
+Each tuple contains the data extracted from one line of the file
+in the indicated columns and with the indicated order.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.extract_dgvMerged">
+<code class="descclassname">alefuncs.</code><code class="descname">extract_dgvMerged</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#extract_dgvMerged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.extract_dgvMerged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ad hoc function to extract deletions and losses out of the dgvMerged database.
+Returns a file ready to be annotated with FusionGenes_Annotation.pl .</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.fill_and_sort">
+<code class="descclassname">alefuncs.</code><code class="descname">fill_and_sort</code><span class="sig-paren">(</span><em>pandas_chrSeries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#fill_and_sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.fill_and_sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>incomplete pandas.Series =&gt; complete and sorted pandas.Series
+Given a pandas.Series in which the first argument is the chromosome name
+and the second argument is a count &#8221; [(&#8216;1&#8217;, 61), (&#8216;3&#8217;, 28), ..., (&#8216;X&#8217;, 29)]&#8221;
+This function returns a new (sorted by chromosome) series with the missing chromosome included as (&#8216;Chr_name&#8217;,0).</p>
+<p>This is useful when creating series out of subsets grouped by Chr.
+If the Chr does not contains any event, then it will be excluded from the subset.
+However, expecially for plotting reasons, you may want to have (&#8216;Chr&#8217;,0) in you list instead of a missing Chr.</p>
+<p>Example.
+&gt; series = [(&#8216;1&#8217;, 61), (&#8216;3&#8217;, 28), ..., (&#8216;X&#8217;, 29)] # in this Series Chr_2 and Chr_Y are missing.
+&gt; fill_and_sort(series)
+&gt;&gt;&gt; [(&#8216;1&#8217;, 61), (&#8216;2&#8217;,0), (&#8216;3&#8217;, 28), ..., (&#8216;X&#8217;, 29), (&#8216;Y&#8217;,0)] # this Series have all the chromosomes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.filter_out">
+<code class="descclassname">alefuncs.</code><code class="descname">filter_out</code><span class="sig-paren">(</span><em>word</em>, <em>infile</em>, <em>outfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#filter_out"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.filter_out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a file line by line
+and writes an output file containing only
+the lines that DO NOT contains &#8216;word&#8217;.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.find">
+<code class="descclassname">alefuncs.</code><code class="descname">find</code><span class="sig-paren">(</span><em>string</em>, <em>char</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.find" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks for a character in a sctring and returns its index.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.find_all_paths">
+<code class="descclassname">alefuncs.</code><code class="descname">find_all_paths</code><span class="sig-paren">(</span><em>graph</em>, <em>start</em>, <em>end</em>, <em>path=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#find_all_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.find_all_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all paths between two nodes of a graph.
+Works on graphs like this:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>graph ={&#8216;A&#8217;: [&#8216;B&#8217;, &#8216;C&#8217;],</dt>
+<dd>&#8216;B&#8217;: [&#8216;C&#8217;, &#8216;D&#8217;],
+&#8216;C&#8217;: [&#8216;D&#8217;],
+&#8216;D&#8217;: [&#8216;C&#8217;],
+&#8216;E&#8217;: [&#8216;F&#8217;],
+&#8216;F&#8217;: [&#8216;C&#8217;]}</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.find_path">
+<code class="descclassname">alefuncs.</code><code class="descname">find_path</code><span class="sig-paren">(</span><em>graph</em>, <em>start</em>, <em>end</em>, <em>path=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#find_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.find_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find a path between two nodes in a graph.
+Works on graphs like this:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>graph ={&#8216;A&#8217;: [&#8216;B&#8217;, &#8216;C&#8217;],</dt>
+<dd>&#8216;B&#8217;: [&#8216;C&#8217;, &#8216;D&#8217;],
+&#8216;C&#8217;: [&#8216;D&#8217;],
+&#8216;D&#8217;: [&#8216;C&#8217;],
+&#8216;E&#8217;: [&#8216;F&#8217;],
+&#8216;F&#8217;: [&#8216;C&#8217;]}</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.find_shortest_path">
+<code class="descclassname">alefuncs.</code><code class="descname">find_shortest_path</code><span class="sig-paren">(</span><em>graph</em>, <em>start</em>, <em>end</em>, <em>path=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#find_shortest_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.find_shortest_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the shortest path between two nodes of a graph.
+Works on graphs like this:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>graph ={&#8216;A&#8217;: [&#8216;B&#8217;, &#8216;C&#8217;],</dt>
+<dd>&#8216;B&#8217;: [&#8216;C&#8217;, &#8216;D&#8217;],
+&#8216;C&#8217;: [&#8216;D&#8217;],
+&#8216;D&#8217;: [&#8216;C&#8217;],
+&#8216;E&#8217;: [&#8216;F&#8217;],
+&#8216;F&#8217;: [&#8216;C&#8217;]}</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.flatten">
+<code class="descclassname">alefuncs.</code><code class="descname">flatten</code><span class="sig-paren">(</span><em>l</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#flatten"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flat an irregular iterable to a list.
+Python &gt;= 3.3 version.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.flatten2">
+<code class="descclassname">alefuncs.</code><code class="descname">flatten2</code><span class="sig-paren">(</span><em>l</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#flatten2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.flatten2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flat an irregular iterable to a list.
+Python &gt;= 2.6 version.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.g4_scanner">
+<code class="descclassname">alefuncs.</code><code class="descname">g4_scanner</code><span class="sig-paren">(</span><em>sequence</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#g4_scanner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.g4_scanner" title="Permalink to this definition">¶</a></dt>
+<dd><p>G-quadruplex motif scanner.
+Scan a sequence for the presence of the regex motif:</p>
+<blockquote>
+<div>[G]{3,5}[ACGT]{1,7}[G]{3,5}[ACGT]{1,7}[G]{3,5}[ACGT]{1,7}[G]{3,5}
+Reference: <a class="reference external" href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1636468/">http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1636468/</a></div></blockquote>
+<p>Return two callable iterators.
+The first one contains G4 found on the + strand.
+The second contains the complementary G4 found on the + strand, i.e. a G4 in the - strand.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gc_content">
+<code class="descclassname">alefuncs.</code><code class="descname">gc_content</code><span class="sig-paren">(</span><em>sequence</em>, <em>percent=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gc_content"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gc_content" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the GC content of a sequence.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gen_control_dataset">
+<code class="descclassname">alefuncs.</code><code class="descname">gen_control_dataset</code><span class="sig-paren">(</span><em>real_dataset</em>, <em>suffix='_control.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gen_control_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gen_control_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a control dataset ad hoc.
+Takes as input an existing dataset and generates breaks
+in the same chromosomes and with the same distance (+-1bp),
+the position are however randomized.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gen_deletion_dataset_from_breaks">
+<code class="descclassname">alefuncs.</code><code class="descname">gen_deletion_dataset_from_breaks</code><span class="sig-paren">(</span><em>list_of_breaks</em>, <em>outfile</em>, <em>ID_already=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gen_deletion_dataset_from_breaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gen_deletion_dataset_from_breaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Genrates a proper deletion dataset file out of a list of breaks</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gen_gap_table">
+<code class="descclassname">alefuncs.</code><code class="descname">gen_gap_table</code><span class="sig-paren">(</span><em>infile='/Users/amarcozzi/Desktop/All_breakpoints_HG19_final.txt'</em>, <em>outfile='/Users/amarcozzi/Desktop/All_breakpoints_HG19_gap.txt'</em>, <em>resolution=10000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gen_gap_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gen_gap_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a file containing a list of coordinates 
+for wich no brakpoints have been found in the input file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gen_multiple_controls">
+<code class="descclassname">alefuncs.</code><code class="descname">gen_multiple_controls</code><span class="sig-paren">(</span><em>real_dataset</em>, <em>how_many</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gen_multiple_controls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gen_multiple_controls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates how_many control datasets.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gen_rnd_breaks">
+<code class="descclassname">alefuncs.</code><code class="descname">gen_rnd_breaks</code><span class="sig-paren">(</span><em>how_many=100</em>, <em>chromosome='Y'</em>, <em>min_distance=1000</em>, <em>max_distance=15000</em>, <em>GapTable_file='tables/gap.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gen_rnd_breaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gen_rnd_breaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns tuples containing 1)the chromosome, 2)first breakpoint, 3)second breakpoint
+Keeps only the points that do not appear in te gap table.
+gen_rnd_breaks(int, string, int, int, filepath) =&gt; [(chrX, int, int), ...]
+valid chromosomes inputs are &#8220;1&#8221; to &#8220;22&#8221; ; &#8220;Y&#8221; ; &#8220;X&#8221;
+The chromosome length is based on the build GRCh37/hg19.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gen_rnd_single_break">
+<code class="descclassname">alefuncs.</code><code class="descname">gen_rnd_single_break</code><span class="sig-paren">(</span><em>how_many=100</em>, <em>chromosome='1'</em>, <em>GapTable_file='/Users/amarcozzi/Desktop/All_breakpoints_HG19_gap_10k.txt'</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gen_rnd_single_break"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gen_rnd_single_break" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns tuples containing 1)the chromosome, 2)the breakpoint
+Keeps only the points that do not appear in te gap table.
+gen_rnd_breaks(int, string, filepath) =&gt; [(chrX, int), ...]
+valid chromosomes inputs are &#8220;1&#8221; to &#8220;22&#8221; ; &#8220;Y&#8221; ; &#8220;X&#8221;
+The chromosome length is based on the build GRCh37/hg19.
+Prerequisites: The gap_list file is in the form:</p>
+<blockquote>
+<div>##chrom chromStart  chromEnd
+chr1    0   10000
+chr1    30000   40000
+chr1    40000   50000
+chr1    50000   60000</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gen_rnd_string">
+<code class="descclassname">alefuncs.</code><code class="descname">gen_rnd_string</code><span class="sig-paren">(</span><em>length</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gen_rnd_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gen_rnd_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string of uppercase and lowercase ascii letters.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.gene_synonyms">
+<code class="descclassname">alefuncs.</code><code class="descname">gene_synonyms</code><span class="sig-paren">(</span><em>gene_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#gene_synonyms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.gene_synonyms" title="Permalink to this definition">¶</a></dt>
+<dd><p>str =&gt; list()
+Queries <a class="reference external" href="http://rest.genenames.org">http://rest.genenames.org</a> and <a class="reference external" href="http://www.ncbi.nlm.nih.gov/">http://www.ncbi.nlm.nih.gov/</a> to figure out the best synonym of gene_name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.get_exons_coord_by_gene_name">
+<code class="descclassname">alefuncs.</code><code class="descname">get_exons_coord_by_gene_name</code><span class="sig-paren">(</span><em>gene_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#get_exons_coord_by_gene_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.get_exons_coord_by_gene_name" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Example:</dt>
+<dd><blockquote class="first">
+<div><p>table = get_exons_coord_by_gene_name(&#8216;TP53&#8217;)
+for k,v in table.iteritems():</p>
+<blockquote>
+<div>print k,v</div></blockquote>
+</div></blockquote>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ENSE00002419584</span> <span class="p">[</span><span class="s1">&#39;7,579,721&#39;</span><span class="p">,</span> <span class="s1">&#39;7,579,700&#39;</span><span class="p">]</span>
+<span class="go">        ENSE00003625790 [&#39;7,579,590&#39;, &#39;7,579,312&#39;]</span>
+<span class="go">        ENSE00003518480 [&#39;7,578,554&#39;, &#39;7,578,371&#39;]</span>
+<span class="go">        ENSE00003462942 [&#39;7,578,289&#39;, &#39;7,578,177&#39;]</span>
+<span class="go">        ENSE00003504863 [&#39;7,577,608&#39;, &#39;7,577,499&#39;]</span>
+<span class="go">        ENSE00003586720 [&#39;7,577,155&#39;, &#39;7,577,019&#39;]</span>
+<span class="go">        ENSE00003636029 [&#39;7,576,926&#39;, &#39;7,576,853&#39;]</span>
+<span class="go">        ENSE00003634848 [&#39;7,574,033&#39;, &#39;7,573,927&#39;]</span>
+<span class="go">        ENSE00002667911 [&#39;7,579,940&#39;, &#39;7,579,839&#39;]</span>
+<span class="go">        ENSE00002051192 [&#39;7,590,799&#39;, &#39;7,590,695&#39;]</span>
+<span class="go">        ENSE00002034209 [&#39;7,573,008&#39;, &#39;7,571,722&#39;]</span>
+<span class="go">        ENSE00003552110 [&#39;7,576,657&#39;, &#39;7,576,525&#39;]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.get_first_transcript_by_gene_name">
+<code class="descclassname">alefuncs.</code><code class="descname">get_first_transcript_by_gene_name</code><span class="sig-paren">(</span><em>gene_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#get_first_transcript_by_gene_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.get_first_transcript_by_gene_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>str =&gt; str
+Return the id of the main trascript for a given gene.
+The data is from <a class="reference external" href="http://grch37.ensembl.org/">http://grch37.ensembl.org/</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.hash">
+<code class="descclassname">alefuncs.</code><code class="descname">hash</code><span class="sig-paren">(</span><em>a_string</em>, <em>algorithm='md5'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>str =&gt; str
+Return the hash of a string calculated using various algorithms.
+Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">hash</span><span class="p">(</span><span class="s1">&#39;prova&#39;</span><span class="p">,</span><span class="s1">&#39;md5&#39;</span><span class="p">)</span>
+<span class="go">&#39;189bbbb00c5f1fb7fba9ad9285f193d1&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">hash</span><span class="p">(</span><span class="s1">&#39;prova&#39;</span><span class="p">,</span><span class="s1">&#39;sha256&#39;</span><span class="p">)</span>
+<span class="go">&#39;6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.in_between">
+<code class="descclassname">alefuncs.</code><code class="descname">in_between</code><span class="sig-paren">(</span><em>one_number</em>, <em>two_numbers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#in_between"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.in_between" title="Permalink to this definition">¶</a></dt>
+<dd><p>(int,list) =&gt; bool
+Return true if a number is in between two other numbers.
+Return False otherwise.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.intersect">
+<code class="descclassname">alefuncs.</code><code class="descname">intersect</code><span class="sig-paren">(</span><em>list1</em>, <em>list2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#intersect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.intersect" title="Permalink to this definition">¶</a></dt>
+<dd><p>(list,list) =&gt; list
+Return the intersection of two lists, i.e. the item in common.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.is_overlapping">
+<code class="descclassname">alefuncs.</code><code class="descname">is_overlapping</code><span class="sig-paren">(</span><em>svA</em>, <em>svB</em>, <em>limit=0.9</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#is_overlapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.is_overlapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>(list,list,float) =&gt; bool
+Check if two SV ovelaps for at least 90% (limit=0.9).
+svX = [chr1,brk1,chr2,brk2]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.kmers_finder">
+<code class="descclassname">alefuncs.</code><code class="descname">kmers_finder</code><span class="sig-paren">(</span><em>sequence_dict</em>, <em>motif_length</em>, <em>min_repetition</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#kmers_finder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.kmers_finder" title="Permalink to this definition">¶</a></dt>
+<dd><p>(dict, int, int) =&gt; OrderedDict(sorted(list))
+Find all the motifs long &#8216;motif_length&#8217; and repeated at least &#8216;min_repetition&#8217; times.
+Return an OrderedDict having motif:repetition as key:value sorted by value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.kmers_finder_with_mismatches">
+<code class="descclassname">alefuncs.</code><code class="descname">kmers_finder_with_mismatches</code><span class="sig-paren">(</span><em>sequence</em>, <em>motif_length</em>, <em>max_mismatches</em>, <em>most_common=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#kmers_finder_with_mismatches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.kmers_finder_with_mismatches" title="Permalink to this definition">¶</a></dt>
+<dd><p>(str, int, int) =&gt; sorted(list)
+Find the most frequent k-mers with mismatches in a string.
+Input: A sequence and a pair of integers: motif_length (&lt;=12) and max_mismatch (&lt;= 3).
+Output: An OrderedDict containing all k-mers with up to d mismatches in string.</p>
+<p>Sample Input:   ACGTTGCATGTCGCATGATGCATGAGAGCT 4 1
+Sample Output:  OrderedDict([(&#8216;ATGC&#8217;, 5), (&#8216;ATGT&#8217;, 5), (&#8216;GATG&#8217;, 5),...])</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.line_to_list">
+<code class="descclassname">alefuncs.</code><code class="descname">line_to_list</code><span class="sig-paren">(</span><em>line</em>, <em>char</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#line_to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.line_to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a list of string out of a line. Splits the word at char.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.list_of_files">
+<code class="descclassname">alefuncs.</code><code class="descname">list_of_files</code><span class="sig-paren">(</span><em>path</em>, <em>extension</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#list_of_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.list_of_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of filepath for each file into path with the target extension.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.list_to_line">
+<code class="descclassname">alefuncs.</code><code class="descname">list_to_line</code><span class="sig-paren">(</span><em>list_</em>, <em>char</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#list_to_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.list_to_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes a string out of a list of items</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.load_obj">
+<code class="descclassname">alefuncs.</code><code class="descname">load_obj</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#load_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.load_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a pickled object.
+Be aware that pickle is version dependent,
+i.e. objects dumped in Py3 cannot be loaded with Py2.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.merge_gaps">
+<code class="descclassname">alefuncs.</code><code class="descname">merge_gaps</code><span class="sig-paren">(</span><em>gap_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#merge_gaps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.merge_gaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges overlapping gaps in a gap list.
+The gap list is in the form: [(&#8216;3&#8217;,&#8216;4&#8217;),(&#8216;5&#8217;,&#8216;6&#8217;),(&#8216;6&#8217;,&#8216;7&#8217;),(&#8216;8&#8217;,&#8216;9&#8217;),(&#8216;10&#8217;,&#8216;11&#8217;),(&#8216;15&#8217;,&#8216;16&#8217;),(&#8216;17&#8217;,&#8216;18&#8217;),(&#8216;18&#8217;,&#8216;19&#8217;)]
+Returns a new list containing the merged gaps: [(&#8216;3&#8217;,&#8216;4&#8217;),(&#8216;5&#8217;,&#8216;7&#8217;),(&#8216;8&#8217;,&#8216;9&#8217;),(&#8216;10&#8217;,&#8216;11&#8217;),(&#8216;15&#8217;,&#8216;16&#8217;),(&#8216;17&#8217;,&#8216;19&#8217;)]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.merge_sort">
+<code class="descclassname">alefuncs.</code><code class="descname">merge_sort</code><span class="sig-paren">(</span><em>intervals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#merge_sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.merge_sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges and sorts the intervals in a list.
+It&#8217;s an alternative of merge_gaps() that sort the list before merging.
+Should be faster but I haven&#8217;t campared them yet.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.multi_threads_fusion_genes_annotation">
+<code class="descclassname">alefuncs.</code><code class="descname">multi_threads_fusion_genes_annotation</code><span class="sig-paren">(</span><em>folder_path</em>, <em>extension</em>, <em>max_simultaneous_threads</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#multi_threads_fusion_genes_annotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.multi_threads_fusion_genes_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes annotate_fusion_genes() for each dataset file in a folder.
+Each execution run on a different thread.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.next_day">
+<code class="descclassname">alefuncs.</code><code class="descname">next_day</code><span class="sig-paren">(</span><em>d='2012-12-04'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#next_day"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.next_day" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the next day in the calendar.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.number_to_string">
+<code class="descclassname">alefuncs.</code><code class="descname">number_to_string</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#number_to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.number_to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a number into a bytes string.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.pandize_dataset">
+<code class="descclassname">alefuncs.</code><code class="descname">pandize_dataset</code><span class="sig-paren">(</span><em>annotated_dataset</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#pandize_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.pandize_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares a dataset to be &#8220;pandas ready&#8221;.
+Takes a file path as input.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.parse_RepeatMasker">
+<code class="descclassname">alefuncs.</code><code class="descname">parse_RepeatMasker</code><span class="sig-paren">(</span><em>infile='RepeatMasker.txt'</em>, <em>rep_type='class'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#parse_RepeatMasker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.parse_RepeatMasker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse RepeatMasker.txt and return a dict of bins for each chromosome
+and a set of repeats found on that bin.</p>
+<p>dict = {&#8216;chromosome&#8217;:{&#8216;bin&#8217;:set(repeats)}}</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.parse_blastXML">
+<code class="descclassname">alefuncs.</code><code class="descname">parse_blastXML</code><span class="sig-paren">(</span><em>infile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#parse_blastXML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.parse_blastXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a blast outfile (XML).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.pip_upgrade_all">
+<code class="descclassname">alefuncs.</code><code class="descname">pip_upgrade_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#pip_upgrade_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.pip_upgrade_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upgrades all pip-installed packages.
+Requires a bash shell. (Unix)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.previous_day">
+<code class="descclassname">alefuncs.</code><code class="descname">previous_day</code><span class="sig-paren">(</span><em>d='2012-12-04'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#previous_day"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.previous_day" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the previous day in the calendar.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.print_sbar">
+<code class="descclassname">alefuncs.</code><code class="descname">print_sbar</code><span class="sig-paren">(</span><em>n</em>, <em>m</em>, <em>s='|#.|'</em>, <em>size=30</em>, <em>message=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#print_sbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.print_sbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>(int,int,string,int) =&gt; None
+Print a progress bar using the simbols in &#8216;s&#8217;.
+Example:</p>
+<blockquote>
+<div><p>range_limit = 1000
+for n in range(range_limit):</p>
+<blockquote>
+<div>print_sbar(n,m=range_limit)
+time.sleep(0.1)</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.probability">
+<code class="descclassname">alefuncs.</code><code class="descname">probability</code><span class="sig-paren">(</span><em>p</em>, <em>n</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple probability calculator.
+Calculates what is the probability that k events occur in n trials.
+Each event have p probability of occurring once.
+Example: What is the probability of having 3 Heads by flipping a coin 10 times?
+probability = prob(0.5,10,3)
+print(probability) =&gt; (15/128) = 0.1171875</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.process">
+<code class="descclassname">alefuncs.</code><code class="descname">process</code><span class="sig-paren">(</span><em>real_dataset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates, annotates and sorts a controll dataset for the given real dataset.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.query_encode">
+<code class="descclassname">alefuncs.</code><code class="descname">query_encode</code><span class="sig-paren">(</span><em>chromosome</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#query_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.query_encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Queries ENCODE via <a class="reference external" href="http://promoter.bx.psu.edu/ENCODE/search_human.php">http://promoter.bx.psu.edu/ENCODE/search_human.php</a>
+Parses the output and returns a dictionary of CIS elements found and the relative location.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.reorder_dict">
+<code class="descclassname">alefuncs.</code><code class="descname">reorder_dict</code><span class="sig-paren">(</span><em>d</em>, <em>keys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#reorder_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.reorder_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>(dict,list) =&gt; OrderedDict
+Change the order of a dictionary&#8217;s keys
+without copying the dictionary (save RAM!).
+Return an OrderedDict.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.run_perl">
+<code class="descclassname">alefuncs.</code><code class="descname">run_perl</code><span class="sig-paren">(</span><em>perl_script_file</em>, <em>input_perl_script</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#run_perl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.run_perl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run an external perl script and return its output</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.run_py">
+<code class="descclassname">alefuncs.</code><code class="descname">run_py</code><span class="sig-paren">(</span><em>code</em>, <em>interp='python3'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#run_py"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.run_py" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run an block of python code using the target interpreter.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.run_pypy">
+<code class="descclassname">alefuncs.</code><code class="descname">run_pypy</code><span class="sig-paren">(</span><em>code</em>, <em>interpr='pypy3'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#run_pypy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.run_pypy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run an block of python code with PyPy</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.save_obj">
+<code class="descclassname">alefuncs.</code><code class="descname">save_obj</code><span class="sig-paren">(</span><em>obj</em>, <em>file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#save_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.save_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump an object with pickle.
+Be aware that pickle is version dependent,
+i.e. objects dumped in Py3 cannot be loaded with Py2.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.sequence_from_coordinates">
+<code class="descclassname">alefuncs.</code><code class="descname">sequence_from_coordinates</code><span class="sig-paren">(</span><em>chromosome</em>, <em>strand</em>, <em>start</em>, <em>end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#sequence_from_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.sequence_from_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download the nucleotide sequence from the gene_name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.sequence_from_gene">
+<code class="descclassname">alefuncs.</code><code class="descname">sequence_from_gene</code><span class="sig-paren">(</span><em>gene_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#sequence_from_gene"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.sequence_from_gene" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download the nucleotide sequence from the gene_name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.sort_dataset">
+<code class="descclassname">alefuncs.</code><code class="descname">sort_dataset</code><span class="sig-paren">(</span><em>dataset_file</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#sort_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.sort_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort a dataset by ChrA. It helps during plotting</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.sortby_chr">
+<code class="descclassname">alefuncs.</code><code class="descname">sortby_chr</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#sortby_chr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.sortby_chr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helps to sort datasets grouped by ChrA/B.
+To use with sorted().</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.split_fasta_file">
+<code class="descclassname">alefuncs.</code><code class="descname">split_fasta_file</code><span class="sig-paren">(</span><em>infile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#split_fasta_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.split_fasta_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a fasta file containing multiple sequences
+into multiple files containing one sequence each.
+One sequence per file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.split_overlap">
+<code class="descclassname">alefuncs.</code><code class="descname">split_overlap</code><span class="sig-paren">(</span><em>array</em>, <em>size</em>, <em>overlap</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#split_overlap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.split_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>(list,int,int) =&gt; [[...],[...],...]
+Split a list into chunks of a specific size and overlap.</p>
+<dl class="docutils">
+<dt>Examples:</dt>
+<dd><p class="first">array = list(range(10))
+split_overlap(array,4,2)
+&gt;&gt;&gt; [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9]]</p>
+<p class="last">array = list(range(11))
+split_overlap(array,4,2)
+&gt;&gt;&gt; [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9], [8, 9, 10]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.string_to_number">
+<code class="descclassname">alefuncs.</code><code class="descname">string_to_number</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#string_to_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.string_to_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a bytes string into a single number.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.substract_datasets">
+<code class="descclassname">alefuncs.</code><code class="descname">substract_datasets</code><span class="sig-paren">(</span><em>infile_1</em>, <em>infile_2</em>, <em>outfile</em>, <em>header=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#substract_datasets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.substract_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes two files containing tab delimited data, comapares them and return a file
+containing the data that is present only in infile_2 but not in infile_1.
+The variable by_column is an int that indicates which column to use
+as data reference for the comparison.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alefuncs.yield_file">
+<code class="descclassname">alefuncs.</code><code class="descname">yield_file</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#yield_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.yield_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple generator that yield the lines of a file.
+Good to read large file without running out of memory.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to alefuncs’ documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">alefuncs a documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Alessio Marcozzi.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.2.
+    </div>
+  </body>
+</html>
