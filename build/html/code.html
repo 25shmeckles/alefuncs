@@ -426,51 +426,42 @@ Queries <a class="reference external" href="http://rest.genenames.org">http://re
 <dl class="function">
 <dt id="alefuncs.get_exons_coord_by_gene_name">
 <code class="descclassname">alefuncs.</code><code class="descname">get_exons_coord_by_gene_name</code><span class="sig-paren">(</span><em>gene_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#get_exons_coord_by_gene_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.get_exons_coord_by_gene_name" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Example:</dt>
-<dd><blockquote class="first">
-<div><p>table = get_exons_coord_by_gene_name(&#8216;TP53&#8217;)
-for k,v in table.iteritems():</p>
-<blockquote>
-<div>print k,v</div></blockquote>
-</div></blockquote>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ENSE00002419584</span> <span class="p">[</span><span class="s1">&#39;7,579,721&#39;</span><span class="p">,</span> <span class="s1">&#39;7,579,700&#39;</span><span class="p">]</span>
-<span class="go">        ENSE00003625790 [&#39;7,579,590&#39;, &#39;7,579,312&#39;]</span>
-<span class="go">        ENSE00003518480 [&#39;7,578,554&#39;, &#39;7,578,371&#39;]</span>
-<span class="go">        ENSE00003462942 [&#39;7,578,289&#39;, &#39;7,578,177&#39;]</span>
-<span class="go">        ENSE00003504863 [&#39;7,577,608&#39;, &#39;7,577,499&#39;]</span>
-<span class="go">        ENSE00003586720 [&#39;7,577,155&#39;, &#39;7,577,019&#39;]</span>
-<span class="go">        ENSE00003636029 [&#39;7,576,926&#39;, &#39;7,576,853&#39;]</span>
-<span class="go">        ENSE00003634848 [&#39;7,574,033&#39;, &#39;7,573,927&#39;]</span>
-<span class="go">        ENSE00002667911 [&#39;7,579,940&#39;, &#39;7,579,839&#39;]</span>
-<span class="go">        ENSE00002051192 [&#39;7,590,799&#39;, &#39;7,590,695&#39;]</span>
-<span class="go">        ENSE00002034209 [&#39;7,573,008&#39;, &#39;7,571,722&#39;]</span>
-<span class="go">        ENSE00003552110 [&#39;7,576,657&#39;, &#39;7,576,525&#39;]</span>
+<dd><div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">get_exons_coord_by_gene_name</span><span class="p">(</span><span class="s1">&#39;TP53&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">... </span>   <span class="k">print</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+
+<span class="go">    ENSE00002419584 [&#39;7,579,721&#39;, &#39;7,579,700&#39;]</span>
+<span class="go">    ENSE00003625790 [&#39;7,579,590&#39;, &#39;7,579,312&#39;]</span>
+<span class="go">    ENSE00003518480 [&#39;7,578,554&#39;, &#39;7,578,371&#39;]</span>
+<span class="go">    ENSE00003462942 [&#39;7,578,289&#39;, &#39;7,578,177&#39;]</span>
+<span class="go">    ENSE00003504863 [&#39;7,577,608&#39;, &#39;7,577,499&#39;]</span>
+<span class="go">    ENSE00003586720 [&#39;7,577,155&#39;, &#39;7,577,019&#39;]</span>
+<span class="go">    ENSE00003636029 [&#39;7,576,926&#39;, &#39;7,576,853&#39;]</span>
+<span class="go">    ENSE00003634848 [&#39;7,574,033&#39;, &#39;7,573,927&#39;]</span>
+<span class="go">    ENSE00002667911 [&#39;7,579,940&#39;, &#39;7,579,839&#39;]</span>
+<span class="go">    ENSE00002051192 [&#39;7,590,799&#39;, &#39;7,590,695&#39;]</span>
+<span class="go">    ENSE00002034209 [&#39;7,573,008&#39;, &#39;7,571,722&#39;]</span>
+<span class="go">    ENSE00003552110 [&#39;7,576,657&#39;, &#39;7,576,525&#39;]</span>
 </pre></div>
 </div>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="alefuncs.get_first_transcript_by_gene_name">
 <code class="descclassname">alefuncs.</code><code class="descname">get_first_transcript_by_gene_name</code><span class="sig-paren">(</span><em>gene_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#get_first_transcript_by_gene_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.get_first_transcript_by_gene_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>str =&gt; str
-Return the id of the main trascript for a given gene.
+<dd><p>str =&gt; str</p>
+<p>Return the id of the main trascript for a given gene.
 The data is from <a class="reference external" href="http://grch37.ensembl.org/">http://grch37.ensembl.org/</a></p>
 </dd></dl>
 
 <dl class="function">
 <dt id="alefuncs.hash">
 <code class="descclassname">alefuncs.</code><code class="descname">hash</code><span class="sig-paren">(</span><em>a_string</em>, <em>algorithm='md5'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.hash" title="Permalink to this definition">¶</a></dt>
-<dd><p>str =&gt; str
-Return the hash of a string calculated using various algorithms.
-Example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">hash</span><span class="p">(</span><span class="s1">&#39;prova&#39;</span><span class="p">,</span><span class="s1">&#39;md5&#39;</span><span class="p">)</span>
+<dd><p>str =&gt; str</p>
+<p>Return the hash of a string calculated using various algorithms.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">hash</span><span class="p">(</span><span class="s1">&#39;prova&#39;</span><span class="p">,</span><span class="s1">&#39;md5&#39;</span><span class="p">)</span>
 <span class="go">&#39;189bbbb00c5f1fb7fba9ad9285f193d1&#39;</span>
-</pre></div>
-</div>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">hash</span><span class="p">(</span><span class="s1">&#39;prova&#39;</span><span class="p">,</span><span class="s1">&#39;sha256&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">hash</span><span class="p">(</span><span class="s1">&#39;prova&#39;</span><span class="p">,</span><span class="s1">&#39;sha256&#39;</span><span class="p">)</span>
 <span class="go">&#39;6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba&#39;</span>
 </pre></div>
 </div>
@@ -616,16 +607,13 @@ Requires a bash shell. (Unix)</p>
 <dl class="function">
 <dt id="alefuncs.print_sbar">
 <code class="descclassname">alefuncs.</code><code class="descname">print_sbar</code><span class="sig-paren">(</span><em>n</em>, <em>m</em>, <em>s='|#.|'</em>, <em>size=30</em>, <em>message=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/alefuncs.html#print_sbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#alefuncs.print_sbar" title="Permalink to this definition">¶</a></dt>
-<dd><p>(int,int,string,int) =&gt; None
-Print a progress bar using the simbols in &#8216;s&#8217;.
-Example:</p>
-<blockquote>
-<div><p>range_limit = 1000
-for n in range(range_limit):</p>
-<blockquote>
-<div>print_sbar(n,m=range_limit)
-time.sleep(0.1)</div></blockquote>
-</div></blockquote>
+<dd><p>(int, int, string, int) =&gt; None</p>
+<p>Print a customizable status bar.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">500</span><span class="p">):</span>
+    <span class="n">print_sbar</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
