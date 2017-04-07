@@ -2,6 +2,40 @@
 ### version: 2017_04
 ### licence: MIT
 
+
+def simple_consensus(alignment_file):
+    '''
+    Return the consensus of a set of aligned sequences.
+    The alignment must be in FASTA format.
+    '''
+    from collections import Counter
+    
+    s = {} #dict of fasta sequences
+    seq = False #init condition
+    with open(alignment_file,'r') as f:
+        for line in f:
+            if line.startswith('>'):
+                if seq:
+                    s.update({_id:seq})
+                _id = line.strip()
+                seq = False
+            else:
+                if not seq:
+                    seq = line.strip().upper()
+                else:
+                    seq += line.strip().upper()
+    #build consensus by base count
+    consensus = ''
+    max_len = max([len(seq) for _,seq in s.items()])
+    for i in range(max_len):
+        count = Counter()
+        for _id, seq in s.items():
+            count.update(seq[i])
+        consensus += count.most_common()[0][0]
+
+    return consensus.replace('-','') #remove gaps
+
+
 def buzz(sequence, noise=0.1):
     '''Return a sequence with the addition of random noise'''
     if not noise:
