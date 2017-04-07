@@ -1,6 +1,26 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2017_02
+### version: 2017_04
 ### licence: MIT
+
+def buzz(sequence, noise=0.1):
+    '''Return a sequence with the addition of random noise'''
+    if not noise:
+        return sequence
+    r = ''
+    x = ['a','t','c','g','del','ins']
+    for letter in sequence:
+        if random.random() < noise:
+            y = random.sample(x,1)[0]
+            if y == 'del':
+                pass
+            elif y == 'dup':
+                r += 2*letter
+            else:
+                r += y
+        else:
+            r += letter
+    return r
+
 
 def print_sbar(n,m,s='|#.|',size=30,message=''):
     '''(int, int, string, int) => None
