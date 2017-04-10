@@ -11,7 +11,7 @@ def buzz(sequence, noise=0.01):
     bits = set([char for char in sequence] + ['del','dup'])
     r = ''
     for char in sequence:
-        if random.random() <= noise:
+        if random.random() >= noise:
             b = random.sample(bits,1)[0]
             if b == 'del':
                 continue
