@@ -2,6 +2,7 @@
 ### version: 2017_04
 ### licence: MIT
 
+<<<<<<< HEAD
 
 def simple_consensus(alignment_file):
     '''
@@ -65,6 +66,70 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
         
         for n in range(500):
             print_sbar(n,m=500)
+=======
+def buzz(sequence, noise=0.01):
+    '''(string,float) => string
+    Return a sequence with some random noise.
+    '''
+    if not noise:
+        return sequence
+    bits = set([char for char in sequence] + ['del','dup'])
+    r = ''
+    for char in sequence:
+        if random.random() <= noise:
+            b = random.sample(bits,1)[0]
+            if b == 'del':
+                continue
+            elif b == 'dup':
+                r += 2*char
+            else:
+                r += b
+        else:
+            r += char
+    return r
+
+
+def simple_consensus(aligned_sequences_file):
+    '''file => string
+    Return the consensus of a series of fasta sequences aligned with muscle.
+    '''
+    # Generate consensus from Muscle alignment
+    sequences = []
+    seq = False
+    with open(aligned_sequences_file,'r') as f:
+        for line in f:
+            if line.startswith('\n'):
+                continue
+            if line.startswith('>'):
+                if seq:
+                    sequences.append(seq)
+                seq = ''
+            else:
+                seq += line.strip()
+
+    #check if all sequenced have the same length
+    for seq in sequences:
+        assert len(seq) == len(sequences[0])
+    
+    #compute consensus by majority vote
+    consensus = ''
+    for i in range(len(sequences[0])):
+        char_count = Counter()
+        for seq in sequences:
+            char_count.update(seq[i])
+        consensus += char_count.most_common()[0][0]
+
+    return consensus.replace('-','')
+
+
+def print_sbar(n,m,s='|#.|',size=30,message=''):
+    '''(int,int,string,int) => None
+    Print a progress bar using the simbols in 's'.
+    Example:
+        range_limit = 1000
+        for n in range(range_limit):
+            print_sbar(n,m=range_limit)
+>>>>>>> origin/master
             time.sleep(0.1)
     '''
     import sys
@@ -85,6 +150,7 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
 
 def hash(a_string,algorithm='md5'):
     '''str => str
+<<<<<<< HEAD
 
     Return the hash of a string calculated using various algorithms.
     
@@ -92,6 +158,13 @@ def hash(a_string,algorithm='md5'):
 
         >>> hash('prova','md5')
         '189bbbb00c5f1fb7fba9ad9285f193d1'
+=======
+    Return the hash of a string calculated using various algorithms.
+    Example:
+        >>> hash('prova','md5')
+        '189bbbb00c5f1fb7fba9ad9285f193d1'
+
+>>>>>>> origin/master
         >>> hash('prova','sha256')
         '6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba'
     '''
@@ -106,7 +179,10 @@ def hash(a_string,algorithm='md5'):
 
 def get_first_transcript_by_gene_name(gene_name):
     '''str => str
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
     Return the id of the main trascript for a given gene.
     The data is from http://grch37.ensembl.org/
     '''
@@ -124,9 +200,17 @@ def get_first_transcript_by_gene_name(gene_name):
    
 def get_exons_coord_by_gene_name(gene_name):
     '''str => OrderedDict({'exon_id':[coordinates]})
+<<<<<<< HEAD
 
     Return an OrderedDict having as k the exon_id
     and as value a tuple containing the genomic coordinates ('chr',start,stop).        
+=======
+    Return an OrderedDict having as k the exon_id
+    and as value a tuple containing the genomic coordinates ('chr',start,stop).
+
+    Example:
+        
+>>>>>>> origin/master
     '''
     from pyensembl import EnsemblRelease
     gene = data.genes_by_name(gene_name)
@@ -143,6 +227,7 @@ def get_exons_coord_by_gene_name(gene_name):
 
 def get_exons_coord_by_gene_name(gene_name):
     '''
+<<<<<<< HEAD
 
     .. code-block:: python
 
@@ -151,6 +236,14 @@ def get_exons_coord_by_gene_name(gene_name):
         ...    print(k,v)
 
             ENSE00002419584 ['7,579,721', '7,579,700']
+=======
+    Example:
+            table = get_exons_coord_by_gene_name('TP53')
+            for k,v in table.iteritems():
+                print k,v
+
+        >>> ENSE00002419584 ['7,579,721', '7,579,700']
+>>>>>>> origin/master
             ENSE00003625790 ['7,579,590', '7,579,312']
             ENSE00003518480 ['7,578,554', '7,578,371']
             ENSE00003462942 ['7,578,289', '7,578,177']
