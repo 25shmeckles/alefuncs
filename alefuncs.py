@@ -65,7 +65,6 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
         range_limit = 1000
         for n in range(range_limit):
             print_sbar(n,m=range_limit)
->>>>>>> origin/master
             time.sleep(0.1)
     '''
     import sys
@@ -86,21 +85,13 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
 
 def hash(a_string,algorithm='md5'):
     '''str => str
-<<<<<<< HEAD
-
     Return the hash of a string calculated using various algorithms.
     
     .. code-block:: python
 
         >>> hash('prova','md5')
         '189bbbb00c5f1fb7fba9ad9285f193d1'
-=======
-    Return the hash of a string calculated using various algorithms.
-    Example:
-        >>> hash('prova','md5')
-        '189bbbb00c5f1fb7fba9ad9285f193d1'
 
->>>>>>> origin/master
         >>> hash('prova','sha256')
         '6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba'
     '''
@@ -115,10 +106,6 @@ def hash(a_string,algorithm='md5'):
 
 def get_first_transcript_by_gene_name(gene_name):
     '''str => str
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
     Return the id of the main trascript for a given gene.
     The data is from http://grch37.ensembl.org/
     '''
@@ -136,17 +123,8 @@ def get_first_transcript_by_gene_name(gene_name):
    
 def get_exons_coord_by_gene_name(gene_name):
     '''str => OrderedDict({'exon_id':[coordinates]})
-<<<<<<< HEAD
-
     Return an OrderedDict having as k the exon_id
     and as value a tuple containing the genomic coordinates ('chr',start,stop).        
-=======
-    Return an OrderedDict having as k the exon_id
-    and as value a tuple containing the genomic coordinates ('chr',start,stop).
-
-    Example:
-        
->>>>>>> origin/master
     '''
     from pyensembl import EnsemblRelease
     gene = data.genes_by_name(gene_name)
@@ -162,9 +140,7 @@ def get_exons_coord_by_gene_name(gene_name):
 
 
 def get_exons_coord_by_gene_name(gene_name):
-    '''
-<<<<<<< HEAD
-
+    '''string => OrderedDict
     .. code-block:: python
 
         >>> table = get_exons_coord_by_gene_name('TP53')
@@ -172,25 +148,6 @@ def get_exons_coord_by_gene_name(gene_name):
         ...    print(k,v)
 
             ENSE00002419584 ['7,579,721', '7,579,700']
-=======
-    Example:
-            table = get_exons_coord_by_gene_name('TP53')
-            for k,v in table.iteritems():
-                print k,v
-
-        >>> ENSE00002419584 ['7,579,721', '7,579,700']
->>>>>>> origin/master
-            ENSE00003625790 ['7,579,590', '7,579,312']
-            ENSE00003518480 ['7,578,554', '7,578,371']
-            ENSE00003462942 ['7,578,289', '7,578,177']
-            ENSE00003504863 ['7,577,608', '7,577,499']
-            ENSE00003586720 ['7,577,155', '7,577,019']
-            ENSE00003636029 ['7,576,926', '7,576,853']
-            ENSE00003634848 ['7,574,033', '7,573,927']
-            ENSE00002667911 ['7,579,940', '7,579,839']
-            ENSE00002051192 ['7,590,799', '7,590,695']
-            ENSE00002034209 ['7,573,008', '7,571,722']
-            ENSE00003552110 ['7,576,657', '7,576,525']
     '''
     from collections import OrderedDict
     from pyensembl import EnsemblRelease
