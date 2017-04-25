@@ -3,6 +3,20 @@
 ### licence: MIT
 
 
+def percent_of(total, fraction):
+    '''(int_or_float,int_or_float) => float
+    Return the percentage of 'fraction' in 'total'.
+    
+    Examples:
+        percent_of(150, 75)
+        >>> 50.0
+        
+        percent_of(30, 90)
+        >>> 300.0
+    '''
+    return (100*fraction)/total
+
+
 def buzz(sequence, noise=0.01):
     '''(string,float) => string
     Return a sequence with some random noise.
