@@ -2,6 +2,21 @@
 ### version: 2017_04
 ### licence: MIT
 
+
+def percent_of(total, fraction):
+    '''(int_or_float,int_or_float) => float
+    Return the percentage of 'fraction' in 'total'.
+    
+    Examples:
+        percent_of(150, 75)
+        >>> 50.0
+        
+        percent_of(30, 90)
+        >>> 300.0
+    '''
+    return (100*fraction)/total
+
+
 def buzz(sequence, noise=0.01):
     '''(string,float) => string
     Return a sequence with some random noise.
@@ -85,7 +100,9 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
 def hash(a_string,algorithm='md5'):
     '''str => str
     Return the hash of a string calculated using various algorithms.
-    Example:
+    
+    .. code-block:: python
+
         >>> hash('prova','md5')
         '189bbbb00c5f1fb7fba9ad9285f193d1'
 
@@ -121,10 +138,7 @@ def get_first_transcript_by_gene_name(gene_name):
 def get_exons_coord_by_gene_name(gene_name):
     '''str => OrderedDict({'exon_id':[coordinates]})
     Return an OrderedDict having as k the exon_id
-    and as value a tuple containing the genomic coordinates ('chr',start,stop).
-
-    Example:
-        
+    and as value a tuple containing the genomic coordinates ('chr',start,stop).        
     '''
     from pyensembl import EnsemblRelease
     gene = data.genes_by_name(gene_name)
@@ -140,24 +154,14 @@ def get_exons_coord_by_gene_name(gene_name):
 
 
 def get_exons_coord_by_gene_name(gene_name):
-    '''
-    Example:
-            table = get_exons_coord_by_gene_name('TP53')
-            for k,v in table.iteritems():
-                print k,v
+    '''string => OrderedDict
+    .. code-block:: python
 
-        >>> ENSE00002419584 ['7,579,721', '7,579,700']
-            ENSE00003625790 ['7,579,590', '7,579,312']
-            ENSE00003518480 ['7,578,554', '7,578,371']
-            ENSE00003462942 ['7,578,289', '7,578,177']
-            ENSE00003504863 ['7,577,608', '7,577,499']
-            ENSE00003586720 ['7,577,155', '7,577,019']
-            ENSE00003636029 ['7,576,926', '7,576,853']
-            ENSE00003634848 ['7,574,033', '7,573,927']
-            ENSE00002667911 ['7,579,940', '7,579,839']
-            ENSE00002051192 ['7,590,799', '7,590,695']
-            ENSE00002034209 ['7,573,008', '7,571,722']
-            ENSE00003552110 ['7,576,657', '7,576,525']
+        >>> table = get_exons_coord_by_gene_name('TP53')
+        >>> for k,v in table.items():
+        ...    print(k,v)
+
+            ENSE00002419584 ['7,579,721', '7,579,700']
     '''
     from collections import OrderedDict
     from pyensembl import EnsemblRelease
