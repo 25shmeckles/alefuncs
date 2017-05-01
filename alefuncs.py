@@ -1,6 +1,50 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2017_04
+### version: 2017_05
 ### licence: MIT
+
+
+def entropy(sequence, verbose=False):
+    '''(string, bool) => float
+    Return the Shannon Entropy of a string.
+    Calculated as the minimum average number of
+    bits per symbol required for encoding the string.
+    The theoretical limit for data compression:
+    Shannon Entropy of the string * string length
+    '''
+    import math
+
+    letters = list(sequence)
+    alphabet = list(set(letters)) # list of symbols in the string
+    # calculate the frequency of each symbol in the string
+    frequencies = []
+    for symbol in alphabet:
+        ctr = 0
+        for sym in letters:
+            if sym == symbol:
+                ctr += 1
+        frequencies.append(float(ctr) / len(letters))
+    
+    # Shannon entropy
+    ent = 0.0
+    for freq in frequencies:
+        ent = ent + freq * math.log(freq, 2)
+    ent = -ent
+    if verbose:
+        print('Input string:')
+        print(sequence)
+        print()
+        print('Alphabet of symbols in the string:')
+        print(alphabet)
+        print()
+        print('Frequencies of alphabet symbols:')
+        print(frequencies)
+        print()
+        print('Shannon entropy:')
+        print(ent)
+        print('Minimum number of bits required to encode each symbol:')
+        print(int(math.ceil(ent)))
+        
+    return ent
 
 
 def percent_of(total, fraction):
@@ -194,6 +238,7 @@ def get_exons_coord_by_gene_name(gene_name):
 def split_overlap(array,size,overlap):
     '''(list,int,int) => [[...],[...],...]
     Split a list into chunks of a specific size and overlap.
+    Works also on strings!
 
     Examples:
         array = list(range(10))
@@ -2032,7 +2077,6 @@ def parse_blastXML(infile):
                 print(hsp.match)
                 print(hsp.sbjct)
 # to be tested
-
 
 def reverse(sequence):
     r = ''
