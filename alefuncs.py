@@ -2469,7 +2469,7 @@ def parse_blastXML(infile):
 
 def reverse(sequence):
     r = ''
-    for i in xrange(len(sequence),0,-1):
+    for i in range(len(sequence),0,-1):
         r += sequence[i-1]
     return r
 
