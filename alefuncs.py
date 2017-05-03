@@ -3,6 +3,44 @@
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
+def vprint(var_name,var_dict=globals(),sep=' : '):
+    '''(str, dict) => print
+    Fast way to check a variable's value.
+
+    >>> scale = 0.35
+    >>> mass = '71 Kg'
+    >>> vprint('scale',globals())
+    scale : 0.35
+    >>> vprint('mass',globals(),sep='=')
+    mass=71 Kg
+    '''
+    try:
+        print(f'{varName}{sep}{g[varName]}')
+    except:
+        print(f'{varName} not found!')
+
+
+def view_matrix(arrays):
+    '''list_of_arrays => print
+    Print out the array, row by row.
+    '''
+    for a in arrays:
+        print(a)
+    print '========='
+    for n,r in enumerate(arrays):
+        print(n,len(r))
+    print(f'row:{len(arrays)}\ncol:{len(r)}')
+
+
+def fill_matrix(arrays,z=0):
+    '''(list_of_arrays, any) => None
+    Add z to fill-in any array shorter than m=max([len(a) for a in arrays]).
+    '''
+    m = max([len(a) for a in arrays])
+    for i,a in enumerate(arrays):
+        if len(a) != m:
+            arrays[i] = np.append(a, [z for n in range(m-len(a))])
+
 
 def get_size(obj_0):
     '''obj => int
@@ -28,6 +66,68 @@ def get_size(obj_0):
             size += sum(inner(getattr(obj, s)) for s in obj.__slots__ if hasattr(obj, s))
         return size
     return inner(obj_0)
+
+
+def total_size(o, handlers={}, verbose=False):
+    '''(object, dict, bool) => print
+    Returns the approximate memory footprint an object and all of its contents.
+
+    Automatically finds the contents of the following builtin containers and
+    their subclasses:  tuple, list, deque, dict, set and frozenset.
+    To search other containers, add handlers to iterate over their contents:
+
+        handlers = {SomeContainerClass: iter,
+                    OtherContainerClass: OtherContainerClass.get_elements}
+                    
+    >>> d = dict(a=1, b=2, c=3, d=[4,5,6,7], e='a string of chars')
+    >>> print(total_size(d, verbose=True))
+    
+        796
+        280 <type 'dict'> {'a': 1, 'c': 3, 'b': 2, 'e': 'a string of chars', 'd': [4, 5, 6, 7]}
+        38 <type 'str'> 'a'
+        24 <type 'int'> 1
+        38 <type 'str'> 'c'
+        24 <type 'int'> 3
+        38 <type 'str'> 'b'
+        24 <type 'int'> 2
+        38 <type 'str'> 'e'
+        54 <type 'str'> 'a string of chars'
+        38 <type 'str'> 'd'
+        104 <type 'list'> [4, 5, 6, 7]
+        24 <type 'int'> 4
+        24 <type 'int'> 5
+        24 <type 'int'> 6
+        24 <type 'int'> 7
+
+    '''
+    dict_handler = lambda d: chain.from_iterable(d.items())
+    all_handlers = {tuple: iter,
+                    list: iter,
+                    deque: iter,
+                    dict: dict_handler,
+                    set: iter,
+                    frozenset: iter,
+                   }
+    all_handlers.update(handlers)     # user handlers take precedence
+    seen = set()                      # track which object id's have already been seen
+    default_size = sys.getsizeof(0)   # estimate sizeof object without __sizeof__
+
+    def sizeof(o):
+        if id(o) in seen:       # do not double count the same object
+            return 0
+        seen.add(id(o))
+        s = sys.getsizeof(o, default_size)
+
+        if verbose:
+            print(s,type(o),repr(o))
+
+        for typ, handler in all_handlers.items():
+            if isinstance(o, typ):
+                s += sum(map(sizeof, handler(o)))
+                break
+        return s
+
+    return sizeof(o)
 
 
 def center(pattern):
