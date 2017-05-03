@@ -3,6 +3,33 @@
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
+
+def get_size(obj_0):
+    '''obj => int
+    Recursively iterate to sum size of object & members (in bytes).
+    Adapted from http://stackoverflow.com/questions/449560/how-do-i-determine-the-size-of-an-object-in-python
+    '''
+    def inner(obj, _seen_ids = set()):
+        obj_id = id(obj)
+        if obj_id in _seen_ids:
+            return 0
+        _seen_ids.add(obj_id)
+        size = sys.getsizeof(obj)
+        if isinstance(obj, zero_depth_bases):
+            pass # bypass remaining control flow and return
+        elif isinstance(obj, (tuple, list, Set, deque)):
+            size += sum(inner(i) for i in obj)
+        elif isinstance(obj, Mapping) or hasattr(obj, iteritems):
+            size += sum(inner(k) + inner(v) for k, v in getattr(obj, iteritems)())
+        # Check for custom object instances - may subclass above too
+        if hasattr(obj, '__dict__'):
+            size += inner(vars(obj))
+        if hasattr(obj, '__slots__'): # can have __slots__ with __dict__
+            size += sum(inner(getattr(obj, s)) for s in obj.__slots__ if hasattr(obj, s))
+        return size
+    return inner(obj_0)
+
+
 def center(pattern):
     '''np.array => np.array
     Return the centered pattern, 
@@ -62,9 +89,59 @@ def normalize(pattern):
     >>> normalize(a)
     '''
     import numpy as np
-    
+
     return pattern / np.linalg.norm(pattern)
 
+
+def gen_patterns(data,length,ptype='all'):
+    '''(array, int) => dict
+
+    Generate all possible patterns of a given legth
+    by manipulating consecutive slices of data.
+    Return a dict of patterns dividad by pattern_type.
+
+    >>> data = [1,2,3,4,5,4,3,2,1]
+    >>> gen_patterns(data,len(data))
+    {'center': {0: array([-1.77777778, -0.77777778,  0.22222222,  1.22222222,  2.22222222,  1.22222222,  0.22222222, -0.77777778, -1.77777778])},
+       'norm': {0: array([ 0.10846523,  0.21693046,  0.32539569,  0.43386092,  0.54232614,  0.43386092,  0.32539569,  0.21693046,  0.10846523])},
+      'scale': {0: array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ,  0.75,  0.5 ,  0.25,  0.  ])},
+        'std': {0: array([-1.35224681, -0.59160798,  0.16903085,  0.92966968,  1.69030851,  0.92966968,  0.16903085, -0.59160798, -1.35224681])}}
+    >>> gen_patterns(data,3)
+    {'center': {0: array([-1.,  0.,  1.]),
+                1: array([-1.,  0.,  1.]),
+                2: array([-1.,  0.,  1.])},
+       'norm': {0: array([ 0.26726124,  0.53452248,  0.80178373]),
+                1: array([ 0.37139068,  0.55708601,  0.74278135]),
+                2: array([ 0.42426407,  0.56568542,  0.70710678])},
+      'scale': {0: array([ 0. ,  0.5,  1. ]),
+                1: array([ 0. ,  0.5,  1. ]),
+                2: array([ 0. ,  0.5,  1. ])},
+        'std': {0: array([-1.22474487,  0.        ,  1.22474487]),
+                1: array([-1.22474487,  0.        ,  1.22474487]),
+                2: array([-1.22474487,  0.        ,  1.22474487])}}
+    '''
+    import numpy as np
+
+    results = {}
+    ptypes = ['std','norm','scale','center']
+    if ptype == 'all': #to do: select specific ptypes
+        for t in ptypes:
+            results.update({t:{}})
+
+        for n in range(length):
+            if n+length > len(data):
+                break
+
+            raw = np.array(data[n:n+length])
+
+            partial = {'std'   :standardize(raw),
+                       'norm'  :normalize(raw),
+                       'scale' :rescale(raw),
+                       'center':center(raw)}
+
+            for t in ptypes:
+                results[t].update({n:partial[t]})
+        return results
 
 def delta_percent(a, b, warnings=False):
     '''(float, float) => float
