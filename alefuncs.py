@@ -1,6 +1,181 @@
 ### author:  alessio.marcozzi@gmail.com
 ### version: 2017_05
 ### licence: MIT
+### requires Python >= 3.6 and numpy
+
+def center(pattern):
+    '''np.array => np.array
+    Return the centered pattern, 
+    which is given by [(value - mean) for value in pattern]
+
+    >>> import numpy as np
+    >>> array = np.array([681.7, 682.489, 681.31, 682.001, 682.001, 682.499, 682.001])
+    >>> center(array)
+    array([-0.30014286,  0.48885714, -0.69014286,  0.00085714,  0.00085714, 0.49885714,  0.00085714])
+    '''
+    import numpy as np
+    #mean = pattern.mean()
+    #return np.array([(value - mean) for value in pattern])
+    return (pattern - np.mean(pattern))
+
+
+def rescale(pattern):
+    '''np.array => np.array
+    Rescale each point of the array to be a float between 0 and 1.
+
+    >>> import numpy as np
+    >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
+    >>> rescale(a)
+    array([ 0. ,  0.2,  0.4,  0.6,  0.8,  1. ,  0.8,  0.6,  0.4,  0.2,  0. ])
+    '''
+    import numpy as np
+    #_max = pattern.max()
+    #_min = pattern.min()
+    #return np.array([(value - _min)/(_max - _min) for value in pattern])
+    return (pattern - pattern.min()) / (pattern.max()-pattern.min())
+
+
+def standardize(pattern):
+    '''np.array => np.array
+    Return a standard pattern.
+
+    >>> import numpy as np
+    >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
+    >>> standardize(a)
+    array([-1.41990459, -0.79514657, -0.17038855,  0.45436947,  1.07912749,
+            1.7038855 ,  1.07912749,  0.45436947, -0.17038855, -0.79514657,
+           -1.41990459])
+    '''
+    import numpy as np
+    #mean = pattern.mean()
+    #std = pattern.std()
+    #return np.array([(value - mean)/std for value in pattern])
+    return (pattern - np.mean(pattern)) / np.std(pattern)
+
+
+def normalize(pattern):
+    '''np.array => np.array
+    Return a normalized pattern using np.linalg.norm().
+
+    >>> import numpy as np
+    >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
+    >>> normalize(a)
+    '''
+    import numpy as np
+    
+    return pattern / np.linalg.norm(pattern)
+
+
+def delta_percent(a, b, warnings=False):
+    '''(float, float) => float
+    Return the difference in percentage between a nd b. 
+    If the result is 0.0 return 1e-09 instead.
+
+    >>> delta_percent(20,22)
+    10.0
+    >>> delta_percent(2,20)
+    900.0
+    >>> delta_percent(1,1)
+    1e-09
+    >>> delta_percent(10,9)
+    -10.0
+    '''
+    #np.seterr(divide='ignore', invalid='ignore')
+    try:
+        x = ((float(b)-a) / abs(a))*100
+        if x == 0.0:
+            return 0.000000001 #avoid -inf
+        else:
+            return x
+    except Exception as e:
+        if warnings:
+            print(f'Exception raised by delta_percent(): {e}')
+        return 0.000000001 #avoid -inf
+
+
+def is_similar(array1,array2,t=0.1):
+    '''(array, array, float) => bool
+    Return True if all the points of two arrays are no more than t apart.
+    '''
+    if len(array1) != len(array2):
+        return False
+    for i,n in enumerate(array1):
+        if abs(n-array2[i]) <= t:
+            pass
+        else:
+            return False
+    return True
+
+
+def cluster_patterns(pattern_list,t):
+    ''' ([array, array, ...], float) => dict
+    Return a dict having as keys the idx of patterns in pattern_list 
+    and as values the idx of the similar patterns.
+    "t" is the inverse of a similarity threshold, 
+    i.e. the max discrepancy between the value of array1[i] and array2[i].
+    If no simalar patterns are found,value is assigned to an empty list.
+
+    >>> a  = [1,2,3,4,5,6,5,4,3,2,1]
+    >>> a1 = [n+1 for n in a]
+    >>> a2 = [n+5 for n in a]
+    >>> a3 = [n+6 for n in a]
+    >>> patterns = [a,a1,a2,a3]
+    >>> cluster_patterns(patterns,t=2)
+    {0: [1], 1: [0], 2: [3], 3: [2]}
+    >>> cluster_patterns(patterns,t=5)
+    {0: [1, 2], 1: [0, 2, 3], 2: [0, 1, 3], 3: [1, 2]}
+    >>> cluster_patterns(patterns,t=0.2)
+    {0: [], 1: [], 2: [], 3: []}
+    '''
+    result = {}
+    for idx, array1 in enumerate(pattern_list):
+        result.update({idx:[]})
+        for i,array2 in enumerate(pattern_list):
+            if i != idx:
+                if is_similar(array1,array2,t=t):
+                    result[idx].append(i)
+    #print 'clusters:',len([k for k,v in result.iteritems() if len(v)])
+    return result
+
+
+def stamp_to_date(stamp,time='utc'):
+    '''(int_or_float, float, str) => datetime.datetime
+    Convert UNIX timestamp to UTC or Local Time
+
+    >>> stamp = 1477558868.93
+    >>> print stamp_to_date(stamp,time='utc')
+    2016-10-27 09:01:08.930000
+    >>> print stamp_to_date(int(stamp),time='utc')
+    2016-10-27 09:01:08
+    >>> stamp_to_date(stamp,time='local')
+    datetime.datetime(2016, 10, 27, 11, 1, 8, 930000)
+    '''
+    import datetime
+
+    if time.lower() == 'utc':
+        return datetime.datetime.utcfromtimestamp(stamp)
+    elif time.lower() == 'local':
+        return datetime.datetime.fromtimestamp(stamp)
+    else:
+        raise ValueError('"time" must be "utc" or "local"')
+
+
+def future_value(interest,period,cash):
+    '''(float, int, int_or_float) => float
+    Return the future value obtained from an amount of cash
+    growing with a fix interest over a period of time.
+
+    >>> future_value(0.5,1,1)
+    1.5
+    >>> future_value(0.1,10,100)
+    259.37424601
+    '''
+    if not 0 <= interest <= 1:
+        raise ValueError('"interest" must be a float between 0 and 1')
+
+    for d in range(period):
+        cash += cash * interest
+    return cash
 
 
 def entropy(sequence, verbose=False):
@@ -235,28 +410,28 @@ def get_exons_coord_by_gene_name(gene_name):
     return table
 
 
-def split_overlap(array,size,overlap):
+def split_overlap(iterable,size,overlap):
     '''(list,int,int) => [[...],[...],...]
-    Split a list into chunks of a specific size and overlap.
-    Works also on strings!
+    Split an iterable into chunks of a specific size and overlap.
+    Works also on strings! 
 
     Examples:
-        array = list(range(10))
-        split_overlap(array,4,2)
+        split_overlap(iterable=list(range(10)),size=3,overlap=2)
         >>> [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9]]
 
-        array = list(range(11))
-        split_overlap(array,4,2)
-        >>> [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9], [8, 9, 10]]
+        split_overlap(iterable=range(10),size=3,overlap=2)
+        >>> [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
     '''
+    if size < 1 or overlap < 0:
+        raise ValueError('"size" must be an integer with >= 1 while "overlap" must be >= 0')
     result = []
     while True:
-        if len(array) <= size:
-            result.append(array)
+        if len(iterable) <= size:
+            result.append(iterable)
             return result
         else:
-            result.append(array[:size])
-            array = array[size-overlap:]
+            result.append(iterable[:size])
+            iterable = iterable[size-overlap:]
 
 
 def reorder_dict(d,keys):
@@ -484,10 +659,47 @@ def query_encode(chromosome, start, end):
         return False
 
 
-def compare(dict_A,dict_B):
+def compare_patterns(pattA, pattB):
+    '''(np.array, np.array) => float
+    Compare two arrays point by point. 
+    Return a "raw similarity score". 
+    You may want to center the two patterns before compare them.
+
+    >>> import numpy as np
+    >>> a  = np.array([1,2,3,4,5,6,5,4,3,2,1])
+    >>> a1 = np.array([n+0.1 for n in a])
+    >>> a2 = np.array([n+1 for n in a])
+    >>> a3 = np.array([n+10 for n in a])
+    >>> compare_patterns(a,a)
+    99.999999999
+    >>> compare_patterns(a,a1)
+    95.69696969696969
+    >>> compare_patterns(a,a2)
+    56.96969696969697
+    >>> compare_patterns(a2,a)
+    72.33766233766234
+    >>> compare_patterns(center(a),center(a2))
+    99.999999999999943
+    >>> compare_patterns(a,a3)
+    -330.3030303030303
+    '''
+    import numpy as np
+
+    if len(pattA) == len(pattB):
+        deltas = []
+        for i,pA in enumerate(pattA):
+            deltas.append(100 - abs(delta_percent(pA,pattB[i])))
+
+        similarity = sum(deltas)/len(pattA)
+        return similarity
+    else:
+        raise ValueError('"pattA" and "pattB" must have same length.')
+
+def compare_bins(dict_A,dict_B):
     '''(dict,dict) => dict, dict, dict
     Compares two dicts of bins.
     Returns the shared elements, the unique elements of A and the unique elements of B.
+
     The dicts shape is supposed to be like this:
         OrderedDict([('1',
                       ['23280000-23290000',
