@@ -3,6 +3,51 @@
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
+def parse_fasta(fasta_file):
+    '''file_path => dict
+    Return a dict of id:sequences.
+    '''
+    d = {}
+    _id = False
+    seq = ''
+    with open(fasta_file,'r') as f:
+        for line in f:
+            if line.startswith('\n'):
+                continue
+            if line.startswith('>'):
+                if not _id:
+                    _id = line[1:].strip()
+                elif _id and seq:
+                    d.update({_id:seq})
+                    _id = line[1:].strip()
+                    seq = ''
+            else:
+                seq += line.strip()
+        d.update({_id:seq})
+    return d
+
+def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_extend=-0.5):
+    '''
+    Return a binary score matrix for a pairwise alignment.
+    '''
+    from Bio import pairwise2
+    from Bio.SubsMat import MatrixInfo as matlist
+    
+    alns = pairwise2.align.globalds(reference, sample, matrix, gap_open, gap_extend)
+
+    top_aln = alns[0]
+    aln_reference, aln_sample, score, begin, end = top_aln
+
+    score = []
+    for i, base in enumerate(aln_reference):
+        if aln_sample[i] == base:
+            score.append(1)
+        else:
+            score.append(0)
+
+    return score
+
+
 def vprint(var_name,var_dict=globals(),sep=' : '):
     '''(str, dict) => print
     Fast way to check a variable's value.
@@ -452,7 +497,7 @@ def simple_consensus(aligned_sequences_file):
                 seq = ''
             else:
                 seq += line.strip()
-
+        sequences.append(seq)
     #check if all sequenced have the same length
     for seq in sequences:
         assert len(seq) == len(sequences[0])
