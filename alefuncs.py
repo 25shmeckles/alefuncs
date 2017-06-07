@@ -575,7 +575,7 @@ def get_first_transcript_by_gene_name(gene_name):
         if '<tbody><tr><td class="bold">' in line:
             return line.split('">')[2].split('</a>')[0]
 
-   
+        
 def get_exons_coord_by_gene_name(gene_name):
     '''str => OrderedDict({'exon_id':[coordinates]})
     Return an OrderedDict having as k the exon_id
