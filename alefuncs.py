@@ -519,7 +519,7 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
     Example:
         range_limit = 1000
         for n in range(range_limit):
-            print_sbar(n,m=range_limit)
+            print_sbar(n+1,m=range_limit)
             time.sleep(0.1)
     '''
     import sys
