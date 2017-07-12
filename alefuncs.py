@@ -3,6 +3,41 @@
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
+from Bio import pairwise2
+from Bio.SubsMat import MatrixInfo as matlist
+from Bio import Entrez, SeqIO
+from Bio.Blast import NCBIXML
+from Bio.Blast.Applications import NcbiblastnCommandline
+
+#from urllib import urlopen
+from urllib.request import urlopen
+from urllib.parse import urlparse
+
+from subprocess import call
+from subprocess import check_output
+
+from pyensembl import EnsemblRelease
+
+from bs4 import BeautifulSoup
+
+from collections import OrderedDict
+from operator import itemgetter
+from itertools import islice
+from threading import Thread
+
+import numpy as np
+import pandas
+
+import regex
+import re
+
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob
+import httplib2 as http
+
+
+
+
+
 def parse_fasta(fasta_file):
     '''file_path => dict
     Return a dict of id:sequences.
@@ -30,9 +65,7 @@ def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_ex
     '''
     Return a binary score matrix for a pairwise alignment.
     '''
-    from Bio import pairwise2
-    from Bio.SubsMat import MatrixInfo as matlist
-    
+
     alns = pairwise2.align.globalds(reference, sample, matrix, gap_open, gap_extend)
 
     top_aln = alns[0]
@@ -71,7 +104,7 @@ def view_matrix(arrays):
     '''
     for a in arrays:
         print(a)
-    print '========='
+    print('=========')
     for n,r in enumerate(arrays):
         print(n,len(r))
     print(f'row:{len(arrays)}\ncol:{len(r)}')
@@ -180,12 +213,10 @@ def center(pattern):
     Return the centered pattern, 
     which is given by [(value - mean) for value in pattern]
 
-    >>> import numpy as np
     >>> array = np.array([681.7, 682.489, 681.31, 682.001, 682.001, 682.499, 682.001])
     >>> center(array)
     array([-0.30014286,  0.48885714, -0.69014286,  0.00085714,  0.00085714, 0.49885714,  0.00085714])
     '''
-    import numpy as np
     #mean = pattern.mean()
     #return np.array([(value - mean) for value in pattern])
     return (pattern - np.mean(pattern))
@@ -195,12 +226,10 @@ def rescale(pattern):
     '''np.array => np.array
     Rescale each point of the array to be a float between 0 and 1.
 
-    >>> import numpy as np
     >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> rescale(a)
     array([ 0. ,  0.2,  0.4,  0.6,  0.8,  1. ,  0.8,  0.6,  0.4,  0.2,  0. ])
     '''
-    import numpy as np
     #_max = pattern.max()
     #_min = pattern.min()
     #return np.array([(value - _min)/(_max - _min) for value in pattern])
@@ -211,14 +240,12 @@ def standardize(pattern):
     '''np.array => np.array
     Return a standard pattern.
 
-    >>> import numpy as np
     >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> standardize(a)
     array([-1.41990459, -0.79514657, -0.17038855,  0.45436947,  1.07912749,
             1.7038855 ,  1.07912749,  0.45436947, -0.17038855, -0.79514657,
            -1.41990459])
     '''
-    import numpy as np
     #mean = pattern.mean()
     #std = pattern.std()
     #return np.array([(value - mean)/std for value in pattern])
@@ -229,12 +256,9 @@ def normalize(pattern):
     '''np.array => np.array
     Return a normalized pattern using np.linalg.norm().
 
-    >>> import numpy as np
     >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> normalize(a)
     '''
-    import numpy as np
-
     return pattern / np.linalg.norm(pattern)
 
 
@@ -265,7 +289,6 @@ def gen_patterns(data,length,ptype='all'):
                 1: array([-1.22474487,  0.        ,  1.22474487]),
                 2: array([-1.22474487,  0.        ,  1.22474487])}}
     '''
-    import numpy as np
 
     results = {}
     ptypes = ['std','norm','scale','center']
@@ -372,7 +395,6 @@ def stamp_to_date(stamp,time='utc'):
     >>> stamp_to_date(stamp,time='local')
     datetime.datetime(2016, 10, 27, 11, 1, 8, 930000)
     '''
-    import datetime
 
     if time.lower() == 'utc':
         return datetime.datetime.utcfromtimestamp(stamp)
@@ -408,8 +430,6 @@ def entropy(sequence, verbose=False):
     The theoretical limit for data compression:
     Shannon Entropy of the string * string length
     '''
-    import math
-
     letters = list(sequence)
     alphabet = list(set(letters)) # list of symbols in the string
     # calculate the frequency of each symbol in the string
@@ -522,7 +542,6 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
             print_sbar(n+1,m=range_limit)
             time.sleep(0.1)
     '''
-    import sys
     #adjust to bar size
     if m != size:
         n =(n*size)/m
@@ -550,7 +569,6 @@ def hash(a_string,algorithm='md5'):
         >>> hash('prova','sha256')
         '6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba'
     '''
-    import hashlib
     if algorithm == 'md5':
         return hashlib.md5(a_string.encode()).hexdigest()
     elif algorithm == 'sha256':
@@ -564,8 +582,6 @@ def get_first_transcript_by_gene_name(gene_name):
     Return the id of the main trascript for a given gene.
     The data is from http://grch37.ensembl.org/
     '''
-    from urllib import urlopen
-    from pyensembl import EnsemblRelease
     data = EnsemblRelease(75)
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(',')[0].split('=')[-1]
@@ -581,7 +597,6 @@ def get_exons_coord_by_gene_name(gene_name):
     Return an OrderedDict having as k the exon_id
     and as value a tuple containing the genomic coordinates ('chr',start,stop).        
     '''
-    from pyensembl import EnsemblRelease
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(',')[0].split('=')[-1]
     gene_location = str(gene[0]).split('=')[-1].strip(')')
@@ -604,8 +619,6 @@ def get_exons_coord_by_gene_name(gene_name):
 
             ENSE00002419584 ['7,579,721', '7,579,700']
     '''
-    from collections import OrderedDict
-    from pyensembl import EnsemblRelease
     data = EnsemblRelease(75)
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(',')[0].split('=')[-1]
@@ -803,7 +816,7 @@ def load_obj(file):
     Be aware that pickle is version dependent,
     i.e. objects dumped in Py3 cannot be loaded with Py2.
     '''
-    import pickle
+    
     try:
         with open(file,'rb') as f:
             obj = pickle.load(f)
@@ -818,7 +831,6 @@ def save_obj(obj, file):
     Be aware that pickle is version dependent,
     i.e. objects dumped in Py3 cannot be loaded with Py2.
     '''
-    import pickle
     try:
         with open(file,'wb') as f:
             pickle.dump(obj, f)
@@ -887,7 +899,6 @@ def compare_patterns(pattA, pattB):
     Return a "raw similarity score". 
     You may want to center the two patterns before compare them.
 
-    >>> import numpy as np
     >>> a  = np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> a1 = np.array([n+0.1 for n in a])
     >>> a2 = np.array([n+1 for n in a])
@@ -905,7 +916,6 @@ def compare_patterns(pattA, pattB):
     >>> compare_patterns(a,a3)
     -330.3030303030303
     '''
-    import numpy as np
 
     if len(pattA) == len(pattB):
         deltas = []
@@ -980,7 +990,6 @@ def sequence_from_coordinates(chromosome,strand,start,end,account="a.marcozzi@um
     This function works only with with GRCh37.
     Inputs can be str or int e.g. 1 or '1' 
     '''
-    from Bio import Entrez, SeqIO
 
     Entrez.email = account # Always tell NCBI who you are
 
@@ -1162,7 +1171,6 @@ def annotate_fusion_genes(dataset_file):
     Uses FusionGenes_Annotation.pl to find fusion genes in the dataset.
     Generates a new file containing all the annotations.
     '''
-    import time
     start = time.time()
     print('annotating', dataset_file, '...')
     raw_output = run_perl('FusionGenes_Annotation.pl', dataset_file)
@@ -1197,7 +1205,6 @@ def blastn(input_fasta_file,db_path='/Users/amarcozzi/Desktop/BLAST_DB/',db_name
     Requires NCBI BLAST+ to be installed. http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
     Takes a fasta file as input and writes the output in an XML file.
     '''
-    from Bio.Blast.Applications import NcbiblastnCommandline
     db = db_path + db_name
     blastn_cline = NcbiblastnCommandline(query=input_fasta_file, db=db, evalue=0.001, outfmt=5, out=out_file)
     print(blastn_cline)
@@ -1349,7 +1356,7 @@ def gen_rnd_string(length):
     '''
     Return a string of uppercase and lowercase ascii letters.
     '''
-    import random, string
+    
     s = [l for l in string.ascii_letters]
     random.shuffle(s)
     s = ''.join(s[:length])
@@ -1360,9 +1367,7 @@ def gene_synonyms(gene_name):
     Queries http://rest.genenames.org and returns a list of synonyms of gene_name.
     Returns None if no synonym was found.
     '''
-    import httplib2 as http
-    import json
-    from urllib.parse import urlparse
+
 
     result = []
     headers = {'Accept': 'application/json'}
@@ -1407,7 +1412,6 @@ def number_to_string(n):
     '''
     Convert a number into a bytes string.
     '''
-    import math
     return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
 #x = 147948829660780569073512294
 #number_to_string(x)
@@ -1431,7 +1435,6 @@ def dict_overview(dictionary,how_many_keys):
     Prints out how_many_elements of the target dictionary.
     Useful to have a quick look at the structure of a dictionary.
     '''
-    from itertools import islice
     ks = list(islice(dictionary, how_many_keys))
     for k in ks:
         print(k)
@@ -1443,7 +1446,7 @@ def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@stu
     Download the Human genome from enterez.
     Save each chromosome in a separate txt file.
     '''
-    from Bio import Entrez, SeqIO
+    
 
     Entrez.email = entrez_usr_email
 
@@ -1718,7 +1721,7 @@ def fill_and_sort(pandas_chrSeries):
     > fill_and_sort(series)
     >>> [('1', 61), ('2',0), ('3', 28), ..., ('X', 29), ('Y',0)] # this Series have all the chromosomes
     '''
-    import pandas
+    
     # add missing ChrA
     CHROMOSOMES = [str(c) for c in range(1,23)]+['X','Y']
     chr_list = CHROMOSOMES[:]
@@ -1797,11 +1800,7 @@ def gene_synonyms(gene_name):
     '''str => list()
     Queries http://rest.genenames.org and http://www.ncbi.nlm.nih.gov/ to figure out the best synonym of gene_name.
     '''
-    import httplib2 as http
-    import json
-    from urllib.parse import urlparse
-    from urllib.request import urlopen
-    from bs4 import BeautifulSoup
+    
     
 
     result = []
@@ -2069,7 +2068,6 @@ def gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance
     valid chromosomes inputs are "1" to "22" ; "Y" ; "X"
     The chromosome length is based on the build GRCh37/hg19.'''
 
-    import random
     # CHR_LENGTHS is based on GRCh37
     CHR_LENGTHS = {'1':249250621,'2' :243199373,'3' :198022430,'4' :191154276,
                '5' :180915260,'6' :171115067,'7' :159138663,'8' :146364022,
@@ -2146,7 +2144,7 @@ def gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance
 # print(gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance=15000, GapTable_file='tables/gap.txt'))
 
 def gen_rnd_id(length):
-    import random
+    
     '''Generates a random string made by uppercase ascii chars and digits'''
     chars = string.ascii_uppercase + string.digits
     return ''.join(random.choice(chars) for char in range(length))
@@ -2166,9 +2164,7 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
                                                         chr1    40000   50000
                                                         chr1    50000   60000
     '''
-    import random
     if verbose == True:
-        import time
         start_time = time.time()
 
     # CHR_LENGTHS is based on GRCh37
@@ -2288,8 +2284,6 @@ def kmers_finder(sequence_dict, motif_length, min_repetition):
     Find all the motifs long 'motif_length' and repeated at least 'min_repetition' times.
     Return an OrderedDict having motif:repetition as key:value sorted by value. 
     '''
-    from collections import OrderedDict 
-    from operator import itemgetter
     motif_dict = {}
     for _id, sequence in sequence_dict.items():
         #populate a dictionary of motifs (motif_dict)
@@ -2317,8 +2311,7 @@ def kmers_finder_with_mismatches(sequence, motif_length, max_mismatches, most_co
     Sample Input:   ACGTTGCATGTCGCATGATGCATGAGAGCT 4 1
     Sample Output:  OrderedDict([('ATGC', 5), ('ATGT', 5), ('GATG', 5),...])
     '''
-    from collections import OrderedDict
-    from operator import itemgetter
+
 
     #check passed variables
     if not motif_length <= 12 and motif_length >= 1:
@@ -2393,8 +2386,8 @@ def list_of_files(path, extension):
     '''
     Return a list of filepath for each file into path with the target extension.
     '''
-    import glob
-    return glob.glob(str(path + '/*.' + extension))
+    
+    return glob.iglob(str(path + '/*.' + extension))
 # print(list_of_files('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test datasets', 'txt'))
 
 def merge_gaps(gap_list):
@@ -2447,7 +2440,6 @@ def merge_sort(intervals):
 def multi_threads_fusion_genes_annotation(folder_path, extension, max_simultaneous_threads):
     ''' Executes annotate_fusion_genes() for each dataset file in a folder.
     Each execution run on a different thread.'''
-    from threading import Thread
     global running_threads
     dataset_files = list_of_files(folder_path, extension)
     threads = 0
@@ -2467,7 +2459,6 @@ def pandize_dataset(annotated_dataset, verbose=True):
     Prepares a dataset to be "pandas ready".
     Takes a file path as input.
     '''
-    import pandas
     # Parse
     if verbose == True:
         message = 'parsing ' + annotated_dataset.split('/')[-1]
@@ -2499,7 +2490,7 @@ def parse_blastXML(infile):
     '''
     Parses a blast outfile (XML).
     '''
-    from Bio.Blast import NCBIXML
+    
     for blast_record in NCBIXML.parse(open(infile)):
         for alignment in blast_record.alignments:
             for hsp in alignment.hsps:
@@ -2529,13 +2520,12 @@ def complement(sequence):
     return r
 
 def get_mismatches(template,primer,maxerr,overlapped=False):
-    import regex
+    
     error = 'e<={}'.format(maxerr)
     return regex.findall('({}){{{}}}'.format(primer,error), template, overlapped=overlapped)
 
 
 def pcr(template,primer_F,primer_R,circular=False):
-    import re
     if circular: ##works only with primers without 5' overhang
         i = template.upper().find(primer_F.upper())
         template = template[i:]+template[:i]
@@ -2575,25 +2565,29 @@ def pcr(template,primer_F,primer_R,circular=False):
 def pip_upgrade_all():
     '''
     Upgrades all pip-installed packages.
-    Requires a bash shell. (Unix)
+    Requires a bash shell.
     '''
-    from subprocess import call
     #pip
     print('upgrading pip...')
     call('pip install --upgrade pip', shell=True)
     call("pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U", shell=True)
     #pip2
     print('upgrading pip2...')
-    call('pip2 install --upgrade pip2', shell=True)
+    call('pip2 install --upgrade pip', shell=True)
     call("pip2 freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip2 install -U", shell=True)
     #pip3
     print('upgrading pip3...')
-    call('pip3 install --upgrade pip3', shell=True)
+    call('pip3 install --upgrade pip', shell=True)
     call("pip3 freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip3 install -U", shell=True)
     #pypy
     print('upgrading pypy-pip...')
     call('pypy -m pip install --upgrade pip',shell=True)
     call("pypy -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy -m pip install -U", shell=True)
+    #pypy3
+    print('upgrading pypy3-pip...')
+    call('pypy3 -m pip install --upgrade pip',shell=True)
+    call("pypy3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy3 -m pip install -U", shell=True)
+
 
 def probability(p,n,k):
     '''
@@ -2604,11 +2598,11 @@ def probability(p,n,k):
     probability = prob(0.5,10,3)
     print(probability) => (15/128) = 0.1171875
     '''
-    from math import factorial
+
     p = float(p)
     n = float(n)
     k = float(k)
-    C = factorial(n) / ( factorial(k) * factorial(n-k) )
+    C = math.factorial(n) / (math.factorial(k) * math.factorial(n-k) )
     probability = C * (p**k) * (1-p)**(n-k)
     return probability
 #from math import factorial
@@ -2643,9 +2637,6 @@ def query_encode(chromosome, start, end):
     Queries ENCODE via http://promoter.bx.psu.edu/ENCODE/search_human.php
     Parses the output and returns a dictionary of CIS elements found and the relative location.
     '''
-    import re
-    from urllib.request import urlopen
-    from bs4 import BeautifulSoup
 
     ## Regex setup
     re1='(chr{})'.format(chromosome) # The specific chromosome
@@ -2655,7 +2646,6 @@ def query_encode(chromosome, start, end):
     re5='(\\d+)' # Integer
     rg = re.compile(re1+re2+re3+re4+re5,re.IGNORECASE|re.DOTALL)
 
-
     ## Query ENCODE
     std_link = 'http://promoter.bx.psu.edu/ENCODE/get_human_cis_region.php?assembly=hg19&'
     query = std_link + 'chr=chr{}&start={}&end={}'.format(chromosome,start,end)
@@ -2663,7 +2653,6 @@ def query_encode(chromosome, start, end):
     html_doc = urlopen(query)
     html_txt = BeautifulSoup(html_doc, 'html.parser').get_text()
     data = html_txt.split('\n')
-
 
     ## Parse the output
     parsed = {}
@@ -2687,13 +2676,12 @@ def run_perl(perl_script_file, input_perl_script):
     '''
     Run an external perl script and return its output
     '''
-    from subprocess import check_output
+    
     return check_output(["perl", perl_script_file, input_perl_script])
 #print(run_perl('FusionGenes_Annotation.pl', 'test_data.txt'))
 
 def run_py(code, interp='python3'):
     '''Run an block of python code using the target interpreter.'''
-    from subprocess import check_output
     with open('tmp.py', 'w') as f:
         for line in code.split('\n'):
             f.write(line+'\n')
@@ -2702,7 +2690,6 @@ def run_py(code, interp='python3'):
 
 def run_pypy(code, interpr='pypy3'):
     '''Run an block of python code with PyPy'''
-    from subprocess import check_output
     with open('tmp.py', 'w') as f:
         for line in code.split('\n'):
             f.write(line+'\n')
@@ -2714,7 +2701,6 @@ def sequence_from_coordinates(chromosome,strand,start,end): #beta hg19 only
     '''
     Download the nucleotide sequence from the gene_name.
     '''
-    from Bio import Entrez, SeqIO
     Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
     
     #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
@@ -2746,8 +2732,6 @@ def sequence_from_gene(gene_name): #beta
     '''
     Download the nucleotide sequence from the gene_name.
     '''
-    from Bio import Entrez, SeqIO
-    from pyensembl import EnsemblRelease
     data = EnsemblRelease(75, auto_download=True)
     Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
     NCBI_IDS = {'1':"NC_000001", '2':"NC_000002",'3':"NC_000003",'4':"NC_000004",
@@ -2801,7 +2785,6 @@ def sort_dataset(dataset_file, overwrite=False):
     '''
     Sort a dataset by ChrA. It helps during plotting
     '''
-    from operator import itemgetter
     text = []
     header_counter = 0
     header = False
