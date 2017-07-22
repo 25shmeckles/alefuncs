@@ -531,7 +531,7 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
     Example:
         range_limit = 1000
         for n in range(range_limit):
-            print_sbar(n,m=range_limit)
+            print_sbar(n+1,m=range_limit)
             time.sleep(0.1)
     '''
     import sys
@@ -587,7 +587,7 @@ def get_first_transcript_by_gene_name(gene_name):
         if '<tbody><tr><td class="bold">' in line:
             return line.split('">')[2].split('</a>')[0]
 
-   
+        
 def get_exons_coord_by_gene_name(gene_name):
     '''str => OrderedDict({'exon_id':[coordinates]})
     Return an OrderedDict having as k the exon_id
