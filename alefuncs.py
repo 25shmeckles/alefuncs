@@ -3,6 +3,18 @@
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
+#https://dzone.com/articles/python-equivalent-flatmap
+# def flatmap(f, items):
+#         return chain.from_iterable(imap(f, items))
+
+# flattened_episodes = flatmap(
+#     lambda episode: [{"id": episode["id"], "topic": topic} 
+#     for topic in episode["topics"]], 
+#     episodes)
+
+# for episode in flattened_episodes:
+#     print episode
+
 def parse_fasta(fasta_file):
     '''file_path => dict
     Return a dict of id:sequences.
