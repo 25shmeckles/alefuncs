@@ -2382,13 +2382,26 @@ def list_to_line(list_, char):
     return string.rstrip(char) # Removes the last char
 #print(list_to_line(['prova', '1', '2', '3', 'prova'], '---'))
 
-def list_of_files(path, extension):
+#def list_of_files(path, extension):
+#    '''
+#    Return a list of filepath for each file into path with the target extension.
+#    '''
+#    
+#    return glob.iglob(str(path + '/*.' + extension))
+# print(list_of_files('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test datasets', 'txt'))
+
+
+def list_of_files(path, extension, recursive=False):
     '''
     Return a list of filepath for each file into path with the target extension.
+    If recursive, it will loop over subfolders as well.
     '''
-    
-    return glob.iglob(str(path + '/*.' + extension))
-# print(list_of_files('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test datasets', 'txt'))
+    if not recursive:
+        return glob.iglob(str(path + '/*.' + extension))
+    else:
+        for root, dirs, files in os.walk(path):
+            for file_path in glob.iglob(root + '/*.' + extension):
+                yield file_path
 
 def merge_gaps(gap_list):
     '''
