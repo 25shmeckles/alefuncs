@@ -2397,7 +2397,8 @@ def list_of_files(path, extension, recursive=False):
     If recursive, it will loop over subfolders as well.
     '''
     if not recursive:
-        return glob.iglob(str(path + '/*.' + extension))
+        for file_path in glob.iglob(path + '/*.' + extension):
+            yield file_path
     else:
         for root, dirs, files in os.walk(path):
             for file_path in glob.iglob(root + '/*.' + extension):
