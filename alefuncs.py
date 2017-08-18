@@ -2382,15 +2382,6 @@ def list_to_line(list_, char):
     return string.rstrip(char) # Removes the last char
 #print(list_to_line(['prova', '1', '2', '3', 'prova'], '---'))
 
-#def list_of_files(path, extension):
-#    '''
-#    Return a list of filepath for each file into path with the target extension.
-#    '''
-#    
-#    return glob.iglob(str(path + '/*.' + extension))
-# print(list_of_files('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test datasets', 'txt'))
-
-
 def list_of_files(path, extension, recursive=False):
     '''
     Return a list of filepath for each file into path with the target extension.
@@ -2538,7 +2529,6 @@ def get_mismatches(template,primer,maxerr,overlapped=False):
     error = 'e<={}'.format(maxerr)
     return regex.findall('({}){{{}}}'.format(primer,error), template, overlapped=overlapped)
 
-
 def pcr(template,primer_F,primer_R,circular=False):
     if circular: ##works only with primers without 5' overhang
         i = template.upper().find(primer_F.upper())
@@ -2602,7 +2592,6 @@ def pip_upgrade_all():
     call('pypy3 -m pip install --upgrade pip',shell=True)
     call("pypy3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy3 -m pip install -U", shell=True)
 
-
 def probability(p,n,k):
     '''
     Simple probability calculator.
@@ -2645,7 +2634,6 @@ def process(real_dataset):
 # for item in list_of_files(folder,'txt'):
 #   process(item)
 
-
 def query_encode(chromosome, start, end):
     '''
     Queries ENCODE via http://promoter.bx.psu.edu/ENCODE/search_human.php
@@ -2685,7 +2673,6 @@ def query_encode(chromosome, start, end):
     return parsed
 #cis_elements = query_encode(2,10000,20000)
 
-
 def run_perl(perl_script_file, input_perl_script):
     '''
     Run an external perl script and return its output
@@ -2701,15 +2688,12 @@ def run_py(code, interp='python3'):
             f.write(line+'\n')
     return check_output([interpr, 'tmp.py'])
 
-
 def run_pypy(code, interpr='pypy3'):
     '''Run an block of python code with PyPy'''
     with open('tmp.py', 'w') as f:
         for line in code.split('\n'):
             f.write(line+'\n')
     return check_output([interpr, 'tmp.py'])
-
-
 
 def sequence_from_coordinates(chromosome,strand,start,end): #beta hg19 only
     '''
