@@ -1,20 +1,19 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2017_05
+### version: 2017_08
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
-from Bio import pairwise2
-from Bio.SubsMat import MatrixInfo as matlist
-from Bio import Entrez, SeqIO
-from Bio.Blast import NCBIXML
-from Bio.Blast.Applications import NcbiblastnCommandline
 
-#from urllib import urlopen
+from Bio import pairwise2,  Entrez, SeqIO
+from Bio.SubsMat import MatrixInfo as matlist
+from Bio.Blast.Applications import NcbiblastnCommandline
+from Bio.Blast import NCBIXML
+
+
 from urllib.request import urlopen
 from urllib.parse import urlparse
 
-from subprocess import call
-from subprocess import check_output
+from subprocess import call, check_output
 
 from pyensembl import EnsemblRelease
 
@@ -35,7 +34,28 @@ import datetime, math, sys, hashlib, pickle, time, random, string, json, glob
 import httplib2 as http
 
 
+def is_prime(n):
+    '''Return True if n is a prime number'''
 
+    if n == 1: 
+        return False #1 is not prime
+
+    #if it's even and not 2, then it's not prime
+    if n == 2:
+        return True
+    if n > 2 and n % 2 == 0:
+        return False
+
+    max_divisor = math.floor(math.sqrt(n))
+    for d in range(3, 1 + max_divisor, 2):
+        if n % d == 0:
+            return False
+    return True
+
+
+
+def flatmap(f, items):
+    return chain.from_iterable(imap(f, items))
 
 
 def parse_fasta(fasta_file):
@@ -262,7 +282,7 @@ def normalize(pattern):
     return pattern / np.linalg.norm(pattern)
 
 
-def gen_patterns(data,length,ptype='all'):
+def gen_patterns(data, length, ptype='all'):
     '''(array, int) => dict
 
     Generate all possible patterns of a given legth
@@ -553,7 +573,7 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
     if _b >= 100:
         _b = 100.0
     #to stdout    
-    sys.stdout.write('\r{}{}{}{} {}%     '.format(message,s[0],_a,s[3],_b))
+    sys.stdout.write(f'\r{message}{s[0]}{_a}{s[3]} {_b}%     ')
     sys.stdout.flush()
 
 
@@ -669,7 +689,7 @@ def split_overlap(iterable,size,overlap):
             iterable = iterable[size-overlap:]
 
 
-def reorder_dict(d,keys):
+def reorder_dict(d, keys):
     '''(dict,list) => OrderedDict
     Change the order of a dictionary's keys
     without copying the dictionary (save RAM!).
@@ -691,7 +711,7 @@ def reorder_dict(d,keys):
 #>>> OrderedDict([('1', 1), ('2', 2), ('3', 3), ('4', 4)])
 
 
-def in_between(one_number,two_numbers):
+def in_between(one_number, two_numbers):
     '''(int,list) => bool
     Return true if a number is in between two other numbers.
     Return False otherwise.
@@ -703,7 +723,7 @@ def in_between(one_number,two_numbers):
     return two_numbers[0] <= one_number <= two_numbers[1]
 
 
-def is_overlapping(svA,svB,limit=0.9):
+def is_overlapping(svA, svB, limit=0.9):
     '''(list,list,float) => bool
     Check if two SV ovelaps for at least 90% (limit=0.9).
     svX = [chr1,brk1,chr2,brk2]
@@ -1018,7 +1038,7 @@ def sequence_from_coordinates(chromosome,strand,start,end,account="a.marcozzi@um
 
 
 #GC content calculator    
-def gc_content(sequence,percent=True):
+def gc_content(sequence, percent=True):
     '''
     Return the GC content of a sequence.
     '''
@@ -1053,7 +1073,7 @@ def gc_content(sequence,percent=True):
 
 
 #Endpoint function to calculate the flexibility of a given sequence
-def dna_flex(sequence,window_size=500,step_zize=100,verbose=False):
+def dna_flex(sequence, window_size=500, step_zize=100, verbose=False):
     '''(str,int,int,bool) => list_of_tuples
     Calculate the flexibility index of a sequence.
     Return a list of tuples.
@@ -1098,7 +1118,7 @@ def g4_scanner(sequence):
 
 
 #Repeat-masker
-def parse_RepeatMasker(infile="RepeatMasker.txt",rep_type='class'):
+def parse_RepeatMasker(infile="RepeatMasker.txt", rep_type='class'):
     '''
     Parse RepeatMasker.txt and return a dict of bins for each chromosome
     and a set of repeats found on that bin.
@@ -1159,7 +1179,7 @@ def previous_day(d='2012-12-04'):
 # >>> '2012-12-31'
 
 
-def intersect(list1,list2):
+def intersect(list1, list2):
     '''(list,list) => list
     Return the intersection of two lists, i.e. the item in common.
     '''
@@ -1199,7 +1219,7 @@ def annotate_fusion_genes(dataset_file):
 # annotate_fusion_genes(dataset_file)
 
 
-def blastn(input_fasta_file,db_path='/Users/amarcozzi/Desktop/BLAST_DB/',db_name='human_genomic',out_file='blastn_out.xml'):
+def blastn(input_fasta_file, db_path='/Users/amarcozzi/Desktop/BLAST_DB/',db_name='human_genomic',out_file='blastn_out.xml'):
     '''
     Run blastn on the local machine using a local database.
     Requires NCBI BLAST+ to be installed. http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
@@ -1212,7 +1232,7 @@ def blastn(input_fasta_file,db_path='/Users/amarcozzi/Desktop/BLAST_DB/',db_name
 # to be tested
 
 
-def check_line(line,unexpected_char=['\n','',' ','#']):
+def check_line(line, unexpected_char=['\n','',' ','#']):
     '''
     Check if the line starts with an unexpected character.
     If so, return False, else True
@@ -1223,7 +1243,7 @@ def check_line(line,unexpected_char=['\n','',' ','#']):
     return True
 
 
-def dice_coefficient(sequence_a,sequence_b):
+def dice_coefficient(sequence_a, sequence_b):
     '''(str, str) => float
     Return the dice cofficient of two sequences.
     '''
@@ -1845,7 +1865,7 @@ def gene_synonyms(gene_name):
         return tmp
 #print(gene_synonyms('MLL3'))
 
-def gen_controls(how_many,chromosome,GapTable_file,outfile):
+def gen_controls(how_many, chromosome, GapTable_file,outfile):
     global running_threads # in case of multithreading
     list_brkps = gen_rnd_single_break(how_many, chromosome, GapTable_file, verbose=False)
     with open(outfile,'w') as f:
@@ -1870,7 +1890,7 @@ def gen_controls(how_many,chromosome,GapTable_file,outfile):
 #   Thread(target=gen_controls, args=(how_many,chromosome,GapTable_file,outfile)).start()
 #   threads += 1
 
-def gen_control_dataset(real_dataset,suffix='_control.txt'):# tested only for deletion/duplication
+def gen_control_dataset(real_dataset, suffix='_control.txt'):# tested only for deletion/duplication
     '''
     Generates a control dataset ad hoc.
     Takes as input an existing dataset and generates breaks
@@ -2004,7 +2024,7 @@ def gen_gap_table(infile='/Users/amarcozzi/Desktop/All_breakpoints_HG19_final.tx
 # gen_gap_table(infile='/Users/amarcozzi/Desktop/current_brkps_DB/out_ALL.txt', outfile='/Users/amarcozzi/Desktop/current_brkps_DB/out_ALL_gap.txt', resolution=10000)
 # print('Done in',time.time()-start,'seconds')
 
-def gen_multiple_controls(real_dataset,how_many):
+def gen_multiple_controls(real_dataset, how_many):
     '''
     Generates how_many control datasets.
     '''
@@ -2524,10 +2544,11 @@ def complement(sequence):
         r += d[b]
     return r
 
-def get_mismatches(template,primer,maxerr,overlapped=False):
-    
+
+def get_mismatches(template, primer, maxerr, overlapped=False):
     error = 'e<={}'.format(maxerr)
-    return regex.findall('({}){{{}}}'.format(primer,error), template, overlapped=overlapped)
+    return regex.findall(f'({primer}){{{error}}}', template, overlapped=overlapped)
+
 
 def pcr(template,primer_F,primer_R,circular=False):
     if circular: ##works only with primers without 5' overhang
