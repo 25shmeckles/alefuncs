@@ -3,14 +3,26 @@
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
+
 from Bio import pairwise2,  Entrez, SeqIO
 from Bio.SubsMat import MatrixInfo as matlist
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 
+
+from urllib.request import urlopen
+from urllib.parse import urlparse
+
+from subprocess import call, check_output
+
 from pyensembl import EnsemblRelease
 
 from bs4 import BeautifulSoup
+
+from collections import OrderedDict
+from operator import itemgetter
+from itertools import islice
+from threading import Thread
 
 import numpy as np
 import pandas
@@ -20,15 +32,6 @@ import re
 
 import datetime, math, sys, hashlib, pickle, time, random, string, json, glob
 import httplib2 as http
-
-from urllib.parse import urlparse
-from urllib.request import urlopen
-from collections import OrderedDict
-from itertools import islice
-from operator import itemgetter
-from threading import Thread
-from subprocess import call, check_output
-
 
 
 def is_prime(n):
@@ -2542,11 +2545,13 @@ def complement(sequence):
         r += d[b]
     return r
 
+
 def get_mismatches(template, primer, maxerr, overlapped=False):
     error = 'e<={}'.format(maxerr)
     return regex.findall(f'({primer}){{{error}}}', template, overlapped=overlapped)
 
-def pcr(template, primer_F, primer_R, circular=False):
+
+def pcr(template,primer_F,primer_R,circular=False):
     if circular: ##works only with primers without 5' overhang
         i = template.upper().find(primer_F.upper())
         template = template[i:]+template[:i]
