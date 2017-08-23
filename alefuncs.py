@@ -51,6 +51,27 @@ from operator import itemgetter
 from threading import Thread
 from subprocess import call, check_output
 
+
+
+def is_prime(n):
+    '''Return True if n is a prime number'''
+
+    if n == 1: # one is not prime
+        return False
+    if n == 2:
+        return True
+    if n > 2 and n % 2 == 0:
+        return False
+
+    max_divisor = math.floor(math.sqrt(n))
+    for d in range(3, 1 + max_divisor, 2):
+        if n % d == 0:
+            return False
+    return True
+
+
+
+
 def parse_fasta(fasta_file):
     '''file_path => dict
     Return a dict of id:sequences.
