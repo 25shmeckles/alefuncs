@@ -1,22 +1,9 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2017_05
+### version: 2017_08
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
-#https://dzone.com/articles/python-equivalent-flatmap
-# def flatmap(f, items):
-#         return chain.from_iterable(imap(f, items))
-
-# flattened_episodes = flatmap(
-#     lambda episode: [{"id": episode["id"], "topic": topic} 
-#     for topic in episode["topics"]], 
-#     episodes)
-
-# for episode in flattened_episodes:
-#     print episode
-
-from Bio import pairwise2
-from Bio import Entrez, SeqIO
+from Bio import pairwise2,  Entrez, SeqIO
 from Bio.SubsMat import MatrixInfo as matlist
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
@@ -28,20 +15,11 @@ from bs4 import BeautifulSoup
 import numpy as np
 import pandas
 
-import datetime
-import math
-import sys
-import hashlib
-import pickle
-import time
-import random
-import string
-import httplib2 as http
-import json
-import glob
-
 import regex
 import re
+
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob
+import httplib2 as http
 
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -73,6 +51,10 @@ def is_prime(n):
 
 
 
+def flatmap(f, items):
+    return chain.from_iterable(imap(f, items))
+
+
 
 def parse_fasta(fasta_file):
     '''file_path => dict
@@ -101,6 +83,7 @@ def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_ex
     '''
     Return a binary score matrix for a pairwise alignment.
     '''
+
     alns = pairwise2.align.globalds(reference, sample, matrix, gap_open, gap_extend)
 
     top_aln = alns[0]
@@ -297,7 +280,7 @@ def normalize(pattern):
     return pattern / np.linalg.norm(pattern)
 
 
-def gen_patterns(data,length,ptype='all'):
+def gen_patterns(data, length, ptype='all'):
     '''(array, int) => dict
 
     Generate all possible patterns of a given legth
@@ -324,6 +307,7 @@ def gen_patterns(data,length,ptype='all'):
                 1: array([-1.22474487,  0.        ,  1.22474487]),
                 2: array([-1.22474487,  0.        ,  1.22474487])}}
     '''
+
     results = {}
     ptypes = ['std','norm','scale','center']
     if ptype == 'all': #to do: select specific ptypes
@@ -429,6 +413,7 @@ def stamp_to_date(stamp,time='utc'):
     >>> stamp_to_date(stamp,time='local')
     datetime.datetime(2016, 10, 27, 11, 1, 8, 930000)
     '''
+
     if time.lower() == 'utc':
         return datetime.datetime.utcfromtimestamp(stamp)
     elif time.lower() == 'local':
@@ -463,7 +448,6 @@ def entropy(sequence, verbose=False):
     The theoretical limit for data compression:
     Shannon Entropy of the string * string length
     '''
-
     letters = list(sequence)
     alphabet = list(set(letters)) # list of symbols in the string
     # calculate the frequency of each symbol in the string
@@ -587,7 +571,7 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
     if _b >= 100:
         _b = 100.0
     #to stdout    
-    sys.stdout.write('\r{}{}{}{} {}%     '.format(message,s[0],_a,s[3],_b))
+    sys.stdout.write(f'\r{message}{s[0]}{_a}{s[3]} {_b}%     ')
     sys.stdout.flush()
 
 
@@ -703,7 +687,7 @@ def split_overlap(iterable,size,overlap):
             iterable = iterable[size-overlap:]
 
 
-def reorder_dict(d,keys):
+def reorder_dict(d, keys):
     '''(dict,list) => OrderedDict
     Change the order of a dictionary's keys
     without copying the dictionary (save RAM!).
@@ -725,7 +709,7 @@ def reorder_dict(d,keys):
 #>>> OrderedDict([('1', 1), ('2', 2), ('3', 3), ('4', 4)])
 
 
-def in_between(one_number,two_numbers):
+def in_between(one_number, two_numbers):
     '''(int,list) => bool
     Return true if a number is in between two other numbers.
     Return False otherwise.
@@ -737,7 +721,7 @@ def in_between(one_number,two_numbers):
     return two_numbers[0] <= one_number <= two_numbers[1]
 
 
-def is_overlapping(svA,svB,limit=0.9):
+def is_overlapping(svA, svB, limit=0.9):
     '''(list,list,float) => bool
     Check if two SV ovelaps for at least 90% (limit=0.9).
     svX = [chr1,brk1,chr2,brk2]
@@ -1052,7 +1036,7 @@ def sequence_from_coordinates(chromosome,strand,start,end,account="a.marcozzi@um
 
 
 #GC content calculator    
-def gc_content(sequence,percent=True):
+def gc_content(sequence, percent=True):
     '''
     Return the GC content of a sequence.
     '''
@@ -1087,7 +1071,7 @@ def gc_content(sequence,percent=True):
 
 
 #Endpoint function to calculate the flexibility of a given sequence
-def dna_flex(sequence,window_size=500,step_zize=100,verbose=False):
+def dna_flex(sequence, window_size=500, step_zize=100, verbose=False):
     '''(str,int,int,bool) => list_of_tuples
     Calculate the flexibility index of a sequence.
     Return a list of tuples.
@@ -1132,7 +1116,7 @@ def g4_scanner(sequence):
 
 
 #Repeat-masker
-def parse_RepeatMasker(infile="RepeatMasker.txt",rep_type='class'):
+def parse_RepeatMasker(infile="RepeatMasker.txt", rep_type='class'):
     '''
     Parse RepeatMasker.txt and return a dict of bins for each chromosome
     and a set of repeats found on that bin.
@@ -1193,7 +1177,7 @@ def previous_day(d='2012-12-04'):
 # >>> '2012-12-31'
 
 
-def intersect(list1,list2):
+def intersect(list1, list2):
     '''(list,list) => list
     Return the intersection of two lists, i.e. the item in common.
     '''
@@ -1233,7 +1217,7 @@ def annotate_fusion_genes(dataset_file):
 # annotate_fusion_genes(dataset_file)
 
 
-def blastn(input_fasta_file,db_path='/Users/amarcozzi/Desktop/BLAST_DB/',db_name='human_genomic',out_file='blastn_out.xml'):
+def blastn(input_fasta_file, db_path='/Users/amarcozzi/Desktop/BLAST_DB/',db_name='human_genomic',out_file='blastn_out.xml'):
     '''
     Run blastn on the local machine using a local database.
     Requires NCBI BLAST+ to be installed. http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
@@ -1246,7 +1230,7 @@ def blastn(input_fasta_file,db_path='/Users/amarcozzi/Desktop/BLAST_DB/',db_name
 # to be tested
 
 
-def check_line(line,unexpected_char=['\n','',' ','#']):
+def check_line(line, unexpected_char=['\n','',' ','#']):
     '''
     Check if the line starts with an unexpected character.
     If so, return False, else True
@@ -1257,7 +1241,7 @@ def check_line(line,unexpected_char=['\n','',' ','#']):
     return True
 
 
-def dice_coefficient(sequence_a,sequence_b):
+def dice_coefficient(sequence_a, sequence_b):
     '''(str, str) => float
     Return the dice cofficient of two sequences.
     '''
@@ -1390,6 +1374,7 @@ def gen_rnd_string(length):
     '''
     Return a string of uppercase and lowercase ascii letters.
     '''
+    
     s = [l for l in string.ascii_letters]
     random.shuffle(s)
     s = ''.join(s[:length])
@@ -1400,6 +1385,8 @@ def gene_synonyms(gene_name):
     Queries http://rest.genenames.org and returns a list of synonyms of gene_name.
     Returns None if no synonym was found.
     '''
+
+
     result = []
     headers = {'Accept': 'application/json'}
 
@@ -1477,6 +1464,7 @@ def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@stu
     Download the Human genome from enterez.
     Save each chromosome in a separate txt file.
     '''
+    
 
     Entrez.email = entrez_usr_email
 
@@ -1751,6 +1739,7 @@ def fill_and_sort(pandas_chrSeries):
     > fill_and_sort(series)
     >>> [('1', 61), ('2',0), ('3', 28), ..., ('X', 29), ('Y',0)] # this Series have all the chromosomes
     '''
+    
     # add missing ChrA
     CHROMOSOMES = [str(c) for c in range(1,23)]+['X','Y']
     chr_list = CHROMOSOMES[:]
@@ -1829,6 +1818,9 @@ def gene_synonyms(gene_name):
     '''str => list()
     Queries http://rest.genenames.org and http://www.ncbi.nlm.nih.gov/ to figure out the best synonym of gene_name.
     '''
+    
+    
+
     result = []
     tmp = []
     headers = {'Accept': 'application/json'}
@@ -1871,7 +1863,7 @@ def gene_synonyms(gene_name):
         return tmp
 #print(gene_synonyms('MLL3'))
 
-def gen_controls(how_many,chromosome,GapTable_file,outfile):
+def gen_controls(how_many, chromosome, GapTable_file,outfile):
     global running_threads # in case of multithreading
     list_brkps = gen_rnd_single_break(how_many, chromosome, GapTable_file, verbose=False)
     with open(outfile,'w') as f:
@@ -1879,6 +1871,8 @@ def gen_controls(how_many,chromosome,GapTable_file,outfile):
             f.write(list_to_line(item,'\t')+'\n')
     running_threads -= 1 # in case of multithreading
 # # Generate controls
+# import time
+# from threading import Thread
 # threads = 0
 # running_threads = 0
 # max_simultaneous_threads = 20
@@ -1894,7 +1888,7 @@ def gen_controls(how_many,chromosome,GapTable_file,outfile):
 #   Thread(target=gen_controls, args=(how_many,chromosome,GapTable_file,outfile)).start()
 #   threads += 1
 
-def gen_control_dataset(real_dataset,suffix='_control.txt'):# tested only for deletion/duplication
+def gen_control_dataset(real_dataset, suffix='_control.txt'):# tested only for deletion/duplication
     '''
     Generates a control dataset ad hoc.
     Takes as input an existing dataset and generates breaks
@@ -2018,15 +2012,17 @@ def gen_gap_table(infile='/Users/amarcozzi/Desktop/All_breakpoints_HG19_final.tx
         for item in gap_list:
             line = 'chr'+str(item[0])+'\t'+str(item[1]-resolution)+'\t'+str(item[1])
             f.write(line+'\n')
+# import time
 # start = time.time()
 # gen_gap_table()
 # print('Done in',time.time()-start,'seconds')
 ## Generate a gap table file
+# import time
 # start = time.time()
 # gen_gap_table(infile='/Users/amarcozzi/Desktop/current_brkps_DB/out_ALL.txt', outfile='/Users/amarcozzi/Desktop/current_brkps_DB/out_ALL_gap.txt', resolution=10000)
 # print('Done in',time.time()-start,'seconds')
 
-def gen_multiple_controls(real_dataset,how_many):
+def gen_multiple_controls(real_dataset, how_many):
     '''
     Generates how_many control datasets.
     '''
@@ -2084,13 +2080,12 @@ def gen_deletion_dataset_from_breaks(list_of_breaks, outfile, ID_already=False):
 #       gen_deletion_dataset_from_breaks(breaks, outfile)
 
 def gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance=15000, GapTable_file='tables/gap.txt'):
-    '''
-    Returns tuples containing 1)the chromosome, 2)first breakpoint, 3)second breakpoint
+    '''Returns tuples containing 1)the chromosome, 2)first breakpoint, 3)second breakpoint
     Keeps only the points that do not appear in te gap table.
     gen_rnd_breaks(int, string, int, int, filepath) => [(chrX, int, int), ...]
     valid chromosomes inputs are "1" to "22" ; "Y" ; "X"
-    The chromosome length is based on the build GRCh37/hg19.
-    '''
+    The chromosome length is based on the build GRCh37/hg19.'''
+
     # CHR_LENGTHS is based on GRCh37
     CHR_LENGTHS = {'1':249250621,'2' :243199373,'3' :198022430,'4' :191154276,
                '5' :180915260,'6' :171115067,'7' :159138663,'8' :146364022,
@@ -2167,17 +2162,15 @@ def gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance
 # print(gen_rnd_breaks(how_many=100, chromosome='Y', min_distance=1000, max_distance=15000, GapTable_file='tables/gap.txt'))
 
 def gen_rnd_id(length):
-    '''
-    Generates a random string made by uppercase ascii chars and digits.
-    '''
+    
+    '''Generates a random string made by uppercase ascii chars and digits'''
     chars = string.ascii_uppercase + string.digits
     return ''.join(random.choice(chars) for char in range(length))
 # print(gen_rnd_id(16))
 
 #@profile
 def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/amarcozzi/Desktop/All_breakpoints_HG19_gap_10k.txt', verbose=False):
-    '''
-    Returns tuples containing 1)the chromosome, 2)the breakpoint
+    '''Returns tuples containing 1)the chromosome, 2)the breakpoint
     Keeps only the points that do not appear in te gap table.
     gen_rnd_breaks(int, string, filepath) => [(chrX, int), ...]
     valid chromosomes inputs are "1" to "22" ; "Y" ; "X"
@@ -2264,6 +2257,7 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
     return list_of_breakpoints
 # gen_rnd_single_break(verbose=True)
 # ## Generate single breaks dataset
+# import time
 # start = time.time()
 # breaks_on_1 = gen_rnd_single_break(how_many=19147,verbose=False)
 # for item in breaks_on_1:
@@ -2275,6 +2269,8 @@ def gen_rnd_single_break(how_many=100, chromosome='1', GapTable_file='/Users/ama
 #   for item in list_brkps:
 #       f.write(list_to_line(item,'\t')+'\n')
 # ## Generate multiple controls
+# import time
+# from threading import Thread
 # start_time = time.time()
 # threads = 0
 # running_threads = 0
@@ -2306,8 +2302,6 @@ def kmers_finder(sequence_dict, motif_length, min_repetition):
     Find all the motifs long 'motif_length' and repeated at least 'min_repetition' times.
     Return an OrderedDict having motif:repetition as key:value sorted by value. 
     '''
- 
-    
     motif_dict = {}
     for _id, sequence in sequence_dict.items():
         #populate a dictionary of motifs (motif_dict)
@@ -2335,6 +2329,8 @@ def kmers_finder_with_mismatches(sequence, motif_length, max_mismatches, most_co
     Sample Input:   ACGTTGCATGTCGCATGATGCATGAGAGCT 4 1
     Sample Output:  OrderedDict([('ATGC', 5), ('ATGT', 5), ('GATG', 5),...])
     '''
+
+
     #check passed variables
     if not motif_length <= 12 and motif_length >= 1:
         raise ValueError("motif_length must be between 0 and 12. {} was passed.".format(motif_length))
@@ -2404,12 +2400,18 @@ def list_to_line(list_, char):
     return string.rstrip(char) # Removes the last char
 #print(list_to_line(['prova', '1', '2', '3', 'prova'], '---'))
 
-def list_of_files(path, extension):
+def list_of_files(path, extension, recursive=False):
     '''
     Return a list of filepath for each file into path with the target extension.
+    If recursive, it will loop over subfolders as well.
     '''
-    return glob.iglob(str(path + '/*.' + extension))
-# print(list_of_files('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test datasets', 'txt'))
+    if not recursive:
+        for file_path in glob.iglob(path + '/*.' + extension):
+            yield file_path
+    else:
+        for root, dirs, files in os.walk(path):
+            for file_path in glob.iglob(root + '/*.' + extension):
+                yield file_path
 
 def merge_gaps(gap_list):
     '''
@@ -2511,6 +2513,7 @@ def parse_blastXML(infile):
     '''
     Parses a blast outfile (XML).
     '''
+    
     for blast_record in NCBIXML.parse(open(infile)):
         for alignment in blast_record.alignments:
             for hsp in alignment.hsps:
@@ -2539,12 +2542,11 @@ def complement(sequence):
         r += d[b]
     return r
 
-def get_mismatches(template,primer,maxerr,overlapped=False):
+def get_mismatches(template, primer, maxerr, overlapped=False):
     error = 'e<={}'.format(maxerr)
-    return regex.findall('({}){{{}}}'.format(primer,error), template, overlapped=overlapped)
+    return regex.findall(f'({primer}){{{error}}}', template, overlapped=overlapped)
 
-
-def pcr(template,primer_F,primer_R,circular=False):
+def pcr(template, primer_F, primer_R, circular=False):
     if circular: ##works only with primers without 5' overhang
         i = template.upper().find(primer_F.upper())
         template = template[i:]+template[:i]
@@ -2584,7 +2586,7 @@ def pcr(template,primer_F,primer_R,circular=False):
 def pip_upgrade_all():
     '''
     Upgrades all pip-installed packages.
-    Requires a bash shell. (Unix)
+    Requires a bash shell.
     '''
     #pip
     print('upgrading pip...')
@@ -2592,16 +2594,20 @@ def pip_upgrade_all():
     call("pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U", shell=True)
     #pip2
     print('upgrading pip2...')
-    call('pip2 install --upgrade pip2', shell=True)
+    call('pip2 install --upgrade pip', shell=True)
     call("pip2 freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip2 install -U", shell=True)
     #pip3
     print('upgrading pip3...')
-    call('pip3 install --upgrade pip3', shell=True)
+    call('pip3 install --upgrade pip', shell=True)
     call("pip3 freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip3 install -U", shell=True)
     #pypy
     print('upgrading pypy-pip...')
     call('pypy -m pip install --upgrade pip',shell=True)
     call("pypy -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy -m pip install -U", shell=True)
+    #pypy3
+    print('upgrading pypy3-pip...')
+    call('pypy3 -m pip install --upgrade pip',shell=True)
+    call("pypy3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy3 -m pip install -U", shell=True)
 
 def probability(p,n,k):
     '''
@@ -2612,12 +2618,14 @@ def probability(p,n,k):
     probability = prob(0.5,10,3)
     print(probability) => (15/128) = 0.1171875
     '''
+
     p = float(p)
     n = float(n)
     k = float(k)
     C = math.factorial(n) / (math.factorial(k) * math.factorial(n-k) )
     probability = C * (p**k) * (1-p)**(n-k)
     return probability
+#from math import factorial
 #print(probability(0.5,10,3))
 #print(probability(0.5,1,1))
 
@@ -2643,12 +2651,12 @@ def process(real_dataset):
 # for item in list_of_files(folder,'txt'):
 #   process(item)
 
-
 def query_encode(chromosome, start, end):
     '''
     Queries ENCODE via http://promoter.bx.psu.edu/ENCODE/search_human.php
     Parses the output and returns a dictionary of CIS elements found and the relative location.
     '''
+
     ## Regex setup
     re1='(chr{})'.format(chromosome) # The specific chromosome
     re2='(:)'    # Any Single Character ':'
@@ -2657,7 +2665,6 @@ def query_encode(chromosome, start, end):
     re5='(\\d+)' # Integer
     rg = re.compile(re1+re2+re3+re4+re5,re.IGNORECASE|re.DOTALL)
 
-
     ## Query ENCODE
     std_link = 'http://promoter.bx.psu.edu/ENCODE/get_human_cis_region.php?assembly=hg19&'
     query = std_link + 'chr=chr{}&start={}&end={}'.format(chromosome,start,end)
@@ -2665,7 +2672,6 @@ def query_encode(chromosome, start, end):
     html_doc = urlopen(query)
     html_txt = BeautifulSoup(html_doc, 'html.parser').get_text()
     data = html_txt.split('\n')
-
 
     ## Parse the output
     parsed = {}
@@ -2684,34 +2690,27 @@ def query_encode(chromosome, start, end):
     return parsed
 #cis_elements = query_encode(2,10000,20000)
 
-
 def run_perl(perl_script_file, input_perl_script):
     '''
-    Run an external perl script and return its output.
+    Run an external perl script and return its output
     '''
+    
     return check_output(["perl", perl_script_file, input_perl_script])
 #print(run_perl('FusionGenes_Annotation.pl', 'test_data.txt'))
 
 def run_py(code, interp='python3'):
-    '''
-    Run an block of python code using the target interpreter.
-    '''
+    '''Run an block of python code using the target interpreter.'''
     with open('tmp.py', 'w') as f:
         for line in code.split('\n'):
             f.write(line+'\n')
     return check_output([interpr, 'tmp.py'])
-
 
 def run_pypy(code, interpr='pypy3'):
-    '''
-    Run an block of python code with PyPy.
-    '''
+    '''Run an block of python code with PyPy'''
     with open('tmp.py', 'w') as f:
         for line in code.split('\n'):
             f.write(line+'\n')
     return check_output([interpr, 'tmp.py'])
-
-
 
 def sequence_from_coordinates(chromosome,strand,start,end): #beta hg19 only
     '''
