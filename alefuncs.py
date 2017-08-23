@@ -58,7 +58,6 @@ def flatmap(f, items):
     return chain.from_iterable(imap(f, items))
 
 
-
 def parse_fasta(fasta_file):
     '''file_path => dict
     Return a dict of id:sequences.
