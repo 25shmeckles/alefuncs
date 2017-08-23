@@ -56,8 +56,10 @@ from subprocess import call, check_output
 def is_prime(n):
     '''Return True if n is a prime number'''
 
-    if n == 1: # one is not prime
-        return False
+    if n == 1: 
+        return False #1 is not prime
+
+    #if it's even and not 2, then it's not prime
     if n == 2:
         return True
     if n > 2 and n % 2 == 0:
