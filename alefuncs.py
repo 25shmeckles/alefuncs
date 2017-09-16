@@ -33,6 +33,31 @@ import re
 import datetime, math, sys, hashlib, pickle, time, random, string, json, glob
 import httplib2 as http
 
+from urllib.request import urlopen
+from pyliftover import LiftOver
+
+
+def snp237(snp_number):
+    '''int => list
+    Return the genomic position of a SNP on the GCRh37 reference genome.
+    '''
+    query = f'https://www.snpedia.com/index.php/Rs{snp_number}'
+    html = urlopen(query).read().decode("utf-8")
+    for line in html.split('\n'):
+        if line.startswith('<tr><td width="90">Reference</td>'):
+            reference = line.split('"')[-2]
+        elif line.startswith('<tr><td width="90">Chromosome</td>'):
+            chromosome = line.split('<td>')[1].split('<')[0]
+        elif line.startswith('<tr><td width="90">Position</td>'):
+            position = int(line.split('<td>')[1].split('<')[0])
+            break
+
+    if 'GRCh38' in reference:
+        lo = LiftOver('hg38', 'hg19')
+        return lo.convert_coordinate(f'chr{chromosome}', position)[0][:2]
+    else:
+        return f'chr{chromosome}', position
+
 
 def is_prime(n):
     '''Return True if n is a prime number'''
