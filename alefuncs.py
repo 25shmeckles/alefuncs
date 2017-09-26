@@ -2560,10 +2560,10 @@ def reverse(sequence):
     return r
 
 def complement(sequence):
-    d = {'A':'T',
-         'T':'A',
-         'C':'G',
-         'G':'C'}
+    d = {'A':'T','a':'t',
+         'T':'A','t':'a',
+         'C':'G','c':'g',
+         'G':'C','g':'c'}
     r = ''
     for b in sequence.upper():
         r += d[b]
