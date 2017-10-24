@@ -1448,10 +1448,12 @@ def gene_synonyms(gene_name):
 def string_to_number(s):
     '''
     Convert a bytes string into a single number.
+    Example:
+        >>> string_to_number('foo bar baz')
+        147948829660780569073512294
     '''
     return int.from_bytes(s.encode(), 'little')
-#string_to_number('foo bar baz')
-#>>> 147948829660780569073512294
+
 
 def number_to_string(n):
     '''
