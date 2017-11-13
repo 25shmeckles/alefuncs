@@ -509,6 +509,31 @@ def entropy(sequence, verbose=False):
     return ent
 
 
+def quick_entropy(sequence):
+    '''(string, bool) => float
+    Return the Shannon Entropy of a string.
+    Compact version of entropy()
+    Calculated as the minimum average number of bits per symbol
+    required for encoding the string.
+    The theoretical limit for data compression:
+    Shannon Entropy of the string * string length.
+    '''
+    
+    alphabet = set(sequence) # list of symbols in the string
+
+    # calculate the frequency of each symbol in the string
+    frequencies = []
+    for symbol in alphabet:
+        frequencies.append(sequence.count(symbol) / len(sequence))
+
+    # Shannon entropy
+    ent = 0.0
+    for freq in frequencies:
+        ent -= freq * math.log(freq, 2)
+        
+    return ent
+
+
 def percent_of(total, fraction):
     '''(int_or_float,int_or_float) => float
     Return the percentage of 'fraction' in 'total'.
