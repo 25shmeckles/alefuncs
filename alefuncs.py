@@ -9,7 +9,6 @@ from Bio.SubsMat import MatrixInfo as matlist
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 
-
 from urllib.request import urlopen
 from urllib.parse import urlparse
 
@@ -126,6 +125,7 @@ def parse_fasta(fasta_file):
                 seq += line.strip()
         d.update({_id:seq})
     return d
+
 
 def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_extend=-0.5):
     '''
