@@ -37,6 +37,27 @@ from urllib.request import urlopen
 from pyliftover import LiftOver
 
 
+def convert_mw(mw, to='g'):
+    '''(int_or_float, str) => float
+    Converts molecular weights (in dalton) to g, mg, ug, ng, pg.
+    Example:
+            >> diploid_human_genome_mw = 6_469.66e6 * 660 #lenght * average weight of nucleotide
+            >> convert_mw(diploid_human_genome_mw, to="ng")
+            0.0070904661368191195
+    '''
+    if to == 'g':
+        return mw * 1.6605402e-24
+    if to == 'mg':
+        return mw * 1.6605402e-21
+    if to == 'ug':
+        return mw * 1.6605402e-18
+    if to == 'ng':
+        return mw * 1.6605402e-15
+    if to == 'pg':
+        return mw * 1.6605402e-12
+    raise ValueError(f"'to' must be one of ['g','mg','ug','ng','pg'] but '{to}' was passed instead.")
+
+
 def snp237(snp_number):
     '''int => list
     Return the genomic position of a SNP on the GCRh37 reference genome.
