@@ -98,3 +98,5 @@ ENV/
 *.png
 *.jpg
 *.psd
+
+*.pyc
