@@ -9,7 +9,6 @@ from Bio.SubsMat import MatrixInfo as matlist
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 
-
 from urllib.request import urlopen
 from urllib.parse import urlparse
 
@@ -35,6 +34,27 @@ import httplib2 as http
 
 from urllib.request import urlopen
 from pyliftover import LiftOver
+
+
+def convert_mw(mw, to='g'):
+    '''(int_or_float, str) => float
+    Converts molecular weights (in dalton) to g, mg, ug, ng, pg.
+    Example:
+            >> diploid_human_genome_mw = 6_469.66e6 * 660 #lenght * average weight of nucleotide
+            >> convert_mw(diploid_human_genome_mw, to="ng")
+            0.0070904661368191195
+    '''
+    if to == 'g':
+        return mw * 1.6605402e-24
+    if to == 'mg':
+        return mw * 1.6605402e-21
+    if to == 'ug':
+        return mw * 1.6605402e-18
+    if to == 'ng':
+        return mw * 1.6605402e-15
+    if to == 'pg':
+        return mw * 1.6605402e-12
+    raise ValueError(f"'to' must be one of ['g','mg','ug','ng','pg'] but '{to}' was passed instead.")
 
 
 def snp237(snp_number):
@@ -105,6 +125,7 @@ def parse_fasta(fasta_file):
                 seq += line.strip()
         d.update({_id:seq})
     return d
+
 
 def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_extend=-0.5):
     '''
@@ -505,6 +526,31 @@ def entropy(sequence, verbose=False):
         print(ent)
         print('Minimum number of bits required to encode each symbol:')
         print(int(math.ceil(ent)))
+        
+    return ent
+
+
+def quick_entropy(sequence):
+    '''(string, bool) => float
+    Return the Shannon Entropy of a string.
+    Compact version of entropy()
+    Calculated as the minimum average number of bits per symbol
+    required for encoding the string.
+    The theoretical limit for data compression:
+    Shannon Entropy of the string * string length.
+    '''
+    
+    alphabet = set(sequence) # list of symbols in the string
+
+    # calculate the frequency of each symbol in the string
+    frequencies = []
+    for symbol in alphabet:
+        frequencies.append(sequence.count(symbol) / len(sequence))
+
+    # Shannon entropy
+    ent = 0.0
+    for freq in frequencies:
+        ent -= freq * math.log(freq, 2)
         
     return ent
 
