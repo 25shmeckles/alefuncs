@@ -2667,16 +2667,16 @@ def pip_upgrade_all():
     '''
     #pip
     print('upgrading pip...')
-    call('pip install --upgrade pip', shell=True)
-    call("pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip install -U", shell=True)
+    call('python -m pip install --upgrade pip', shell=True)
+    call("python -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python -m pip install -U", shell=True)
     #pip2
     print('upgrading pip2...')
-    call('pip2 install --upgrade pip', shell=True)
-    call("pip2 freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip2 install -U", shell=True)
+    call('python2 -m pip install --upgrade pip', shell=True)
+    call("python2 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python2 -m pip install -U", shell=True)
     #pip3
     print('upgrading pip3...')
-    call('pip3 install --upgrade pip', shell=True)
-    call("pip3 freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip3 install -U", shell=True)
+    call('python3 -m pip install --upgrade pip', shell=True)
+    call("python3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python3 -m pip install -U", shell=True)
     #pypy
     print('upgrading pypy-pip...')
     call('pypy -m pip install --upgrade pip',shell=True)
