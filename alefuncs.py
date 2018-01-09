@@ -36,6 +36,27 @@ from urllib.request import urlopen
 from pyliftover import LiftOver
 
 
+
+def occur(string, sub):
+    '''
+    Counts the occurrences of a sequence in a string considering overlaps.
+
+    Example:
+            >> s = 'ACTGGGACGGGGGG'
+            >> s.count('GGG')
+            3
+            >> occur(s,'GGG')
+            5
+    '''
+    count = start = 0
+    while True:
+        start = string.find(sub, start) + 1
+        if start > 0:
+            count+=1
+        else:
+            return count
+
+
 def convert_mw(mw, to='g'):
     '''(int_or_float, str) => float
     Converts molecular weights (in dalton) to g, mg, ug, ng, pg.
