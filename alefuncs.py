@@ -148,6 +148,36 @@ def parse_fasta(fasta_file):
     return d
 
 
+def get_fasta_stats(fasta_file):
+    '''file_path => dict
+    Return lenght and base counts of each seuqence found in the fasta file.
+    '''
+    d = {}
+    _id = False
+    seq = ''
+    with open(fasta_file,'r') as f:
+        for line in f:
+            if line.startswith('\n'):
+                continue
+            if line.startswith('>'):
+                if not _id:
+                    _id = line[1:].strip()
+                elif _id and seq:
+                    d.update({_id:seq})
+                    _id = line[1:].strip()
+                    seq = ''
+            else:
+                seq += line.strip().upper()
+        d.update({_id:{'length':len(seq),
+                       'A':seq.count('A'),
+                       'T':seq.count('T'),
+                       'C':seq.count('C'),
+                       'G':seq.count('G'),
+                       'N':seq.count('N')}
+                 })
+    return d
+
+
 def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_extend=-0.5):
     '''
     Return a binary score matrix for a pairwise alignment.
@@ -168,15 +198,15 @@ def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_ex
     return score
 
 
-def vprint(var_name,var_dict=globals(),sep=' : '):
+def vp(var_name,var_dict=globals(),sep=' : '):
     '''(str, dict) => print
-    Fast way to check a variable's value.
+    Variable Print, a fast way to print out a variable's value.
 
     >>> scale = 0.35
     >>> mass = '71 Kg'
-    >>> vprint('scale',globals())
+    >>> vp('scale')
     scale : 0.35
-    >>> vprint('mass',globals(),sep='=')
+    >>> vp('mass',sep='=')
     mass=71 Kg
     '''
     try:
@@ -669,16 +699,16 @@ def print_sbar(n,m,s='|#.|',size=30,message=''):
     sys.stdout.flush()
 
 
-def hash(a_string,algorithm='md5'):
+def get_hash(a_string,algorithm='md5'):
     '''str => str
     Return the hash of a string calculated using various algorithms.
     
     .. code-block:: python
 
-        >>> hash('prova','md5')
+        >>> get_hash('prova','md5')
         '189bbbb00c5f1fb7fba9ad9285f193d1'
 
-        >>> hash('prova','sha256')
+        >>> get_hash('prova','sha256')
         '6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba'
     '''
     if algorithm == 'md5':
