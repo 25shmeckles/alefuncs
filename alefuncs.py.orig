@@ -36,27 +36,7 @@ from urllib.request import urlopen
 from pyliftover import LiftOver
 
 
-
-def occur(string, sub):
-    '''
-    Counts the occurrences of a sequence in a string considering overlaps.
-
-    Example:
-            >> s = 'ACTGGGACGGGGGG'
-            >> s.count('GGG')
-            3
-            >> occur(s,'GGG')
-            5
-    '''
-    count = start = 0
-    while True:
-        start = string.find(sub, start) + 1
-        if start > 0:
-            count+=1
-        else:
-            return count
-
-
+<<<<<<< HEAD
 def get_prime(n):
     for num in range(2,n,2):
         if all(num%i != 0 for i in range(2,int(math.sqrt(num))+1)):
@@ -81,6 +61,27 @@ def encrypt(msg, pwd):
 
 def decrypt(encr, pwd):
     return ''.join([number_to_string((a-string_to_number(b))) for a,b in loop_zip(encr, pwd)])
+=======
+
+def occur(string, sub):
+    '''
+    Counts the occurrences of a sequence in a string considering overlaps.
+
+    Example:
+            >> s = 'ACTGGGACGGGGGG'
+            >> s.count('GGG')
+            3
+            >> occur(s,'GGG')
+            5
+    '''
+    count = start = 0
+    while True:
+        start = string.find(sub, start) + 1
+        if start > 0:
+            count+=1
+        else:
+            return count
+>>>>>>> 25shmeckles/master
 
 
 def convert_mw(mw, to='g'):
