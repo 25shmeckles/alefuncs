@@ -36,6 +36,32 @@ from urllib.request import urlopen
 from pyliftover import LiftOver
 
 
+def get_prime(n):
+    for num in range(2,n,2):
+        if all(num%i != 0 for i in range(2,int(math.sqrt(num))+1)):
+            yield num
+
+def loop_zip(strA, strB):
+    assert len(strA) >= len(strB)
+    s = ''
+    n = 0
+    for l in strA:
+        try:
+            s += strB[n]
+        except IndexError:
+            n = 0
+            s += strB[n]
+        n += 1
+    return zip(list(strA),list(s))
+
+def encrypt(msg, pwd):
+    return [(string_to_number(a)+string_to_number(b)) for a,b in loop_zip(msg, pwd)]
+
+
+def decrypt(encr, pwd):
+    return ''.join([number_to_string((a-string_to_number(b))) for a,b in loop_zip(encr, pwd)])
+
+
 def convert_mw(mw, to='g'):
     '''(int_or_float, str) => float
     Converts molecular weights (in dalton) to g, mg, ug, ng, pg.
