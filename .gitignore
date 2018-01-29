@@ -97,7 +97,7 @@ ENV/
 
 # Plots and images
 *.pdf
-*.png
+#*.png
 *.jpg
 *.psd
 
