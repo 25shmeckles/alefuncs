@@ -36,27 +36,7 @@ from urllib.request import urlopen
 from pyliftover import LiftOver
 
 
-
-def occur(string, sub):
-    '''
-    Counts the occurrences of a sequence in a string considering overlaps.
-
-    Example:
-            >> s = 'ACTGGGACGGGGGG'
-            >> s.count('GGG')
-            3
-            >> occur(s,'GGG')
-            5
-    '''
-    count = start = 0
-    while True:
-        start = string.find(sub, start) + 1
-        if start > 0:
-            count+=1
-        else:
-            return count
-
-
+<<<<<<< HEAD
 def get_prime(n):
     for num in range(2,n,2):
         if all(num%i != 0 for i in range(2,int(math.sqrt(num))+1)):
@@ -81,6 +61,27 @@ def encrypt(msg, pwd):
 
 def decrypt(encr, pwd):
     return ''.join([number_to_string((a-string_to_number(b))) for a,b in loop_zip(encr, pwd)])
+=======
+
+def occur(string, sub):
+    '''
+    Counts the occurrences of a sequence in a string considering overlaps.
+
+    Example:
+            >> s = 'ACTGGGACGGGGGG'
+            >> s.count('GGG')
+            3
+            >> occur(s,'GGG')
+            5
+    '''
+    count = start = 0
+    while True:
+        start = string.find(sub, start) + 1
+        if start > 0:
+            count+=1
+        else:
+            return count
+>>>>>>> 25shmeckles/master
 
 
 def convert_mw(mw, to='g'):
@@ -813,85 +814,28 @@ def get_exons_coord_by_gene_name(gene_name):
     return table
 
 
-def split_overlap(seq, size, overlap):
-    '''(seq,int,int) => [[...],[...],...]
-    Split a sequence into chunks of a specific size and overlap.
-    Works also on strings!
-    It is very efficient for short sequences (len(seq()) <= 100).
+def split_overlap(iterable,size,overlap):
+    '''(list,int,int) => [[...],[...],...]
+    Split an iterable into chunks of a specific size and overlap.
+    Works also on strings! 
 
     Examples:
-        >>> split_overlap(seq=list(range(10)),size=3,overlap=2)
-        [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
+        split_overlap(iterable=list(range(10)),size=3,overlap=2)
+        >>> [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9]]
 
-        >>> split_overlap(seq=range(10),size=3,overlap=2)
-        [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
+        split_overlap(iterable=range(10),size=3,overlap=2)
+        >>> [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
     '''
     if size < 1 or overlap < 0:
-        raise ValueError('"size must be >= 1 and overlap >= 0')
+        raise ValueError('"size" must be an integer with >= 1 while "overlap" must be >= 0')
     result = []
     while True:
-        if len(seq) <= size:
-            result.append(seq)
+        if len(iterable) <= size:
+            result.append(iterable)
             return result
         else:
-            result.append(seq[:size])
-            seq = seq[size-overlap:]
-
-
-def split_overlap_long(seq, size, overlap):
-    '''(seq,int,int) => generator
-    Split a sequence into chunks of a specific size and overlap.
-    Return a generator. It is very efficient for long sequences (len(seq()) > 100).
-    https://stackoverflow.com/questions/48381870/a-better-way-to-split-a-sequence-in-chunks-with-overlaps
-
-    Examples:
-        >>> split_overlap_long(seq=list(range(10)),size=3,overlap=2)
-        <generator object split_overlap_long at 0x10bc49d58>
-
-        >>> list(split_overlap_long(seq=list(range(10)),size=3,overlap=2))
-        [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
-
-        >>> list(split_overlap_long(seq=range(10),size=3,overlap=2))
-        [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
-    '''       
-    if size < 1 or overlap < 0:
-        raise ValueError('size must be >= 1 and overlap >= 0')
-
-    for i in range(0, len(seq) - overlap, size - overlap):            
-        yield seq[i:i + size]
-
-
-def itr_split_overlap(iterable, size, overlap):
-    '''(iterable,int,int) => generator
-    Similar to long_split_overlap() but it works on any iterable.
-    In case of long sequences, long_split_overlap() is more efficient
-    but this function can handle potentially infinite iterables using deque().
-    https://stackoverflow.com/questions/48381870/a-better-way-to-split-a-sequence-in-chunks-with-overlaps
-
-    Warning: for range() and symilar, it behaves differently than split_overlap() and split_overlap_long()
-    Examples:
-        >>> list(itr_split_overlap(iterable=range(10),size=3,overlap=2))
-        [(0, 1, 2), (1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6), (5, 6, 7), (6, 7, 8), (7, 8, 9)]
-    '''
-    if size < 1 or overlap < 0:
-        raise ValueError('size must be >= 1 and overlap >= 0')
-
-    itr = iter(iterable)
-    buf = deque(islice(itr, size), maxlen=size)
-
-    chunk = None
-    for chunk in iter(lambda: tuple(islice(itr, size - overlap)), ()):
-        yield tuple(buf)
-        buf.extend(chunk)
-
-    rest = tuple(buf)
-
-    if chunk:
-        rest = rest[size - overlap - len(chunk):]
-
-    yield rest
-    
-
+            result.append(iterable[:size])
+            iterable = iterable[size-overlap:]
 
 
 def reorder_dict(d, keys):
