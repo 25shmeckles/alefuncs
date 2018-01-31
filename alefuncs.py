@@ -63,6 +63,13 @@ def get_prime(n):
             yield num
 
 def loop_zip(strA, strB):
+    '''(str, str) => zip()
+    Return a zip object containing each letters of strA, paired with letters of strB.
+    If strA is longer than strB, then its letters will be paired recursively.
+    Example:
+        >>> list(loop_zip('ABCDEF', '123'))
+        [('A', '1'), ('B', '2'), ('C', '3'), ('D', '1'), ('E', '2'), ('F', '3')]
+    '''
     assert len(strA) >= len(strB)
     s = ''
     n = 0
@@ -76,10 +83,20 @@ def loop_zip(strA, strB):
     return zip(list(strA),list(s))
 
 def encrypt(msg, pwd):
+    '''(str, str) => list
+    Simple encryption/decription tool.
+    TODO: Evaluate whether it is safe enough.
+    '''
+    if len(msg) < len(pwd):
+        raise ValueError('The password is longer than the message. This is not allowed.')
     return [(string_to_number(a)+string_to_number(b)) for a,b in loop_zip(msg, pwd)]
 
 
 def decrypt(encr, pwd):
+    '''(str, str) => list
+    Simple encryption/decription tool.
+    TODO: Evaluate whether it is safe enough.
+    '''
     return ''.join([number_to_string((a-string_to_number(b))) for a,b in loop_zip(encr, pwd)])
 
 
@@ -1638,6 +1655,9 @@ def string_to_number(s):
 def number_to_string(n):
     '''
     Convert a number into a bytes string.
+    Example:
+        >>> number_to_string(147948829660780569073512294)
+        'foo bar baz'
     '''
     return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
 #x = 147948829660780569073512294
