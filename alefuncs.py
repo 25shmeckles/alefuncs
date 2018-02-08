@@ -1,5 +1,5 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2017_08
+### version: 2018_02
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
@@ -12,7 +12,7 @@ from Bio.Blast import NCBIXML
 from urllib.request import urlopen
 from urllib.parse import urlparse
 
-from subprocess import call, check_output
+from subprocess import call, check_output, run
 
 from pyensembl import EnsemblRelease
 
@@ -35,6 +35,104 @@ import httplib2 as http
 from urllib.request import urlopen
 from pyliftover import LiftOver
 
+
+def xna_calc(sequence, t='dsDNA', p=0):
+    '''str => dict
+    BETA version, works only for dsDNA and ssDNA.
+    Return basic "biomath" calculations based on the input sequence.
+    Arguments:
+        t (type) :'ssDNA' or 'dsDNA'
+        p (phosphates): 0,1,2
+        #in case if ssDNA having 3'P, you should pass 2 i.e., 2 phospates present in 1 dsDNA molecule 
+    '''
+    r = {}
+    
+    #check inputs
+    c = Counter(sequence.upper())
+    for k in c.keys():
+        if k in 'ACGNT':
+            pass
+        else:
+            raise ValueError(f'Wrong sequence passed: "sequence" contains invalid characters, only "ATCGN" are allowed.')
+    if t not in ['ssDNA','dsDNA']:
+        raise ValueError(f'Wrong DNA type passed: "t" can be "ssDNA" or "dsDNA". "{t}" was passed instead.')
+    if not 0 <= p <= 2:
+        raise ValueError(f'Wrong number of 5\'-phosphates passed: "p" must be an integer from 0 to 4. {p} was passed instead.')
+    
+    
+    ##Calculate:
+    
+    #length
+    r['len'] = len(sequence)
+    
+
+    #molecular weight
+    #still unsure about what is the best method to do this
+    
+    #s = 'ACTGACTGACTATATTCGCGATCGATGCGCTAGCTCGTACGC'
+    #bioinformatics.org : 25986.8  Da
+    #Thermo             : 25854.8  Da 
+    #Promega            : 27720.0  Da 
+    #MolBioTools        : 25828.77 Da
+    #This function      : 25828.86 Da #Similar to OligoCalc implementation
+    
+    #DNA Molecular Weight (typically for synthesized DNA oligonucleotides.
+    #The OligoCalc DNA MW calculations assume that there is not a 5' monophosphate)
+    #Anhydrous Molecular Weight = (An x 313.21) + (Tn x 304.2) + (Cn x 289.18) + (Gn x 329.21) - 61.96
+    #An, Tn, Cn, and Gn are the number of each respective nucleotide within the polynucleotide.
+    #The subtraction of 61.96 gm/mole from the oligonucleotide molecular weight takes into account the removal
+    #of HPO2 (63.98) and the addition of two hydrogens (2.02).
+    #Alternatively, you could think of this of the removal of a phosphate and the addition of a hydroxyl,
+    #since this formula calculates the molecular weight of 5' and 3' hydroxylated oligonucleotides.
+    #Please note: this calculation works well for synthesized oligonucleotides.
+    #If you would like an accurate MW for restriction enzyme cut DNA, please use:
+    #Molecular Weight = (An x 313.21) + (Tn x 304.2) + (Cn x 289.18) + (Gn x 329.21) - 61.96 + 79.0
+    #The addition of 79.0 gm/mole to the oligonucleotide molecular weight takes into account the 5' monophosphate
+    #left by most restriction enzymes.
+    #No phosphate is present at the 5' end of strands made by primer extension,
+    #so no adjustment to the OligoCalc DNA MW calculation is necessary for primer extensions.
+    #That means that for ssDNA, you need to add 79.0 to the value calculated by OligoCalc
+    #to get the weight with a 5' monophosphate.
+    #Finally, if you need to calculate the molecular weight of phosphorylated dsDNA,
+    #don't forget to adjust both strands. You can automatically perform either addition
+    #by selecting the Phosphorylated option from the 5' modification select list.
+    #Please note that the chemical modifications are only valid for DNA and may not be valid for RNA
+    #due to differences in the linkage chemistry, and also due to the lack of the 5' phosphates
+    #from synthetic RNA molecules. RNA Molecular Weight (for instance from an RNA transcript).
+    #The OligoCalc RNA MW calculations assume that there is a 5' triphosphate on the molecule)
+    #Molecular Weight = (An x 329.21) + (Un x 306.17) + (Cn x 305.18) + (Gn x 345.21) + 159.0
+    #An, Un, Cn, and Gn are the number of each respective nucleotide within the polynucleotide.
+    #Addition of 159.0 gm/mole to the molecular weight takes into account the 5' triphosphate.
+    
+    if t == 'ssDNA':
+        mw = ((c['A']*313.21)+(c['T']*304.2)+(c['C']*289.18)+(c['G']*329.21)+(c['N']*303.7)-61.96)+(p*79.0)
+        
+    elif t =='dsDNA':
+        mw_F = ((c['A']*313.21)+(c['T']*304.2)+(c['C']*289.18)+(c['G']*329.21)+(c['N']*303.7)-61.96)+(p*79.0)
+        d = Counter(complement(sequence.upper())) #complement sequence
+        mw_R = ((d['A']*313.21)+(d['T']*304.2)+(d['C']*289.18)+(d['G']*329.21)+(d['N']*303.7)-61.96)+(p*79.0)
+        mw = mw_F + mw_R
+    elif t == 'ssRNA':
+        pass
+    elif t == 'dsRNA':
+        pass
+    else:
+        return ValueError(f'Nucleic acid type not understood: "{t}"')
+        
+    r['MW in Daltons'] = mw
+    
+    #in ng
+    r['MW in ng'] = mw * 1.6605402e-15
+    
+    #molecules in 1ng
+    r['molecules per ng'] = 1/r['MW in ng']
+    
+    #ng for 10e10 molecules
+    r['ng per billion molecules'] = (10**9)/r['molecules per ng'] #(1 billions)
+    
+    #moles per ng
+    r['moles per ng'] = (r['MW in ng'] * mw)
+    return r
 
 
 def occur(string, sub):
@@ -62,6 +160,26 @@ def get_prime(n):
         if all(num%i != 0 for i in range(2,int(math.sqrt(num))+1)):
             yield num
 
+            
+def ssl_fencrypt(infile, outfile):
+    '''(file_path, file_path) => encrypted_file
+    Uses openssl to encrypt/decrypt files.
+    '''
+    pwd = getpass('enter encryption pwd:')
+    if getpass('repeat pwd:') == pwd:
+        run(f'openssl enc -aes-256-cbc -a -salt -pass pass:{pwd} -in {infile} -out {outfile}',shell=True)
+    else:
+        print("passwords don't match.")
+
+    
+def ssl_fdecrypt(infile, outfile):
+    '''(file_path, file_path) => decrypted_file
+    Uses openssl to encrypt/decrypt files.
+    '''
+    pwd = getpass('enter decryption pwd:')
+    run(f'openssl enc -d -aes-256-cbc -a -pass pass:{pwd} -in {infile} -out {outfile}', shell=True)     
+
+    
 def loop_zip(strA, strB):
     '''(str, str) => zip()
     Return a zip object containing each letters of strA, paired with letters of strB.
@@ -82,20 +200,23 @@ def loop_zip(strA, strB):
         n += 1
     return zip(list(strA),list(s))
 
-def encrypt(msg, pwd):
+
+def s_encrypt(msg, pwd):
     '''(str, str) => list
     Simple encryption/decription tool.
-    TODO: Evaluate whether it is safe enough.
+    WARNING:
+    This is NOT cryptographically secure!!
     '''
     if len(msg) < len(pwd):
         raise ValueError('The password is longer than the message. This is not allowed.')
     return [(string_to_number(a)+string_to_number(b)) for a,b in loop_zip(msg, pwd)]
 
 
-def decrypt(encr, pwd):
+def s_decrypt(encr, pwd):
     '''(str, str) => list
     Simple encryption/decription tool.
-    TODO: Evaluate whether it is safe enough.
+    WARNING:
+    This is NOT cryptographically secure!!
     '''
     return ''.join([number_to_string((a-string_to_number(b))) for a,b in loop_zip(encr, pwd)])
 
