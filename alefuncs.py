@@ -1499,22 +1499,29 @@ def yield_file(infile):
 
 
 #Downaload sequence from ensembl
-def sequence_from_coordinates(chromosome,strand,start,end,account="a.marcozzi@umcutrecht.nl"):
+def sequence_from_coordinates(chromosome, strand, start, end, ref_genome=37):
     '''
     Download the nucleotide sequence from the gene_name.
-    This function works only with with GRCh37.
-    Inputs can be str or int e.g. 1 or '1' 
     '''
-
-    Entrez.email = account # Always tell NCBI who you are
-
-    #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
-    NCBI_IDS = {'1':'NC_000001.10','2':'NC_000002.11','3':'NC_000003.11','4':'NC_000004.11',
-                '5':'NC_000005.9','6':'NC_000006.11','7':'NC_000007.13','8':'NC_000008.10',
-                '9':'NC_000009.11','10':'NC_000010.10','11':'NC_000011.9','12':'NC_000012.11',
-                '13':'NC_000013.10','14':'NC_000014.8','15':'NC_000015.9','16':'NC_000016.9',
-                '17':'NC_000017.10','18':'NC_000018.9','19':'NC_000019.9','20':'NC_000020.10',
-                '21':'NC_000021.8','22':'NC_000022.10','X':'NC_000023.10','Y':'NC_000024.9'}       
+    Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
+    
+    if int(ref_genome) == 37:
+        #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
+        NCBI_IDS = {'1':'NC_000001.10','2':'NC_000002.11','3':'NC_000003.11','4':'NC_000004.11',
+                    '5':'NC_000005.9','6':'NC_000006.11','7':'NC_000007.13','8':'NC_000008.10',
+                    '9':'NC_000009.11','10':'NC_000010.10','11':'NC_000011.9','12':'NC_000012.11',
+                    '13':'NC_000013.10','14':'NC_000014.8','15':'NC_000015.9','16':'NC_000016.9',
+                    '17':'NC_000017.10','18':'NC_000018.9','19':'NC_000019.9','20':'NC_000020.10',
+                    '21':'NC_000021.8','22':'NC_000022.10','X':'NC_000023.10','Y':'NC_000024.9'}
+    elif int(ref_genome) == 38:
+        #GRCh38 from https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.38
+        NCBI_IDS = {'1':'NC_000001.11','2':'NC_000002.12','3':'NC_000003.12','4':'NC_000004.12',
+                    '5':'NC_000005.10','6':'NC_000006.12','7':'NC_000007.14','8':'NC_000008.11',
+                    '9':'NC_000009.12','10':'NC_000010.11','11':'NC_000011.10','12':'NC_000012.12',
+                    '13':'NC_000013.11','14':'NC_000014.9','15':'NC_000015.10','16':'NC_000016.10',
+                    '17':'NC_000017.11','18':'NC_000018.10','19':'NC_000019.10','20':'NC_000020.11',
+                    '21':'NC_000021.9','22':'NC_000022.11','X':'NC_000023.11','Y':'NC_000024.10'}
+        
   
     try:        
         handle = Entrez.efetch(db="nucleotide", 
