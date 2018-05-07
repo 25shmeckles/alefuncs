@@ -41,6 +41,48 @@ from pyliftover import LiftOver
 from PIL import Image
 
 
+def merge_dict(dictA, dictB):
+    '''(dict, dict) => dict
+    Merge two dicts, if they contain the same keys, it sums their values.
+    Return the merged dict.
+    
+    Example:
+        dictA = {'any key':1, 'point':{'x':2, 'y':3}, 'something':'aaaa'}
+        dictB = {'any key':1, 'point':{'x':2, 'y':3, 'z':0, 'even more nested':{'w':99}}, 'extra':8}
+        merge_dict(dictA, dictB)
+        
+        {'any key': 2,
+         'point': {'x': 4, 'y': 6, 'z': 0, 'even more nested': {'w': 99}},
+         'something': 'aaaa',
+         'extra': 8}
+    '''
+    r = {}
+    
+    common_k = [k for k in dictA if k in dictB]
+    common_k += [k for k in dictB if k in dictA]
+    common_k = set(common_k)
+    
+    for k, v in dictA.items():
+        #add unique k of dictA
+        if k not in common_k:
+            r[k] = v
+        
+        else:
+            #add inner keys if they are not containing other dicts 
+            if type(v) is not dict:
+                if k in dictB:
+                    r[k] = v + dictB[k]
+            else:
+                #recursively merge the inner dicts
+                r[k] = merge_dict(dictA[k], dictB[k])
+    
+    #add unique k of dictB
+    for k, v in dictB.items():
+        if k not in common_k:
+            r[k] = v
+
+    return r
+
 
 def png_to_flat_array(img_file):
     img = Image.open(img_file).convert('RGBA')
