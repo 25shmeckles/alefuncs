@@ -41,6 +41,18 @@ from pyliftover import LiftOver
 from PIL import Image
 
 
+def heikin_ashi(O, H, L, C, oldO, oldC):
+    '''
+    Generates a Heikin-Ashi candle from ticker data.
+    '''
+    HA_Close = (O + H + L + C)/4
+    HA_Open = (oldO + oldC)/2
+    elements = np.array([H, L, HA_Open, HA_Close])
+    HA_High = elements.max(0) 
+    HA_Low = elements.min(0)   
+    return np.array([HA_Open, HA_High, HA_Low, HA_Close])
+
+
 def merge_dict(dictA, dictB):
     '''(dict, dict) => dict
     Merge two dicts, if they contain the same keys, it sums their values.
