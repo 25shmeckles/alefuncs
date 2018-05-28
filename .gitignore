@@ -102,3 +102,9 @@ ENV/
 *.psd
 
 
+
+*.pyc
+
+Untitled.ipynb
+
+__pycache__/alefuncs.cpython-36.pyc
