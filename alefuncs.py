@@ -2011,15 +2011,18 @@ def determine_average_breaks_distance(dataset): # tested only for deletion/dupli
 #print(determine_average_breaks_distance('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test_datasets/random/sorted/rnd_dataset_100_annotated_sorted.txt'))
 
 
-def dict_overview(dictionary,how_many_keys):
+def dict_overview(dictionary, how_many_keys, indent=False):
     '''
     Prints out how_many_elements of the target dictionary.
     Useful to have a quick look at the structure of a dictionary.
     '''
+    
     ks = list(islice(dictionary, how_many_keys))
     for k in ks:
-        print(k)
-        print(dictionary[k])
+        if indent:
+            print(f'{k}\n\t{dictionary[k]}')
+        else:
+            print(f'{k}\t{dictionary[k]}')
 
 
 def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@students.uu.nl"): #beta: works properly only forGRCh37
