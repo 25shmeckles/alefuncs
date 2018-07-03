@@ -2968,7 +2968,7 @@ def list_to_line(list_, char):
 
 def list_of_files(path, extension, recursive=False):
     '''
-    Return a list of filepath for each file into path with the target extension.
+    Return a list of filepaths for each file into path with the target extension.
     If recursive, it will loop over subfolders as well.
     '''
     if not recursive:
