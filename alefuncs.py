@@ -1,5 +1,5 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2017_08
+### version: 2018_07
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
@@ -9,10 +9,12 @@ from Bio.SubsMat import MatrixInfo as matlist
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
 
+import tensorflow as tf
+
 from urllib.request import urlopen
 from urllib.parse import urlparse
 
-from subprocess import call, check_output
+from subprocess import call, check_output, run
 
 from pyensembl import EnsemblRelease
 
@@ -24,17 +26,373 @@ from itertools import islice
 from threading import Thread
 
 import numpy as np
-import pandas
+import matplotlib.pyplot as plt
 
+import pandas
 import regex
 import re
 
-import datetime, math, sys, hashlib, pickle, time, random, string, json, glob
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os
 import httplib2 as http
 
 from urllib.request import urlopen
 from pyliftover import LiftOver
 
+from PIL import Image
+
+
+def rolling_normalize_df(df, method='min-max', size=30, overlap=5):
+    '''
+    Return a new df with datapoints normalized based on a sliding window
+    of rolling on the a pandas.DataFrame.
+    It is useful to have local (window by window) normalization of the values.
+    '''
+    
+    to_merge = []
+    for item in split_overlap_long(df, size, overlap, is_dataframe=True):
+        to_merge.append(normalize_df(item, method))
+                
+    new_df = pd.concat(to_merge)
+    return new_df.groupby(new_df.index).mean()
+
+
+def normalize_df(df, method='min-max'):
+    '''
+    Return normalized data.
+    max, min, mean and std are computed considering
+    all the values of the dfand not by column.
+    i.e. mean = df.values.mean() and not df.mean().
+    Ideal to normalize df having multiple columns of non-indipendent values.
+    Methods implemented:
+                       'raw'      No normalization
+                       'min-max'  Deafault
+                       'norm'     ...
+                       'z-norm'   ...
+                       'sigmoid'  ...
+                       'decimal'  ...
+                       'softmax'  It's a transformation rather than a normalization
+                       'tanh'     ...
+    '''
+    if type(df) is not pd.core.frame.DataFrame:
+        df = pd.DataFrame(df)
+        
+    if method == 'min-max':
+        return (df-df.values.min())/(df.values.max()-df.values.min())
+
+    if method == 'norm':
+        return (df-df.values.mean())/(df.values.max()-df.values.mean())
+
+    if method == 'z-norm':
+        return (df-df.values.mean())/df.values.std()
+
+    if method == 'sigmoid':
+        _max = df.values.max()
+        return df.apply(lambda x: 1/(1+np.exp(-x/_max)))
+
+    if method == 'decimal':
+        #j = len(str(int(df.values.max())))
+        i = 10**len(str(int(df.values.max())))#10**j
+        return df.apply(lambda x: x/i)
+
+    if method == 'tanh':
+        return 0.5*(np.tanh(0.01*(df-df.values.mean()))/df.values.std() + 1)
+
+    if method == 'softmax':
+        return np.exp(df)/np.sum(np.exp(df))
+
+    if method == 'raw':
+        return df
+
+    raise ValueError(f'"method" not found: {method}')
+
+
+
+def merge_dict(dictA, dictB):
+    '''(dict, dict) => dict
+    Merge two dicts, if they contain the same keys, it sums their values.
+    Return the merged dict.
+    
+    Example:
+        dictA = {'any key':1, 'point':{'x':2, 'y':3}, 'something':'aaaa'}
+        dictB = {'any key':1, 'point':{'x':2, 'y':3, 'z':0, 'even more nested':{'w':99}}, 'extra':8}
+        merge_dict(dictA, dictB)
+        
+        {'any key': 2,
+         'point': {'x': 4, 'y': 6, 'z': 0, 'even more nested': {'w': 99}},
+         'something': 'aaaa',
+         'extra': 8}
+    '''
+    r = {}
+    
+    common_k = [k for k in dictA if k in dictB]
+    common_k += [k for k in dictB if k in dictA]
+    common_k = set(common_k)
+    
+    for k, v in dictA.items():
+        #add unique k of dictA
+        if k not in common_k:
+            r[k] = v
+        
+        else:
+            #add inner keys if they are not containing other dicts 
+            if type(v) is not dict:
+                if k in dictB:
+                    r[k] = v + dictB[k]
+            else:
+                #recursively merge the inner dicts
+                r[k] = merge_dict(dictA[k], dictB[k])
+    
+    #add unique k of dictB
+    for k, v in dictB.items():
+        if k not in common_k:
+            r[k] = v
+
+    return r
+
+
+def png_to_flat_array(img_file):
+    img = Image.open(img_file).convert('RGBA')
+    arr = np.array(img)
+    # make a 1-dimensional view of arr
+    return arr.ravel()
+
+
+def png_to_vector_matrix(img_file):
+    # convert it to a matrix
+    return np.matrix(png_to_flat_array(img_file))
+
+
+
+def TFKMeansCluster(vectors, noofclusters, datatype="uint8"):
+    '''
+    K-Means Clustering using TensorFlow.
+    'vectors' should be a n*k 2-D NumPy array, where n is the number
+    of vectors of dimensionality k.
+    'noofclusters' should be an integer.
+    '''
+ 
+    noofclusters = int(noofclusters)
+    assert noofclusters < len(vectors)
+ 
+    #Find out the dimensionality
+    dim = len(vectors[0])
+ 
+    #Will help select random centroids from among the available vectors
+    vector_indices = list(range(len(vectors)))
+    random.shuffle(vector_indices)
+ 
+    #GRAPH OF COMPUTATION
+    #We initialize a new graph and set it as the default during each run
+    #of this algorithm. This ensures that as this function is called
+    #multiple times, the default graph doesn't keep getting crowded with
+    #unused ops and Variables from previous function calls.
+ 
+    graph = tf.Graph()
+ 
+    with graph.as_default():
+ 
+        #SESSION OF COMPUTATION
+ 
+        sess = tf.Session()
+ 
+        ##CONSTRUCTING THE ELEMENTS OF COMPUTATION
+ 
+        ##First lets ensure we have a Variable vector for each centroid,
+        ##initialized to one of the vectors from the available data points
+        centroids = [tf.Variable((vectors[vector_indices[i]])) for i in range(noofclusters)]
+        
+        ##These nodes will assign the centroid Variables the appropriate
+        ##values
+        centroid_value = tf.placeholder(datatype, [dim])
+        cent_assigns = []
+        for centroid in centroids:
+            cent_assigns.append(tf.assign(centroid, centroid_value))
+ 
+        ##Variables for cluster assignments of individual vectors(initialized
+        ##to 0 at first)
+        assignments = [tf.Variable(0) for i in range(len(vectors))]
+        ##These nodes will assign an assignment Variable the appropriate
+        ##value
+        assignment_value = tf.placeholder("int32")
+        cluster_assigns = []
+        for assignment in assignments:
+            cluster_assigns.append(tf.assign(assignment,
+                                             assignment_value))
+ 
+        ##Now lets construct the node that will compute the mean
+        #The placeholder for the input
+        mean_input = tf.placeholder("float", [None, dim])
+        #The Node/op takes the input and computes a mean along the 0th
+        #dimension, i.e. the list of input vectors
+        mean_op = tf.reduce_mean(mean_input, 0)
+ 
+        ##Node for computing Euclidean distances
+        #Placeholders for input
+        v1 = tf.placeholder("float", [dim])
+        v2 = tf.placeholder("float", [dim])
+        euclid_dist = tf.sqrt(tf.reduce_sum(tf.pow(tf.subtract(v1, v2), 2)))
+ 
+        ##This node will figure out which cluster to assign a vector to,
+        ##based on Euclidean distances of the vector from the centroids.
+        #Placeholder for input
+        centroid_distances = tf.placeholder("float", [noofclusters])
+        cluster_assignment = tf.argmin(centroid_distances, 0)
+ 
+        ##INITIALIZING STATE VARIABLES
+ 
+        ##This will help initialization of all Variables defined with respect
+        ##to the graph. The Variable-initializer should be defined after
+        ##all the Variables have been constructed, so that each of them
+        ##will be included in the initialization.
+        init_op = tf.global_variables_initializer() #deprecated tf.initialize_all_variables()
+        
+ 
+        #Initialize all variables
+        sess.run(init_op)
+ 
+        ##CLUSTERING ITERATIONS
+ 
+        #Now perform the Expectation-Maximization steps of K-Means clustering
+        #iterations. To keep things simple, we will only do a set number of
+        #iterations, instead of using a Stopping Criterion.
+        noofiterations = 100
+        for iteration_n in range(noofiterations):
+ 
+            ##EXPECTATION STEP
+            ##Based on the centroid locations till last iteration, compute
+            ##the _expected_ centroid assignments.
+            #Iterate over each vector
+            for vector_n in range(len(vectors)):
+                vect = vectors[vector_n]
+                #Compute Euclidean distance between this vector and each
+                #centroid. Remember that this list cannot be named
+                #'centroid_distances', since that is the input to the
+                #cluster assignment node.
+                distances = [sess.run(euclid_dist, feed_dict={v1: vect, v2: sess.run(centroid)})
+                             for centroid in centroids]
+                #Now use the cluster assignment node, with the distances
+                #as the input
+                assignment = sess.run(cluster_assignment, feed_dict = {
+                    centroid_distances: distances})
+                #Now assign the value to the appropriate state variable
+                sess.run(cluster_assigns[vector_n], feed_dict={
+                    assignment_value: assignment})
+ 
+            ##MAXIMIZATION STEP
+            #Based on the expected state computed from the Expectation Step,
+            #compute the locations of the centroids so as to maximize the
+            #overall objective of minimizing within-cluster Sum-of-Squares
+            for cluster_n in range(noofclusters):
+                #Collect all the vectors assigned to this cluster
+                assigned_vects = [vectors[i] for i in range(len(vectors))
+                                  if sess.run(assignments[i]) == cluster_n]
+                #Compute new centroid location
+                new_location = sess.run(mean_op, feed_dict={mean_input: np.array(assigned_vects)})
+                #Assign value to appropriate variable
+                sess.run(cent_assigns[cluster_n], feed_dict={centroid_value: new_location})
+ 
+        #Return centroids and assignments
+        centroids = sess.run(centroids)
+        assignments = sess.run(assignments)
+        return centroids, assignments
+
+def xna_calc(sequence, t='dsDNA', p=0):
+    '''str => dict
+    BETA version, works only for dsDNA and ssDNA.
+    Return basic "biomath" calculations based on the input sequence.
+    Arguments:
+        t (type) :'ssDNA' or 'dsDNA'
+        p (phosphates): 0,1,2
+        #in case if ssDNA having 3'P, you should pass 2 i.e., 2 phospates present in 1 dsDNA molecule 
+    '''
+    r = {}
+    
+    #check inputs
+    c = Counter(sequence.upper())
+    for k in c.keys():
+        if k in 'ACGNT':
+            pass
+        else:
+            raise ValueError(f'Wrong sequence passed: "sequence" contains invalid characters, only "ATCGN" are allowed.')
+    if t not in ['ssDNA','dsDNA']:
+        raise ValueError(f'Wrong DNA type passed: "t" can be "ssDNA" or "dsDNA". "{t}" was passed instead.')
+    if not 0 <= p <= 2:
+        raise ValueError(f'Wrong number of 5\'-phosphates passed: "p" must be an integer from 0 to 4. {p} was passed instead.')
+    
+    
+    ##Calculate:
+    
+    #length
+    r['len'] = len(sequence)
+    
+
+    #molecular weight
+    #still unsure about what is the best method to do this
+    
+    #s = 'ACTGACTGACTATATTCGCGATCGATGCGCTAGCTCGTACGC'
+    #bioinformatics.org : 25986.8  Da
+    #Thermo             : 25854.8  Da 
+    #Promega            : 27720.0  Da 
+    #MolBioTools        : 25828.77 Da
+    #This function      : 25828.86 Da #Similar to OligoCalc implementation
+    
+    #DNA Molecular Weight (typically for synthesized DNA oligonucleotides.
+    #The OligoCalc DNA MW calculations assume that there is not a 5' monophosphate)
+    #Anhydrous Molecular Weight = (An x 313.21) + (Tn x 304.2) + (Cn x 289.18) + (Gn x 329.21) - 61.96
+    #An, Tn, Cn, and Gn are the number of each respective nucleotide within the polynucleotide.
+    #The subtraction of 61.96 gm/mole from the oligonucleotide molecular weight takes into account the removal
+    #of HPO2 (63.98) and the addition of two hydrogens (2.02).
+    #Alternatively, you could think of this of the removal of a phosphate and the addition of a hydroxyl,
+    #since this formula calculates the molecular weight of 5' and 3' hydroxylated oligonucleotides.
+    #Please note: this calculation works well for synthesized oligonucleotides.
+    #If you would like an accurate MW for restriction enzyme cut DNA, please use:
+    #Molecular Weight = (An x 313.21) + (Tn x 304.2) + (Cn x 289.18) + (Gn x 329.21) - 61.96 + 79.0
+    #The addition of 79.0 gm/mole to the oligonucleotide molecular weight takes into account the 5' monophosphate
+    #left by most restriction enzymes.
+    #No phosphate is present at the 5' end of strands made by primer extension,
+    #so no adjustment to the OligoCalc DNA MW calculation is necessary for primer extensions.
+    #That means that for ssDNA, you need to add 79.0 to the value calculated by OligoCalc
+    #to get the weight with a 5' monophosphate.
+    #Finally, if you need to calculate the molecular weight of phosphorylated dsDNA,
+    #don't forget to adjust both strands. You can automatically perform either addition
+    #by selecting the Phosphorylated option from the 5' modification select list.
+    #Please note that the chemical modifications are only valid for DNA and may not be valid for RNA
+    #due to differences in the linkage chemistry, and also due to the lack of the 5' phosphates
+    #from synthetic RNA molecules. RNA Molecular Weight (for instance from an RNA transcript).
+    #The OligoCalc RNA MW calculations assume that there is a 5' triphosphate on the molecule)
+    #Molecular Weight = (An x 329.21) + (Un x 306.17) + (Cn x 305.18) + (Gn x 345.21) + 159.0
+    #An, Un, Cn, and Gn are the number of each respective nucleotide within the polynucleotide.
+    #Addition of 159.0 gm/mole to the molecular weight takes into account the 5' triphosphate.
+    
+    if t == 'ssDNA':
+        mw = ((c['A']*313.21)+(c['T']*304.2)+(c['C']*289.18)+(c['G']*329.21)+(c['N']*303.7)-61.96)+(p*79.0)
+        
+    elif t =='dsDNA':
+        mw_F = ((c['A']*313.21)+(c['T']*304.2)+(c['C']*289.18)+(c['G']*329.21)+(c['N']*303.7)-61.96)+(p*79.0)
+        d = Counter(complement(sequence.upper())) #complement sequence
+        mw_R = ((d['A']*313.21)+(d['T']*304.2)+(d['C']*289.18)+(d['G']*329.21)+(d['N']*303.7)-61.96)+(p*79.0)
+        mw = mw_F + mw_R
+    elif t == 'ssRNA':
+        pass
+    elif t == 'dsRNA':
+        pass
+    else:
+        return ValueError(f'Nucleic acid type not understood: "{t}"')
+        
+    r['MW in Daltons'] = mw
+    
+    #in ng
+    r['MW in ng'] = mw * 1.6605402e-15
+    
+    #molecules in 1ng
+    r['molecules per ng'] = 1/r['MW in ng']
+    
+    #ng for 10e10 molecules
+    r['ng per billion molecules'] = (10**9)/r['molecules per ng'] #(1 billions)
+    
+    #moles per ng
+    r['moles per ng'] = (r['MW in ng'] * mw)
+    return r
 
 
 def occur(string, sub):
@@ -62,7 +420,34 @@ def get_prime(n):
         if all(num%i != 0 for i in range(2,int(math.sqrt(num))+1)):
             yield num
 
+            
+def ssl_fencrypt(infile, outfile):
+    '''(file_path, file_path) => encrypted_file
+    Uses openssl to encrypt/decrypt files.
+    '''
+    pwd = getpass('enter encryption pwd:')
+    if getpass('repeat pwd:') == pwd:
+        run(f'openssl enc -aes-256-cbc -a -salt -pass pass:{pwd} -in {infile} -out {outfile}',shell=True)
+    else:
+        print("passwords don't match.")
+
+    
+def ssl_fdecrypt(infile, outfile):
+    '''(file_path, file_path) => decrypted_file
+    Uses openssl to encrypt/decrypt files.
+    '''
+    pwd = getpass('enter decryption pwd:')
+    run(f'openssl enc -d -aes-256-cbc -a -pass pass:{pwd} -in {infile} -out {outfile}', shell=True)     
+
+    
 def loop_zip(strA, strB):
+    '''(str, str) => zip()
+    Return a zip object containing each letters of strA, paired with letters of strB.
+    If strA is longer than strB, then its letters will be paired recursively.
+    Example:
+        >>> list(loop_zip('ABCDEF', '123'))
+        [('A', '1'), ('B', '2'), ('C', '3'), ('D', '1'), ('E', '2'), ('F', '3')]
+    '''
     assert len(strA) >= len(strB)
     s = ''
     n = 0
@@ -75,11 +460,24 @@ def loop_zip(strA, strB):
         n += 1
     return zip(list(strA),list(s))
 
-def encrypt(msg, pwd):
+
+def s_encrypt(msg, pwd):
+    '''(str, str) => list
+    Simple encryption/decription tool.
+    WARNING:
+    This is NOT cryptographically secure!!
+    '''
+    if len(msg) < len(pwd):
+        raise ValueError('The password is longer than the message. This is not allowed.')
     return [(string_to_number(a)+string_to_number(b)) for a,b in loop_zip(msg, pwd)]
 
 
-def decrypt(encr, pwd):
+def s_decrypt(encr, pwd):
+    '''(str, str) => list
+    Simple encryption/decription tool.
+    WARNING:
+    This is NOT cryptographically secure!!
+    '''
     return ''.join([number_to_string((a-string_to_number(b))) for a,b in loop_zip(encr, pwd)])
 
 
@@ -813,28 +1211,105 @@ def get_exons_coord_by_gene_name(gene_name):
     return table
 
 
-def split_overlap(iterable,size,overlap):
-    '''(list,int,int) => [[...],[...],...]
-    Split an iterable into chunks of a specific size and overlap.
-    Works also on strings! 
+def split_overlap(seq, size, overlap, is_dataframe=False):
+    '''(seq,int,int) => [[...],[...],...]
+    Split a sequence into chunks of a specific size and overlap.
+    Works also on strings!
+    It is very efficient for short sequences (len(seq()) <= 100).
 
+    Set "is_dataframe=True" to split a pandas.DataFrame 
+    
     Examples:
-        split_overlap(iterable=list(range(10)),size=3,overlap=2)
-        >>> [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7], [6, 7, 8, 9]]
+        >>> split_overlap(seq=list(range(10)),size=3,overlap=2)
+        [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
 
-        split_overlap(iterable=range(10),size=3,overlap=2)
-        >>> [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
+        >>> split_overlap(seq=range(10),size=3,overlap=2)
+        [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
     '''
     if size < 1 or overlap < 0:
-        raise ValueError('"size" must be an integer with >= 1 while "overlap" must be >= 0')
+        raise ValueError('"size must be >= 1 and overlap >= 0')
+    
     result = []
-    while True:
-        if len(iterable) <= size:
-            result.append(iterable)
-            return result
-        else:
-            result.append(iterable[:size])
-            iterable = iterable[size-overlap:]
+    
+    if is_dataframe:
+        while True:
+            if len(seq) <= size:
+                result.append(seq)
+                return result
+            else:
+                result.append(seq.iloc[:size])
+                seq = seq.iloc[size-overlap:]
+    
+    else:
+        while True:
+            if len(seq) <= size:
+                result.append(seq)
+                return result
+            else:
+                result.append(seq[:size])
+                seq = seq[size-overlap:]
+
+
+def split_overlap_long(seq, size, overlap, is_dataframe=False):
+    '''(seq,int,int) => generator
+    Split a sequence into chunks of a specific size and overlap.
+    Return a generator. It is very efficient for long sequences (len(seq()) > 100).
+    https://stackoverflow.com/questions/48381870/a-better-way-to-split-a-sequence-in-chunks-with-overlaps
+
+    Set "is_dataframe=True" to split a pandas.DataFrame
+
+    Examples:
+        >>> split_overlap_long(seq=list(range(10)),size=3,overlap=2)
+        <generator object split_overlap_long at 0x10bc49d58>
+
+        >>> list(split_overlap_long(seq=list(range(10)),size=3,overlap=2))
+        [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
+
+        >>> list(split_overlap_long(seq=range(10),size=3,overlap=2))
+        [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
+    '''       
+    if size < 1 or overlap < 0:
+        raise ValueError('size must be >= 1 and overlap >= 0')
+
+    if is_dataframe:
+        for i in range(0, len(seq) - overlap, size - overlap):            
+            yield seq.iloc[i:i + size]
+    else:    
+        for i in range(0, len(seq) - overlap, size - overlap):            
+            yield seq[i:i + size]
+
+
+def itr_split_overlap(iterable, size, overlap):
+    '''(iterable,int,int) => generator
+    Similar to long_split_overlap() but it works on any iterable.
+    In case of long sequences, long_split_overlap() is more efficient
+    but this function can handle potentially infinite iterables using deque().
+    https://stackoverflow.com/questions/48381870/a-better-way-to-split-a-sequence-in-chunks-with-overlaps
+
+    Warning: for range() and symilar, it behaves differently than split_overlap() and split_overlap_long()
+    Examples:
+        >>> list(itr_split_overlap(iterable=range(10),size=3,overlap=2))
+        [(0, 1, 2), (1, 2, 3), (2, 3, 4), (3, 4, 5), (4, 5, 6), (5, 6, 7), (6, 7, 8), (7, 8, 9)]
+    '''
+    if size < 1 or overlap < 0:
+        raise ValueError('size must be >= 1 and overlap >= 0')
+
+    itr = iter(iterable)
+    buf = deque(islice(itr, size), maxlen=size)
+
+    chunk = None
+    for chunk in iter(lambda: tuple(islice(itr, size - overlap)), ()):
+        yield tuple(buf)
+        buf.extend(chunk)
+
+    rest = tuple(buf)
+
+    if chunk:
+        rest = rest[size - overlap - len(chunk):]
+
+    yield rest
+    
+
 
 
 def reorder_dict(d, keys):
@@ -1152,22 +1627,29 @@ def yield_file(infile):
 
 
 #Downaload sequence from ensembl
-def sequence_from_coordinates(chromosome,strand,start,end,account="a.marcozzi@umcutrecht.nl"):
+def sequence_from_coordinates(chromosome, strand, start, end, ref_genome=37):
     '''
     Download the nucleotide sequence from the gene_name.
-    This function works only with with GRCh37.
-    Inputs can be str or int e.g. 1 or '1' 
     '''
-
-    Entrez.email = account # Always tell NCBI who you are
-
-    #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
-    NCBI_IDS = {'1':'NC_000001.10','2':'NC_000002.11','3':'NC_000003.11','4':'NC_000004.11',
-                '5':'NC_000005.9','6':'NC_000006.11','7':'NC_000007.13','8':'NC_000008.10',
-                '9':'NC_000009.11','10':'NC_000010.10','11':'NC_000011.9','12':'NC_000012.11',
-                '13':'NC_000013.10','14':'NC_000014.8','15':'NC_000015.9','16':'NC_000016.9',
-                '17':'NC_000017.10','18':'NC_000018.9','19':'NC_000019.9','20':'NC_000020.10',
-                '21':'NC_000021.8','22':'NC_000022.10','X':'NC_000023.10','Y':'NC_000024.9'}       
+    Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
+    
+    if int(ref_genome) == 37:
+        #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
+        NCBI_IDS = {'1':'NC_000001.10','2':'NC_000002.11','3':'NC_000003.11','4':'NC_000004.11',
+                    '5':'NC_000005.9','6':'NC_000006.11','7':'NC_000007.13','8':'NC_000008.10',
+                    '9':'NC_000009.11','10':'NC_000010.10','11':'NC_000011.9','12':'NC_000012.11',
+                    '13':'NC_000013.10','14':'NC_000014.8','15':'NC_000015.9','16':'NC_000016.9',
+                    '17':'NC_000017.10','18':'NC_000018.9','19':'NC_000019.9','20':'NC_000020.10',
+                    '21':'NC_000021.8','22':'NC_000022.10','X':'NC_000023.10','Y':'NC_000024.9'}
+    elif int(ref_genome) == 38:
+        #GRCh38 from https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.38
+        NCBI_IDS = {'1':'NC_000001.11','2':'NC_000002.12','3':'NC_000003.12','4':'NC_000004.12',
+                    '5':'NC_000005.10','6':'NC_000006.12','7':'NC_000007.14','8':'NC_000008.11',
+                    '9':'NC_000009.12','10':'NC_000010.11','11':'NC_000011.10','12':'NC_000012.12',
+                    '13':'NC_000013.11','14':'NC_000014.9','15':'NC_000015.10','16':'NC_000016.10',
+                    '17':'NC_000017.11','18':'NC_000018.10','19':'NC_000019.10','20':'NC_000020.11',
+                    '21':'NC_000021.9','22':'NC_000022.11','X':'NC_000023.11','Y':'NC_000024.10'}
+        
   
     try:        
         handle = Entrez.efetch(db="nucleotide", 
@@ -1581,6 +2063,9 @@ def string_to_number(s):
 def number_to_string(n):
     '''
     Convert a number into a bytes string.
+    Example:
+        >>> number_to_string(147948829660780569073512294)
+        'foo bar baz'
     '''
     return n.to_bytes(math.ceil(n.bit_length() / 8), 'little').decode()
 #x = 147948829660780569073512294
@@ -1600,15 +2085,18 @@ def determine_average_breaks_distance(dataset): # tested only for deletion/dupli
 #print(determine_average_breaks_distance('/home/amarcozz/Documents/Projects/Fusion Genes/Scripts/test_datasets/random/sorted/rnd_dataset_100_annotated_sorted.txt'))
 
 
-def dict_overview(dictionary,how_many_keys):
+def dict_overview(dictionary, how_many_keys, indent=False):
     '''
     Prints out how_many_elements of the target dictionary.
     Useful to have a quick look at the structure of a dictionary.
     '''
+    
     ks = list(islice(dictionary, how_many_keys))
     for k in ks:
-        print(k)
-        print(dictionary[k])
+        if indent:
+            print(f'{k}\n\t{dictionary[k]}')
+        else:
+            print(f'{k}\t{dictionary[k]}')
 
 
 def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@students.uu.nl"): #beta: works properly only forGRCh37
@@ -2554,7 +3042,7 @@ def list_to_line(list_, char):
 
 def list_of_files(path, extension, recursive=False):
     '''
-    Return a list of filepath for each file into path with the target extension.
+    Return a list of filepaths for each file into path with the target extension.
     If recursive, it will loop over subfolders as well.
     '''
     if not recursive:

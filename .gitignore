@@ -4,6 +4,7 @@
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.ipynb_checkpoints/
 *.py[cod]
 *$py.class
 *.pyc
@@ -96,10 +97,14 @@ ENV/
 
 # Plots and images
 *.pdf
-*.png
+#*.png
 *.jpg
 *.psd
 
 
 
 *.pyc
+
+Untitled.ipynb
+
+__pycache__/alefuncs.cpython-36.pyc
