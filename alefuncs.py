@@ -41,6 +41,71 @@ from pyliftover import LiftOver
 from PIL import Image
 
 
+def rolling_normalize_df(df, method='min-max', size=30, overlap=5):
+    '''
+    Return a new df with datapoints normalized based on a sliding window
+    of rolling on the a pandas.DataFrame.
+    It is useful to have local (window by window) normalization of the values.
+    '''
+    
+    to_merge = []
+    for item in split_overlap_long(df, size, overlap, is_dataframe=True):
+        to_merge.append(normalize_df(item, method))
+                
+    new_df = pd.concat(to_merge)
+    return new_df.groupby(new_df.index).mean()
+
+
+def normalize_df(df, method='min-max'):
+    '''
+    Return normalized data.
+    max, min, mean and std are computed considering
+    all the values of the dfand not by column.
+    i.e. mean = df.values.mean() and not df.mean().
+    Ideal to normalize df having multiple columns of non-indipendent values.
+    Methods implemented:
+                       'raw'      No normalization
+                       'min-max'  Deafault
+                       'norm'     ...
+                       'z-norm'   ...
+                       'sigmoid'  ...
+                       'decimal'  ...
+                       'softmax'  It's a transformation rather than a normalization
+                       'tanh'     ...
+    '''
+    if type(df) is not pd.core.frame.DataFrame:
+        df = pd.DataFrame(df)
+        
+    if method == 'min-max':
+        return (df-df.values.min())/(df.values.max()-df.values.min())
+
+    if method == 'norm':
+        return (df-df.values.mean())/(df.values.max()-df.values.mean())
+
+    if method == 'z-norm':
+        return (df-df.values.mean())/df.values.std()
+
+    if method == 'sigmoid':
+        _max = df.values.max()
+        return df.apply(lambda x: 1/(1+np.exp(-x/_max)))
+
+    if method == 'decimal':
+        #j = len(str(int(df.values.max())))
+        i = 10**len(str(int(df.values.max())))#10**j
+        return df.apply(lambda x: x/i)
+
+    if method == 'tanh':
+        return 0.5*(np.tanh(0.01*(df-df.values.mean()))/df.values.std() + 1)
+
+    if method == 'softmax':
+        return np.exp(df)/np.sum(np.exp(df))
+
+    if method == 'raw':
+        return df
+
+    raise ValueError(f'"method" not found: {method}')
+
+
 
 def merge_dict(dictA, dictB):
     '''(dict, dict) => dict
