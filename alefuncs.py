@@ -236,9 +236,9 @@ def vp(var_name,var_dict=globals(),sep=' : '):
     mass=71 Kg
     '''
     try:
-        print(f'{varName}{sep}{g[varName]}')
+        print(f'{var_name}{sep}{g[var_name]}')
     except:
-        print(f'{varName} not found!')
+        print(f'{var_name} not found!')
 
 
 def view_matrix(arrays):
@@ -2737,31 +2737,40 @@ def pcr(template,primer_F,primer_R,circular=False):
 ##expected = 'GACAAATGGCTCTAGAGAGGGCCTATTTCCCATGATT--something--GCCAATTCTGCAGACAAATGGGGTACCCGTTACATAA'
 ##expected == result
 
-def pip_upgrade_all():
+def pip_upgrade_all(executable=False):
     '''
     Upgrades all pip-installed packages.
     Requires a bash shell.
     '''
-    #pip
-    print('upgrading pip...')
-    call('python -m pip install --upgrade pip', shell=True)
-    call("python -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python -m pip install -U", shell=True)
-    #pip2
-    print('upgrading pip2...')
-    call('python2 -m pip install --upgrade pip', shell=True)
-    call("python2 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python2 -m pip install -U", shell=True)
-    #pip3
-    print('upgrading pip3...')
-    call('python3 -m pip install --upgrade pip', shell=True)
-    call("python3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python3 -m pip install -U", shell=True)
-    #pypy
-    print('upgrading pypy-pip...')
-    call('pypy -m pip install --upgrade pip',shell=True)
-    call("pypy -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy -m pip install -U", shell=True)
-    #pypy3
-    print('upgrading pypy3-pip...')
-    call('pypy3 -m pip install --upgrade pip',shell=True)
-    call("pypy3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy3 -m pip install -U", shell=True)
+    if executable:
+        print('upgrading pip...')
+        call(f'{executable} -m pip install --upgrade pip',
+             shell=True)
+        call(f"{executable} -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 {executable} -m pip install -U",
+             shell=True)
+        print('done')
+        
+    else:
+        #pip
+        print('upgrading pip...')
+        call('python -m pip install --upgrade pip', shell=True)
+        call("python -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python -m pip install -U", shell=True)
+        #pip2
+        print('upgrading pip2...')
+        call('python2 -m pip install --upgrade pip', shell=True)
+        call("python2 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python2 -m pip install -U", shell=True)
+        #pip3
+        print('upgrading pip3...')
+        call('python3 -m pip install --upgrade pip', shell=True)
+        call("python3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 python3 -m pip install -U", shell=True)
+        #pypy
+        print('upgrading pypy-pip...')
+        call('pypy -m pip install --upgrade pip',shell=True)
+        call("pypy -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy -m pip install -U", shell=True)
+        #pypy3
+        print('upgrading pypy3-pip...')
+        call('pypy3 -m pip install --upgrade pip',shell=True)
+        call("pypy3 -m pip freeze --local | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pypy3 -m pip install -U", shell=True)
 
 def probability(p,n,k):
     '''
@@ -2901,7 +2910,7 @@ def sequence_from_gene(gene_name): #beta
     '''
     Download the nucleotide sequence from the gene_name.
     '''
-    data = EnsemblRelease(75, auto_download=True)
+    data = EnsemblRelease(75)
     Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
     NCBI_IDS = {'1':"NC_000001", '2':"NC_000002",'3':"NC_000003",'4':"NC_000004",
                 '5':"NC_000005",'6':"NC_000006",'7':"NC_000007", '8':"NC_000008",
