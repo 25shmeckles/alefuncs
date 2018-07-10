@@ -1,5 +1,5 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2018_02
+### version: 2018_07
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
@@ -40,17 +40,6 @@ from pyliftover import LiftOver
 
 from PIL import Image
 
-
-def heikin_ashi(O, H, L, C, oldO, oldC):
-    '''
-    Generates a Heikin-Ashi candle from ticker data.
-    '''
-    HA_Close = (O + H + L + C)/4
-    HA_Open = (oldO + oldC)/2
-    elements = np.array([H, L, HA_Open, HA_Close])
-    HA_High = elements.max(0) 
-    HA_Low = elements.min(0)   
-    return np.array([HA_Open, HA_High, HA_Low, HA_Close])
 
 
 def merge_dict(dictA, dictB):
@@ -1157,12 +1146,14 @@ def get_exons_coord_by_gene_name(gene_name):
     return table
 
 
-def split_overlap(seq, size, overlap):
+def split_overlap(seq, size, overlap, is_dataframe=False):
     '''(seq,int,int) => [[...],[...],...]
     Split a sequence into chunks of a specific size and overlap.
     Works also on strings!
     It is very efficient for short sequences (len(seq()) <= 100).
 
+    Set "is_dataframe=True" to split a pandas.DataFrame 
+    
     Examples:
         >>> split_overlap(seq=list(range(10)),size=3,overlap=2)
         [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
@@ -1172,21 +1163,35 @@ def split_overlap(seq, size, overlap):
     '''
     if size < 1 or overlap < 0:
         raise ValueError('"size must be >= 1 and overlap >= 0')
+    
     result = []
-    while True:
-        if len(seq) <= size:
-            result.append(seq)
-            return result
-        else:
-            result.append(seq[:size])
-            seq = seq[size-overlap:]
+    
+    if is_dataframe:
+        while True:
+            if len(seq) <= size:
+                result.append(seq)
+                return result
+            else:
+                result.append(seq.iloc[:size])
+                seq = seq.iloc[size-overlap:]
+    
+    else:
+        while True:
+            if len(seq) <= size:
+                result.append(seq)
+                return result
+            else:
+                result.append(seq[:size])
+                seq = seq[size-overlap:]
 
 
-def split_overlap_long(seq, size, overlap):
+def split_overlap_long(seq, size, overlap, is_dataframe=False):
     '''(seq,int,int) => generator
     Split a sequence into chunks of a specific size and overlap.
     Return a generator. It is very efficient for long sequences (len(seq()) > 100).
     https://stackoverflow.com/questions/48381870/a-better-way-to-split-a-sequence-in-chunks-with-overlaps
+
+    Set "is_dataframe=True" to split a pandas.DataFrame
 
     Examples:
         >>> split_overlap_long(seq=list(range(10)),size=3,overlap=2)
@@ -1201,8 +1206,12 @@ def split_overlap_long(seq, size, overlap):
     if size < 1 or overlap < 0:
         raise ValueError('size must be >= 1 and overlap >= 0')
 
-    for i in range(0, len(seq) - overlap, size - overlap):            
-        yield seq[i:i + size]
+    if is_dataframe:
+        for i in range(0, len(seq) - overlap, size - overlap):            
+            yield seq.iloc[i:i + size]
+    else:    
+        for i in range(0, len(seq) - overlap, size - overlap):            
+            yield seq[i:i + size]
 
 
 def itr_split_overlap(iterable, size, overlap):
