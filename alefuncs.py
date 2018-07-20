@@ -40,6 +40,97 @@ from pyliftover import LiftOver
 
 from PIL import Image
 
+def gen_ascii_symbols(input_file, chars):
+    '''
+    Return a dict of letters/numbers associated with
+    the corresponding ascii-art representation.
+    You can use http://www.network-science.de/ascii/ to generate the ascii-art for each symbol.
+        
+    The input file looks like:
+
+    ,adPPYYba,  
+    ""     `Y8  
+    ,adPPPPP88  
+    88,    ,88  
+    `"8bbdP"Y8  
+
+
+    88           
+    88           
+    88           
+    88,dPPYba,   
+    88P'    "8a  
+    88       d8  
+    88b,   ,a8"  
+    8Y"Ybbd8"'
+    
+    ...
+    
+    Each symbol is separated by at least one empty line ("\n")
+    '''
+    #input_file = 'ascii_symbols.txt'
+    #chars = string.ascii_lowercase+string.ascii_uppercase+'0123456789'
+
+    symbols = []
+    s = ''
+    with open(input_file, 'r') as f:
+        for line in f:
+            if line == '\n':
+                if len(s):
+                    symbols.append(s)
+                    s = ''
+                else:
+                    continue
+            else:
+                s += line
+
+    return dict(zip(chars,symbols))
+
+
+
+def gen_ascii_captcha(symbols, length=6, max_h=10, noise_level=0, noise_char='.'):
+    '''
+    Return a string of the specified length made by random symbols.
+    Print the ascii-art representation of it.
+    
+    Example:
+    
+    symbols = gen_ascii_symbols(input_file='ascii_symbols.txt',
+                                chars = string.ascii_lowercase+string.ascii_uppercase+'0123456789')
+
+    while True:
+        captcha = gen_ascii_captcha(symbols, noise_level=0.2)
+        x = input('captcha: ')
+        if x == captcha:
+            print('\ncorrect')
+            break
+        print('\ninvalid captcha, please retry')
+    '''
+    assert noise_level <= 1
+    #max_h = 10
+    #noise_level = 0
+    captcha = ''.join(random.sample(chars, length))
+    #print(code)
+    pool = [symbols[c].split('\n') for c in captcha]
+
+    for n in range(max_h, 0, -1):
+        line = ''
+        for item in pool:
+            try:
+                next_line = item[-n]
+            except IndexError:
+                next_line = ''.join([' ' for i in range(max([len(_item) for _item in item]))])
+
+            if noise_level:
+                #if random.random() < noise_level:
+                #    next_line = next_line.replace(' ', noise_char)
+                next_line = ''.join([c if random.random() > noise_level \
+                                     else random.choice(noise_char) for c in next_line])
+            line += next_line
+
+        print(line)
+    return captcha
+
 
 def rnd_sample_df(df, n=1, slice_size=1):
     '''
