@@ -75,7 +75,7 @@ def find_min_max(array):
             'minima':minima}
 
 
-def smooth(array, window_len=10, window='hamming'):
+def smooth(array, window_len=10, window='hanning'):
     '''np.array, int, str => np.array
     Smooth the data using a window with requested size.
     
