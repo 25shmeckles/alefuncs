@@ -27,6 +27,8 @@ from threading import Thread
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import signal
+from scipy.signal import argrelextrema
 
 import pandas
 import regex
@@ -39,6 +41,122 @@ from urllib.request import urlopen
 from pyliftover import LiftOver
 
 from PIL import Image
+
+
+
+
+def random_walk(lenght):
+    '''int => np.array
+    Return a random walk path.
+    '''
+    walk = []
+    y = 0
+    for _ in range(lenght):
+        if random.randint(0,1):
+            y += 1
+        else:
+            y -= 1
+        walk.append(y)
+    return np.array(walk)
+
+
+def find_min_max(array):
+    '''np.array => dict
+    Return a dictionary of indexes
+    where the maxima and minima of the input array are found.
+    '''
+    # for local maxima
+    maxima = argrelextrema(array, np.greater)
+
+    # for local minima
+    minima = argrelextrema(array, np.less)
+    
+    return {'maxima':maxima,
+            'minima':minima}
+
+
+def smooth(array, window_len=10, window='hamming'):
+    '''np.array, int, str => np.array
+    Smooth the data using a window with requested size.
+    
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal 
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+    
+    input:
+        x: the input signal 
+        window_len: the dimension of the smoothing window; should be an odd integer
+        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+            flat window will produce a moving average smoothing.
+
+    output:
+        the smoothed signal
+        
+    example:
+
+        t = linspace(-2,2,0.1)
+        x = sin(t)+randn(len(t))*0.1
+        y = smooth(x)
+    
+    see also: 
+    
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+ 
+    TODO: the window parameter could be the window itself if an array instead of a string
+    NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
+    '''
+
+    if array.ndim != 1:
+        raise ValueError("smooth only accepts 1 dimension arrays.")
+
+    if array.size < window_len:
+        raise ValueError("Input vector needs to be bigger than window size.")
+
+
+    if window_len<3:
+        return x
+
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
+
+
+    s = np.r_[array[window_len-1:0:-1],array,array[-2:-window_len-1:-1]]
+    #print(len(s))
+    if window == 'flat': #moving average
+        w = np.ones(window_len,'d')
+    else:
+        w = eval('np.'+window+'(window_len)')
+
+    y = np.convolve(w/w.sum(),s,mode='valid')
+    
+    y = y[int(window_len/2-1):-int(window_len/2)]
+    offset = len(y)-len(array) #in case input and output are not of the same lenght
+    assert len(array) == len(y[offset:])
+    return y[offset:] 
+
+
+
+def cohen_effect_size(group1, group2):
+    '''(np.array, np.array) => float
+    Compute the Cohen Effect Size (d) between two groups
+    by comparing the difference between groups to the variability within groups.
+    Return the the difference in standard deviation.
+    '''
+    assert type(group1) == np.ndarray
+    assert type(group2) == np.ndarray
+
+    diff = group1.mean() - group2.mean()
+    var1 = group1.var()
+    var2 = group2.var()
+    n1, n2 = len(group1), len(group2)
+    pooled_var = (n1 * var1 + n2 * var2) / (n1 + n2)
+    d = diff / np.sqrt(pooled_var)
+    return d
+
+
 
 def gen_ascii_symbols(input_file, chars):
     '''
