@@ -34,7 +34,7 @@ import pandas
 import regex
 import re
 
-import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal
 import httplib2 as http
 
 from urllib.request import urlopen
@@ -43,6 +43,32 @@ from pyliftover import LiftOver
 from PIL import Image
 
 
+
+class TimeoutError(Exception):
+    '''
+    Custom error for Timeout class.
+    '''
+    pass
+
+
+class Timeout:
+    '''
+    A timeout handler with context manager.
+    Based on UNIX signals.
+    '''
+    def __init__(self, seconds=1, error_message='Timeout'):
+        self.seconds = seconds
+        self.error_message = error_message
+        
+    def handle_timeout(self, signum, frame):
+        raise TimeoutError(self.error_message)
+        
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+        
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
 
 
 def random_walk(lenght):
