@@ -461,7 +461,7 @@ def loop_zip(strA, strB):
     return zip(list(strA),list(s))
 
 
-def s_encrypt(msg, pwd):
+def encrypt(msg, pwd):
     '''(str, str) => list
     Simple encryption/decription tool.
     WARNING:
@@ -472,7 +472,7 @@ def s_encrypt(msg, pwd):
     return [(string_to_number(a)+string_to_number(b)) for a,b in loop_zip(msg, pwd)]
 
 
-def s_decrypt(encr, pwd):
+def decrypt(encr, pwd):
     '''(str, str) => list
     Simple encryption/decription tool.
     WARNING:
@@ -1041,6 +1041,9 @@ def percent_of(total, fraction):
         percent_of(30, 90)
         >>> 300.0
     '''
+    assert total > 0
+    if np.isnan(total) or np.isnan(fraction):
+        return nan
     return (100*fraction)/total
 
 
