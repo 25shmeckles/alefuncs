@@ -27,18 +27,278 @@ from threading import Thread
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import signal
+from scipy.signal import argrelextrema
 
 import pandas
 import regex
 import re
 
-import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal
 import httplib2 as http
 
 from urllib.request import urlopen
 from pyliftover import LiftOver
 
 from PIL import Image
+
+
+
+class TimeoutError(Exception):
+    '''
+    Custom error for Timeout class.
+    '''
+    pass
+
+
+class Timeout:
+    '''
+    A timeout handler with context manager.
+    Based on UNIX signals.
+    '''
+    def __init__(self, seconds=1, error_message='Timeout'):
+        self.seconds = seconds
+        self.error_message = error_message
+        
+    def handle_timeout(self, signum, frame):
+        raise TimeoutError(self.error_message)
+        
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+        
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
+
+
+def random_walk(lenght):
+    '''int => np.array
+    Return a random walk path.
+    '''
+    walk = []
+    y = 0
+    for _ in range(lenght):
+        if random.randint(0,1):
+            y += 1
+        else:
+            y -= 1
+        walk.append(y)
+    return np.array(walk)
+
+
+def find_min_max(array):
+    '''np.array => dict
+    Return a dictionary of indexes
+    where the maxima and minima of the input array are found.
+    '''
+    # for local maxima
+    maxima = argrelextrema(array, np.greater)
+
+    # for local minima
+    minima = argrelextrema(array, np.less)
+    
+    return {'maxima':maxima,
+            'minima':minima}
+
+
+def smooth(array, window_len=10, window='hanning'):
+    '''np.array, int, str => np.array
+    Smooth the data using a window with requested size.
+    
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal 
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+    
+    input:
+        x: the input signal 
+        window_len: the dimension of the smoothing window; should be an odd integer
+        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+            flat window will produce a moving average smoothing.
+
+    output:
+        the smoothed signal
+        
+    example:
+
+        t = linspace(-2,2,0.1)
+        x = sin(t)+randn(len(t))*0.1
+        y = smooth(x)
+    
+    see also: 
+    
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+ 
+    TODO: the window parameter could be the window itself if an array instead of a string
+    NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
+    '''
+
+    if array.ndim != 1:
+        raise ValueError("smooth only accepts 1 dimension arrays.")
+
+    if array.size < window_len:
+        raise ValueError("Input vector needs to be bigger than window size.")
+
+
+    if window_len<3:
+        return x
+
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
+
+
+    s = np.r_[array[window_len-1:0:-1],array,array[-2:-window_len-1:-1]]
+    #print(len(s))
+    if window == 'flat': #moving average
+        w = np.ones(window_len,'d')
+    else:
+        w = eval('np.'+window+'(window_len)')
+
+    y = np.convolve(w/w.sum(),s,mode='valid')
+    
+    y = y[int(window_len/2-1):-int(window_len/2)]
+    offset = len(y)-len(array) #in case input and output are not of the same lenght
+    assert len(array) == len(y[offset:])
+    return y[offset:] 
+
+
+
+def cohen_effect_size(group1, group2):
+    '''(np.array, np.array) => float
+    Compute the Cohen Effect Size (d) between two groups
+    by comparing the difference between groups to the variability within groups.
+    Return the the difference in standard deviation.
+    '''
+    assert type(group1) == np.ndarray
+    assert type(group2) == np.ndarray
+
+    diff = group1.mean() - group2.mean()
+    var1 = group1.var()
+    var2 = group2.var()
+    n1, n2 = len(group1), len(group2)
+    pooled_var = (n1 * var1 + n2 * var2) / (n1 + n2)
+    d = diff / np.sqrt(pooled_var)
+    return d
+
+
+
+def gen_ascii_symbols(input_file, chars):
+    '''
+    Return a dict of letters/numbers associated with
+    the corresponding ascii-art representation.
+    You can use http://www.network-science.de/ascii/ to generate the ascii-art for each symbol.
+        
+    The input file looks like:
+
+    ,adPPYYba,  
+    ""     `Y8  
+    ,adPPPPP88  
+    88,    ,88  
+    `"8bbdP"Y8  
+
+
+    88           
+    88           
+    88           
+    88,dPPYba,   
+    88P'    "8a  
+    88       d8  
+    88b,   ,a8"  
+    8Y"Ybbd8"'
+    
+    ...
+    
+    Each symbol is separated by at least one empty line ("\n")
+    '''
+    #input_file = 'ascii_symbols.txt'
+    #chars = string.ascii_lowercase+string.ascii_uppercase+'0123456789'
+
+    symbols = []
+    s = ''
+    with open(input_file, 'r') as f:
+        for line in f:
+            if line == '\n':
+                if len(s):
+                    symbols.append(s)
+                    s = ''
+                else:
+                    continue
+            else:
+                s += line
+
+    return dict(zip(chars,symbols))
+
+
+
+def gen_ascii_captcha(symbols, length=6, max_h=10, noise_level=0, noise_char='.'):
+    '''
+    Return a string of the specified length made by random symbols.
+    Print the ascii-art representation of it.
+    
+    Example:
+    
+    symbols = gen_ascii_symbols(input_file='ascii_symbols.txt',
+                                chars = string.ascii_lowercase+string.ascii_uppercase+'0123456789')
+
+    while True:
+        captcha = gen_ascii_captcha(symbols, noise_level=0.2)
+        x = input('captcha: ')
+        if x == captcha:
+            print('\ncorrect')
+            break
+        print('\ninvalid captcha, please retry')
+    '''
+    assert noise_level <= 1
+    #max_h = 10
+    #noise_level = 0
+    captcha = ''.join(random.sample(chars, length))
+    #print(code)
+    pool = [symbols[c].split('\n') for c in captcha]
+
+    for n in range(max_h, 0, -1):
+        line = ''
+        for item in pool:
+            try:
+                next_line = item[-n]
+            except IndexError:
+                next_line = ''.join([' ' for i in range(max([len(_item) for _item in item]))])
+
+            if noise_level:
+                #if random.random() < noise_level:
+                #    next_line = next_line.replace(' ', noise_char)
+                next_line = ''.join([c if random.random() > noise_level \
+                                     else random.choice(noise_char) for c in next_line])
+            line += next_line
+
+        print(line)
+    return captcha
+
+
+def rnd_sample_df(df, n=1, slice_size=1):
+    '''
+    Yield dataframes generated by randomly slicing df.
+    It is different from pandas.DataFrame.sample().
+    '''
+    assert n > 0 and slice_size > 0
+    max_len = len(df)-slice_size
+    for _ in range(n):
+        i = random.randint(0,max_len)
+        yield df.iloc[i:i+slice_size] 
+
+
+def date_to_stamp(d='2012-12-31'):
+    '''
+    Return UNIX timestamp of a date.
+    '''
+    Y,M,D = d.split('-')
+    stamp = time.mktime(datetime.date(int(Y),
+                                      int(M),
+                                      int(D)
+                                     ).timetuple()
+                       )
+    return stamp
 
 
 def rolling_normalize_df(df, method='min-max', size=30, overlap=5):
