@@ -44,6 +44,15 @@ from PIL import Image
 
 
 
+def factorial(n):
+    '''
+    Return the factorial of n.
+    This is just for teaching purpose,
+    for production code use math.factorial(n) instead.
+    '''
+    return reduce(lambda x,y:x*y,[1]+list(range(1,n+1)))
+
+
 class TimeoutError(Exception):
     '''
     Custom error for Timeout class.
