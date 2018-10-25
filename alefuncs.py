@@ -44,6 +44,18 @@ from PIL import Image
 
 
 
+def fancy_relu(x):
+    '''
+    np.array => np.array
+    A very fast ReLu implementation.
+    Uses numpy fancy indexing to do the trick.
+    '''
+    #modifies x
+    #fastest method
+    x[x<0]=0
+    return x
+
+
 def factorial(n):
     '''
     Return the factorial of n.
