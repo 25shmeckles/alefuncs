@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.signal import argrelextrema
 
-import pandas
+import pandas as pd
 import regex
 import re
 
@@ -2659,9 +2659,9 @@ def fill_and_sort(pandas_chrSeries):
         for _item in complete_series:
             if _item[0]==item:
                 sorted_.append(_item[1])
-    return pandas.Series(sorted_, index=CHROMOSOMES)
+    return pd.Series(sorted_, index=CHROMOSOMES)
 # counts = [50,9,45,6]
-# pandas_chrSeries = pandas.Series(counts, index=['1','4','X','10'])
+# pandas_chrSeries = pd.Series(counts, index=['1','4','X','10'])
 # print(pandas_chrSeries)
 # good_series = fill_and_sort(pandas_chrSeries)
 # print(good_series)
@@ -3391,7 +3391,7 @@ def pandize_dataset(annotated_dataset, verbose=True):
         spacer = (100-len(message))*'.'
         print(message, spacer)
 
-    dataset = pandas.io.parsers.read_table(annotated_dataset, dtype={'ChrA':'str','ChrB':'str'}, sep='\t', index_col=0)
+    dataset = pd.io.parsers.read_table(annotated_dataset, dtype={'ChrA':'str','ChrB':'str'}, sep='\t', index_col=0)
     if verbose == True:
         print('OK')
     
