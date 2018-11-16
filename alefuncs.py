@@ -44,6 +44,64 @@ from PIL import Image
 
 
 
+ale_palette = {'purple':"#9b59b6",
+               'blue':"#3498db",
+               'gray':"#95a5a6",
+               'red':"#e74c3c",
+               'black':"#34495e",
+               'green':"#2ecc71"}
+
+
+def call_python(Version, Module, Function, ArgumentList):
+    '''
+    Call a PythonX function from PythonY.
+    '''
+    gw      = execnet.makegateway("popen//python=python%s" % Version)
+    channel = gw.remote_exec("""
+        from %s import %s as the_function
+        channel.send(the_function(*channel.receive()))
+    """ % (Module, Function))
+    channel.send(ArgumentList)
+    return channel.receive()
+
+
+def print_attrs(name, obj):
+	'''
+	Quick overview of an HDF5 file content.
+	Example:
+		f = h5py.File(fast5_read,'r')
+		f.visititems(print_attrs)
+	'''
+    print(name)
+    for key, val in obj.attrs.items():
+        print(key, val)
+
+
+def scaled_tanh(x):
+    #https://stackoverflow.com/questions/13632976/neural-network-with-tanh-wrong-saturation-with-normalized-data
+    return 1.7159 * np.tanh(2/3 * x)
+
+
+def scaled_tanh_deriv(x):
+    #https://stackoverflow.com/questions/13632976/neural-network-with-tanh-wrong-saturation-with-normalized-data
+    #1.14399053 * (1 - np.tanh(2/3 *x)) * (1 + np.tanh(2/3 * x)))
+    return 1.14393 * (1 - np.power(tanh(2/3 * x),2))
+
+
+def scaled_tanh_error(expected, output):
+    #https://stackoverflow.com/questions/13632976/neural-network-with-tanh-wrong-saturation-with-normalized-data
+    return 2/3 * (1.7159 - output**2) * (expected - output)
+
+
+def tanh_deriv(x):
+    '''
+    The derivative of hyperbolic tangent function.
+    Useful for machine-learning regression problem,
+    to compute the local minimum. 
+    '''
+    return 1.0 - np.power(np.tanh(x),2)
+
+
 def fancy_relu(x):
     '''
     np.array => np.array
@@ -2190,6 +2248,25 @@ def dice_coefficient(sequence_a, sequence_b):
     
     score = float(matches)/float(lena + lenb)
     return score
+
+
+def levenshtein_distance(s1, s2):
+    '''
+    Return the "edit distance" of two sequences.
+    '''
+    if len(s1) > len(s2):
+        s1, s2 = s2, s1
+
+    distances = range(len(s1) + 1)
+    for i2, c2 in enumerate(s2):
+        distances_ = [i2+1]
+        for i1, c1 in enumerate(s1):
+            if c1 == c2:
+                distances_.append(distances[i1])
+            else:
+                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
+        distances = distances_
+    return distances[-1]
 
 
 def find_path(graph, start, end, path=[]):
