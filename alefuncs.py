@@ -52,6 +52,64 @@ ale_palette = {'purple':"#9b59b6",
                'green':"#2ecc71"}
 
 
+def md5(fname):
+    '''
+    Compute the md5 of a file in chunks.
+    Avoid running out of memory when hashing large files.
+    '''
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+def viterbi(pi, a, b, obs):
+    '''
+    The Viterbi algorithm for shortest path.
+    # code adapted from Stephen Marsland's, Machine Learning An Algorthmic Perspective, Vol. 2
+    # https://github.com/alexsosn/MarslandMLAlgo/blob/master/Ch16/HMM.py
+    # http://www.blackarbs.com/blog/introduction-hidden-markov-models-python-networkx-sklearn/2/9/2017
+    '''
+    nStates = np.shape(b)[0]
+    T = np.shape(obs)[0]
+    
+    # init blank path
+    path = np.zeros(T)
+    # delta --> highest probability of any path that reaches state i
+    delta = np.zeros((nStates, T))
+    # phi --> argmax by time step for each state
+    phi = np.zeros((nStates, T))
+    
+    # init delta and phi 
+    delta[:, 0] = pi * b[:, obs[0]]
+    phi[:, 0] = 0
+
+    print('\nStart Walk Forward\n')    
+    # the forward algorithm extension
+    for t in range(1, T):
+        for s in range(nStates):
+            delta[s, t] = np.max(delta[:, t-1] * a[:, s]) * b[s, obs[t]] 
+            phi[s, t] = np.argmax(delta[:, t-1] * a[:, s])
+            print('s={s} and t={t}: phi[{s}, {t}] = {phi}'.format(s=s, t=t, phi=phi[s, t]))
+    
+    # find optimal path
+    print('-'*50)
+    print('Start Backtrace\n')
+    path[T-1] = np.argmax(delta[:, T-1])
+    #p('init path\n    t={} path[{}-1]={}\n'.format(T-1, T, path[T-1]))
+    for t in range(T-2, -1, -1):
+        path[t] = phi[path[t+1], [t+1]]
+        #p(' '*4 + 't={t}, path[{t}+1]={path}, [{t}+1]={i}'.format(t=t, path=path[t+1], i=[t+1]))
+        print('path[{}] = {}'.format(t, path[t]))
+        
+    return path, delta, phi
+
+
+def gauss_func(x, amp, x0, sigma):
+    return amp * np.exp(-(x - x0) ** 2. / (2. * sigma ** 2.))
+
+
 def call_python(Version, Module, Function, ArgumentList):
     '''
     Call a PythonX function from PythonY.
