@@ -52,6 +52,25 @@ ale_palette = {'purple':"#9b59b6",
                'green':"#2ecc71"}
 
 
+
+
+def drop(arr, p=0.1):
+    '''
+    General "dropout" function.
+    Works on any shape of np.array of numbers.
+    p is the probability of dropping (set to 0) a number in the array.
+    '''
+    if type(arr) is list:
+        arr = np.array(arr)
+    try: #take care of cases in wich the shape is (n,)
+        size = np.multiply(*arr.shape)
+    except ValueError:
+        size = arr.shape[0]
+    mask = np.random.binomial(1, 1-p, size).reshape(arr.shape)
+    return np.multiply(arr, mask)
+
+
+
 def md5(fname):
     '''
     Compute the md5 of a file in chunks.
@@ -155,7 +174,8 @@ def tanh_deriv(x):
     '''
     The derivative of hyperbolic tangent function.
     Useful for machine-learning regression problem,
-    to compute the local minimum. 
+    to compute the local minimum.
+    https://towardsdatascience.com/activation-functions-neural-networks-1cbd9f8d91d6
     '''
     return 1.0 - np.power(np.tanh(x),2)
 
