@@ -52,6 +52,24 @@ ale_palette = {'purple':"#9b59b6",
                'green':"#2ecc71"}
 
 
+
+class DotNotDict:
+    '''
+    Trasform a dictionary into a class.
+    You can access the dict value using the dot-notation.
+    
+    Example:
+        >> d = {'alpha':0,'beta':1,'gamma':3.5}
+        >> d = DotNotDict(d)
+        >> d.gamma
+           3.5
+    '''
+    def __init__(self, dictionary): 
+        for k, v in dictionary.items():
+            setattr(self, k, v)
+
+
+
 def fake_rsi(length):
     '''Generate an array simulating an RSI trace.'''
     def f(x):
