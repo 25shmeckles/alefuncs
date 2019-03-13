@@ -108,3 +108,4 @@ ENV/
 Untitled.ipynb
 
 __pycache__/alefuncs.cpython-36.pyc
+.DS_Store

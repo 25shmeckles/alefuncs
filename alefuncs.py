@@ -52,6 +52,20 @@ ale_palette = {'purple':"#9b59b6",
                'green':"#2ecc71"}
 
 
+def fake_rsi(length):
+    '''Generate an array simulating an RSI trace.'''
+    def f(x):
+        #RSIs hardly go over 90 or below 10
+        if x > 90:
+            return x-20
+        if x < 10:
+            return x+20
+        return x
+
+    return list(map(f,
+           smooth(
+           rescale(
+           random_walk(length))*100, 5)))
 
 
 def drop(arr, p=0.1):
@@ -143,12 +157,12 @@ def call_python(Version, Module, Function, ArgumentList):
 
 
 def print_attrs(name, obj):
-	'''
-	Quick overview of an HDF5 file content.
-	Example:
-		f = h5py.File(fast5_read,'r')
-		f.visititems(print_attrs)
-	'''
+    '''
+    Quick overview of an HDF5 file content.
+    Example:
+        f = h5py.File(fast5_read,'r')
+        f.visititems(print_attrs)
+    '''
     print(name)
     for key, val in obj.attrs.items():
         print(key, val)
@@ -2047,6 +2061,10 @@ def yield_file(infile):
 def sequence_from_coordinates(chromosome, strand, start, end, ref_genome=37):
     '''
     Download the nucleotide sequence from the gene_name.
+
+    In case of SSL error add the following to your script:
+        import ssl
+        ssl._create_default_https_context = ssl._create_unverified_context
     '''
     Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
     
@@ -3798,37 +3816,6 @@ def run_pypy(code, interpr='pypy3'):
         for line in code.split('\n'):
             f.write(line+'\n')
     return check_output([interpr, 'tmp.py'])
-
-def sequence_from_coordinates(chromosome,strand,start,end): #beta hg19 only
-    '''
-    Download the nucleotide sequence from the gene_name.
-    '''
-    Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
-    
-    #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
-    NCBI_IDS = {'1':'NC_000001.10','2':'NC_000002.11','3':'NC_000003.11','4':'NC_000004.11',
-                '5':'NC_000005.9','6':'NC_000006.11','7':'NC_000007.13','8':'NC_000008.10',
-                '9':'NC_000009.11','10':'NC_000010.10','11':'NC_000011.9','12':'NC_000012.11',
-                '13':'NC_000013.10','14':'NC_000014.8','15':'NC_000015.9','16':'NC_000016.9',
-                '17':'NC_000017.10','18':'NC_000018.9','19':'NC_000019.9','20':'NC_000020.10',
-                '21':'NC_000021.8','22':'NC_000022.10','X':'NC_000023.10','Y':'NC_000024.9'}       
-  
-    try:        
-        handle = Entrez.efetch(db="nucleotide", 
-                               id=NCBI_IDS[str(chromosome)], 
-                               rettype="fasta", 
-                               strand=strand, #"1" for the plus strand and "2" for the minus strand.
-                               seq_start=start,
-                               seq_stop=end)
-        record = SeqIO.read(handle, "fasta")
-        handle.close()
-        sequence = str(record.seq)
-        return sequence
-    except ValueError:
-        print('ValueError: no sequence found in NCBI')
-        return False
-#a = sequence_from_coordinates(9,'-',21967751,21994490)
-#print(a)
 
 def sequence_from_gene(gene_name): #beta
     '''
