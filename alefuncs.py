@@ -1,5 +1,5 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2018_07
+### version: 2019_03
 ### licence: MIT
 ### requires Python >= 3.6 and numpy
 
@@ -55,8 +55,8 @@ ale_palette = {'purple':"#9b59b6",
 
 class DotNotDict:
     '''
-    Trasform a dictionary into a class.
-    You can access the dict value using the dot-notation.
+    Trasform a dictionary into a class so you can use
+    the dot-notation to access the dictionary data.
     
     Example:
         >> d = {'alpha':0,'beta':1,'gamma':3.5}
