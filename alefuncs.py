@@ -1,7 +1,7 @@
 ### author:  alessio.marcozzi@gmail.com
 ### version: 2019_03
 ### licence: MIT
-### requires Python >= 3.6 and numpy
+### requires Python >= 3.6
 
 
 from Bio import pairwise2,  Entrez, SeqIO
@@ -2477,12 +2477,20 @@ def find_shortest_path(graph, start, end, path=[]):
 def gen_rnd_string(length):
     '''
     Return a string of uppercase and lowercase ascii letters.
+    DEPRECATED! Use randstr() instead
     '''
     
     s = [l for l in string.ascii_letters]
     random.shuffle(s)
     s = ''.join(s[:length])
     return s
+
+def randstr(length):
+    '''
+    Return a string of uppercase and lowercase ascii letters.
+    '''
+    return ''.join(random.choice(string.ascii_letters) \
+                   for i in range(length))
 
 def gene_synonyms(gene_name):
     '''str => list()
