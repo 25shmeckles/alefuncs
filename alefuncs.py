@@ -67,6 +67,11 @@ class DotNotDict:
     def __init__(self, dictionary): 
         for k, v in dictionary.items():
             setattr(self, k, v)
+            
+    def __repr__(self):
+        for k in [x for x in dir(self) if not x.startswith('__')]:
+            print(f'{k:>50} : {getattr(self, k)}')
+        return ''
 
 
 
@@ -869,24 +874,36 @@ def get_prime(n):
         if all(num%i != 0 for i in range(2,int(math.sqrt(num))+1)):
             yield num
 
-            
-def ssl_fencrypt(infile, outfile):
+
+def encrypt(infile, outfile=False):
     '''(file_path, file_path) => encrypted_file
-    Uses openssl to encrypt/decrypt files.
+    Uses openssl to encrypt a file.
     '''
     pwd = getpass('enter encryption pwd:')
     if getpass('repeat pwd:') == pwd:
-        run(f'openssl enc -aes-256-cbc -a -salt -pass pass:{pwd} -in {infile} -out {outfile}',shell=True)
+        if outfile:
+            run(f'openssl enc -aes-256-cbc -a -salt -pbkdf2 -pass pass:{pwd} -in {infile} -out {outfile}',
+                shell=True)
+        else:
+            out = check_output(f'openssl enc -aes-256-cbc -a -salt -pbkdf2 -pass pass:{pwd} -in {infile}',
+                               shell=True)
+            return out
     else:
         print("passwords don't match.")
 
     
-def ssl_fdecrypt(infile, outfile):
+def decrypt(infile, outfile=False):
     '''(file_path, file_path) => decrypted_file
-    Uses openssl to encrypt/decrypt files.
+    Uses openssl decrypt a file.
     '''
     pwd = getpass('enter decryption pwd:')
-    run(f'openssl enc -d -aes-256-cbc -a -pass pass:{pwd} -in {infile} -out {outfile}', shell=True)     
+    if outfile:
+        run(f'openssl enc -d -aes-256-cbc -a -pbkdf2 -pass pass:{pwd} -in {infile} -out {outfile}',
+            shell=True)
+    else:
+        out = check_output(f'openssl enc -d -aes-256-cbc -a -pbkdf2 -pass pass:{pwd} -in {infile}',
+                           shell=True)
+        return out     
 
     
 def loop_zip(strA, strB):
