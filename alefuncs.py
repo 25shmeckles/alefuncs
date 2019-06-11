@@ -1,5 +1,5 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2019_03
+### version: 2018_07
 ### licence: MIT
 ### requires Python >= 3.6
 
@@ -42,200 +42,6 @@ from pyliftover import LiftOver
 
 from PIL import Image
 
-
-
-ale_palette = {'purple':"#9b59b6",
-               'blue':"#3498db",
-               'gray':"#95a5a6",
-               'red':"#e74c3c",
-               'black':"#34495e",
-               'green':"#2ecc71"}
-
-
-
-class DotNotDict:
-    '''
-    Trasform a dictionary into a class so you can use
-    the dot-notation to access the dictionary data.
-    
-    Example:
-        >> d = {'alpha':0,'beta':1,'gamma':3.5}
-        >> d = DotNotDict(d)
-        >> d.gamma
-           3.5
-    '''
-    def __init__(self, dictionary): 
-        for k, v in dictionary.items():
-            setattr(self, k, v)
-            
-    def __repr__(self):
-        for k in [x for x in dir(self) if not x.startswith('__')]:
-            print(f'{k:>50} : {getattr(self, k)}')
-        return ''
-
-
-
-def fake_rsi(length):
-    '''Generate an array simulating an RSI trace.'''
-    def f(x):
-        #RSIs hardly go over 90 or below 10
-        if x > 90:
-            return x-20
-        if x < 10:
-            return x+20
-        return x
-
-    return list(map(f,
-           smooth(
-           rescale(
-           random_walk(length))*100, 5)))
-
-
-def drop(arr, p=0.1):
-    '''
-    General "dropout" function.
-    Works on any shape of np.array of numbers.
-    p is the probability of dropping (set to 0) a number in the array.
-    '''
-    if type(arr) is list:
-        arr = np.array(arr)
-    try: #take care of cases in wich the shape is (n,)
-        size = np.multiply(*arr.shape)
-    except ValueError:
-        size = arr.shape[0]
-    mask = np.random.binomial(1, 1-p, size).reshape(arr.shape)
-    return np.multiply(arr, mask)
-
-
-
-def md5(fname):
-    '''
-    Compute the md5 of a file in chunks.
-    Avoid running out of memory when hashing large files.
-    '''
-    hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
-
-
-def viterbi(pi, a, b, obs):
-    '''
-    The Viterbi algorithm for shortest path.
-    # code adapted from Stephen Marsland's, Machine Learning An Algorthmic Perspective, Vol. 2
-    # https://github.com/alexsosn/MarslandMLAlgo/blob/master/Ch16/HMM.py
-    # http://www.blackarbs.com/blog/introduction-hidden-markov-models-python-networkx-sklearn/2/9/2017
-    '''
-    nStates = np.shape(b)[0]
-    T = np.shape(obs)[0]
-    
-    # init blank path
-    path = np.zeros(T)
-    # delta --> highest probability of any path that reaches state i
-    delta = np.zeros((nStates, T))
-    # phi --> argmax by time step for each state
-    phi = np.zeros((nStates, T))
-    
-    # init delta and phi 
-    delta[:, 0] = pi * b[:, obs[0]]
-    phi[:, 0] = 0
-
-    print('\nStart Walk Forward\n')    
-    # the forward algorithm extension
-    for t in range(1, T):
-        for s in range(nStates):
-            delta[s, t] = np.max(delta[:, t-1] * a[:, s]) * b[s, obs[t]] 
-            phi[s, t] = np.argmax(delta[:, t-1] * a[:, s])
-            print('s={s} and t={t}: phi[{s}, {t}] = {phi}'.format(s=s, t=t, phi=phi[s, t]))
-    
-    # find optimal path
-    print('-'*50)
-    print('Start Backtrace\n')
-    path[T-1] = np.argmax(delta[:, T-1])
-    #p('init path\n    t={} path[{}-1]={}\n'.format(T-1, T, path[T-1]))
-    for t in range(T-2, -1, -1):
-        path[t] = phi[path[t+1], [t+1]]
-        #p(' '*4 + 't={t}, path[{t}+1]={path}, [{t}+1]={i}'.format(t=t, path=path[t+1], i=[t+1]))
-        print('path[{}] = {}'.format(t, path[t]))
-        
-    return path, delta, phi
-
-
-def gauss_func(x, amp, x0, sigma):
-    return amp * np.exp(-(x - x0) ** 2. / (2. * sigma ** 2.))
-
-
-def call_python(Version, Module, Function, ArgumentList):
-    '''
-    Call a PythonX function from PythonY.
-    '''
-    gw      = execnet.makegateway("popen//python=python%s" % Version)
-    channel = gw.remote_exec("""
-        from %s import %s as the_function
-        channel.send(the_function(*channel.receive()))
-    """ % (Module, Function))
-    channel.send(ArgumentList)
-    return channel.receive()
-
-
-def print_attrs(name, obj):
-    '''
-    Quick overview of an HDF5 file content.
-    Example:
-        f = h5py.File(fast5_read,'r')
-        f.visititems(print_attrs)
-    '''
-    print(name)
-    for key, val in obj.attrs.items():
-        print(key, val)
-
-
-def scaled_tanh(x):
-    #https://stackoverflow.com/questions/13632976/neural-network-with-tanh-wrong-saturation-with-normalized-data
-    return 1.7159 * np.tanh(2/3 * x)
-
-
-def scaled_tanh_deriv(x):
-    #https://stackoverflow.com/questions/13632976/neural-network-with-tanh-wrong-saturation-with-normalized-data
-    #1.14399053 * (1 - np.tanh(2/3 *x)) * (1 + np.tanh(2/3 * x)))
-    return 1.14393 * (1 - np.power(tanh(2/3 * x),2))
-
-
-def scaled_tanh_error(expected, output):
-    #https://stackoverflow.com/questions/13632976/neural-network-with-tanh-wrong-saturation-with-normalized-data
-    return 2/3 * (1.7159 - output**2) * (expected - output)
-
-
-def tanh_deriv(x):
-    '''
-    The derivative of hyperbolic tangent function.
-    Useful for machine-learning regression problem,
-    to compute the local minimum.
-    https://towardsdatascience.com/activation-functions-neural-networks-1cbd9f8d91d6
-    '''
-    return 1.0 - np.power(np.tanh(x),2)
-
-
-def fancy_relu(x):
-    '''
-    np.array => np.array
-    A very fast ReLu implementation.
-    Uses numpy fancy indexing to do the trick.
-    '''
-    #modifies x
-    #fastest method
-    x[x<0]=0
-    return x
-
-
-def factorial(n):
-    '''
-    Return the factorial of n.
-    This is just for teaching purpose,
-    for production code use math.factorial(n) instead.
-    '''
-    return reduce(lambda x,y:x*y,[1]+list(range(1,n+1)))
 
 
 class TimeoutError(Exception):
@@ -309,12 +115,10 @@ def smooth(array, window_len=10, window='hanning'):
         window_len: the dimension of the smoothing window; should be an odd integer
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
-
     output:
         the smoothed signal
         
     example:
-
         t = linspace(-2,2,0.1)
         x = sin(t)+randn(len(t))*0.1
         y = smooth(x)
@@ -385,14 +189,11 @@ def gen_ascii_symbols(input_file, chars):
     You can use http://www.network-science.de/ascii/ to generate the ascii-art for each symbol.
         
     The input file looks like:
-
     ,adPPYYba,  
     ""     `Y8  
     ,adPPPPP88  
     88,    ,88  
     `"8bbdP"Y8  
-
-
     88           
     88           
     88           
@@ -435,7 +236,6 @@ def gen_ascii_captcha(symbols, length=6, max_h=10, noise_level=0, noise_char='.'
     
     symbols = gen_ascii_symbols(input_file='ascii_symbols.txt',
                                 chars = string.ascii_lowercase+string.ascii_uppercase+'0123456789')
-
     while True:
         captcha = gen_ascii_captcha(symbols, noise_level=0.2)
         x = input('captcha: ')
@@ -473,7 +273,7 @@ def gen_ascii_captcha(symbols, length=6, max_h=10, noise_level=0, noise_char='.'
 def rnd_sample_df(df, n=1, slice_size=1):
     '''
     Yield dataframes generated by randomly slicing df.
-    It is different from pd.DataFrame.sample().
+    It is different from pandas.DataFrame.sample().
     '''
     assert n > 0 and slice_size > 0
     max_len = len(df)-slice_size
@@ -498,7 +298,7 @@ def date_to_stamp(d='2012-12-31'):
 def rolling_normalize_df(df, method='min-max', size=30, overlap=5):
     '''
     Return a new df with datapoints normalized based on a sliding window
-    of rolling on the a pd.DataFrame.
+    of rolling on the a pandas.DataFrame.
     It is useful to have local (window by window) normalization of the values.
     '''
     
@@ -852,7 +652,6 @@ def xna_calc(sequence, t='dsDNA', p=0):
 def occur(string, sub):
     '''
     Counts the occurrences of a sequence in a string considering overlaps.
-
     Example:
             >> s = 'ACTGGGACGGGGGG'
             >> s.count('GGG')
@@ -874,36 +673,24 @@ def get_prime(n):
         if all(num%i != 0 for i in range(2,int(math.sqrt(num))+1)):
             yield num
 
-
-def encrypt(infile, outfile=False):
+            
+def ssl_fencrypt(infile, outfile):
     '''(file_path, file_path) => encrypted_file
-    Uses openssl to encrypt a file.
+    Uses openssl to encrypt/decrypt files.
     '''
     pwd = getpass('enter encryption pwd:')
     if getpass('repeat pwd:') == pwd:
-        if outfile:
-            run(f'openssl enc -aes-256-cbc -a -salt -pbkdf2 -pass pass:{pwd} -in {infile} -out {outfile}',
-                shell=True)
-        else:
-            out = check_output(f'openssl enc -aes-256-cbc -a -salt -pbkdf2 -pass pass:{pwd} -in {infile}',
-                               shell=True)
-            return out
+        run(f'openssl enc -aes-256-cbc -a -salt -pass pass:{pwd} -in {infile} -out {outfile}',shell=True)
     else:
         print("passwords don't match.")
 
     
-def decrypt(infile, outfile=False):
+def ssl_fdecrypt(infile, outfile):
     '''(file_path, file_path) => decrypted_file
-    Uses openssl decrypt a file.
+    Uses openssl to encrypt/decrypt files.
     '''
     pwd = getpass('enter decryption pwd:')
-    if outfile:
-        run(f'openssl enc -d -aes-256-cbc -a -pbkdf2 -pass pass:{pwd} -in {infile} -out {outfile}',
-            shell=True)
-    else:
-        out = check_output(f'openssl enc -d -aes-256-cbc -a -pbkdf2 -pass pass:{pwd} -in {infile}',
-                           shell=True)
-        return out     
+    run(f'openssl enc -d -aes-256-cbc -a -pass pass:{pwd} -in {infile} -out {outfile}', shell=True)     
 
     
 def loop_zip(strA, strB):
@@ -927,7 +714,7 @@ def loop_zip(strA, strB):
     return zip(list(strA),list(s))
 
 
-def s_encrypt(msg, pwd):
+def encrypt(msg, pwd):
     '''(str, str) => list
     Simple encryption/decription tool.
     WARNING:
@@ -938,7 +725,7 @@ def s_encrypt(msg, pwd):
     return [(string_to_number(a)+string_to_number(b)) for a,b in loop_zip(msg, pwd)]
 
 
-def s_decrypt(encr, pwd):
+def decrypt(encr, pwd):
     '''(str, str) => list
     Simple encryption/decription tool.
     WARNING:
@@ -1091,7 +878,6 @@ def quick_align(reference, sample, matrix=matlist.blosum62, gap_open=-10, gap_ex
 def vp(var_name,var_dict=globals(),sep=' : '):
     '''(str, dict) => print
     Variable Print, a fast way to print out a variable's value.
-
     >>> scale = 0.35
     >>> mass = '71 Kg'
     >>> vp('scale')
@@ -1156,11 +942,9 @@ def get_size(obj_0):
 def total_size(o, handlers={}, verbose=False):
     '''(object, dict, bool) => print
     Returns the approximate memory footprint an object and all of its contents.
-
     Automatically finds the contents of the following builtin containers and
     their subclasses:  tuple, list, deque, dict, set and frozenset.
     To search other containers, add handlers to iterate over their contents:
-
         handlers = {SomeContainerClass: iter,
                     OtherContainerClass: OtherContainerClass.get_elements}
                     
@@ -1183,7 +967,6 @@ def total_size(o, handlers={}, verbose=False):
         24 <type 'int'> 5
         24 <type 'int'> 6
         24 <type 'int'> 7
-
     '''
     dict_handler = lambda d: chain.from_iterable(d.items())
     all_handlers = {tuple: iter,
@@ -1219,7 +1002,6 @@ def center(pattern):
     '''np.array => np.array
     Return the centered pattern, 
     which is given by [(value - mean) for value in pattern]
-
     >>> array = np.array([681.7, 682.489, 681.31, 682.001, 682.001, 682.499, 682.001])
     >>> center(array)
     array([-0.30014286,  0.48885714, -0.69014286,  0.00085714,  0.00085714, 0.49885714,  0.00085714])
@@ -1232,7 +1014,6 @@ def center(pattern):
 def rescale(pattern):
     '''np.array => np.array
     Rescale each point of the array to be a float between 0 and 1.
-
     >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> rescale(a)
     array([ 0. ,  0.2,  0.4,  0.6,  0.8,  1. ,  0.8,  0.6,  0.4,  0.2,  0. ])
@@ -1246,7 +1027,6 @@ def rescale(pattern):
 def standardize(pattern):
     '''np.array => np.array
     Return a standard pattern.
-
     >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> standardize(a)
     array([-1.41990459, -0.79514657, -0.17038855,  0.45436947,  1.07912749,
@@ -1262,7 +1042,6 @@ def standardize(pattern):
 def normalize(pattern):
     '''np.array => np.array
     Return a normalized pattern using np.linalg.norm().
-
     >>> a =  np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> normalize(a)
     '''
@@ -1271,11 +1050,9 @@ def normalize(pattern):
 
 def gen_patterns(data, length, ptype='all'):
     '''(array, int) => dict
-
     Generate all possible patterns of a given legth
     by manipulating consecutive slices of data.
     Return a dict of patterns dividad by pattern_type.
-
     >>> data = [1,2,3,4,5,4,3,2,1]
     >>> gen_patterns(data,len(data))
     {'center': {0: array([-1.77777778, -0.77777778,  0.22222222,  1.22222222,  2.22222222,  1.22222222,  0.22222222, -0.77777778, -1.77777778])},
@@ -1322,7 +1099,6 @@ def delta_percent(a, b, warnings=False):
     '''(float, float) => float
     Return the difference in percentage between a nd b. 
     If the result is 0.0 return 1e-09 instead.
-
     >>> delta_percent(20,22)
     10.0
     >>> delta_percent(2,20)
@@ -1366,7 +1142,6 @@ def cluster_patterns(pattern_list,t):
     "t" is the inverse of a similarity threshold, 
     i.e. the max discrepancy between the value of array1[i] and array2[i].
     If no simalar patterns are found,value is assigned to an empty list.
-
     >>> a  = [1,2,3,4,5,6,5,4,3,2,1]
     >>> a1 = [n+1 for n in a]
     >>> a2 = [n+5 for n in a]
@@ -1393,7 +1168,6 @@ def cluster_patterns(pattern_list,t):
 def stamp_to_date(stamp,time='utc'):
     '''(int_or_float, float, str) => datetime.datetime
     Convert UNIX timestamp to UTC or Local Time
-
     >>> stamp = 1477558868.93
     >>> print stamp_to_date(stamp,time='utc')
     2016-10-27 09:01:08.930000
@@ -1415,7 +1189,6 @@ def future_value(interest,period,cash):
     '''(float, int, int_or_float) => float
     Return the future value obtained from an amount of cash
     growing with a fix interest over a period of time.
-
     >>> future_value(0.5,1,1)
     1.5
     >>> future_value(0.1,10,100)
@@ -1507,6 +1280,9 @@ def percent_of(total, fraction):
         percent_of(30, 90)
         >>> 300.0
     '''
+    assert total > 0
+    if np.isnan(total) or np.isnan(fraction):
+        return nan
     return (100*fraction)/total
 
 
@@ -1594,10 +1370,8 @@ def get_hash(a_string,algorithm='md5'):
     Return the hash of a string calculated using various algorithms.
     
     .. code-block:: python
-
         >>> get_hash('prova','md5')
         '189bbbb00c5f1fb7fba9ad9285f193d1'
-
         >>> get_hash('prova','sha256')
         '6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba'
     '''
@@ -1644,11 +1418,9 @@ def get_exons_coord_by_gene_name(gene_name):
 def get_exons_coord_by_gene_name(gene_name):
     '''string => OrderedDict
     .. code-block:: python
-
         >>> table = get_exons_coord_by_gene_name('TP53')
         >>> for k,v in table.items():
         ...    print(k,v)
-
             ENSE00002419584 ['7,579,721', '7,579,700']
     '''
     data = EnsemblRelease(75)
@@ -1682,13 +1454,11 @@ def split_overlap(seq, size, overlap, is_dataframe=False):
     Split a sequence into chunks of a specific size and overlap.
     Works also on strings!
     It is very efficient for short sequences (len(seq()) <= 100).
-
-    Set "is_dataframe=True" to split a pd.DataFrame 
+    Set "is_dataframe=True" to split a pandas.DataFrame 
     
     Examples:
         >>> split_overlap(seq=list(range(10)),size=3,overlap=2)
         [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
-
         >>> split_overlap(seq=range(10),size=3,overlap=2)
         [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
     '''
@@ -1721,16 +1491,12 @@ def split_overlap_long(seq, size, overlap, is_dataframe=False):
     Split a sequence into chunks of a specific size and overlap.
     Return a generator. It is very efficient for long sequences (len(seq()) > 100).
     https://stackoverflow.com/questions/48381870/a-better-way-to-split-a-sequence-in-chunks-with-overlaps
-
-    Set "is_dataframe=True" to split a pd.DataFrame
-
+    Set "is_dataframe=True" to split a pandas.DataFrame
     Examples:
         >>> split_overlap_long(seq=list(range(10)),size=3,overlap=2)
         <generator object split_overlap_long at 0x10bc49d58>
-
         >>> list(split_overlap_long(seq=list(range(10)),size=3,overlap=2))
         [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
-
         >>> list(split_overlap_long(seq=range(10),size=3,overlap=2))
         [range(0, 3), range(1, 4), range(2, 5), range(3, 6), range(4, 7), range(5, 8), range(6, 9), range(7, 10)]
     '''       
@@ -1751,7 +1517,6 @@ def itr_split_overlap(iterable, size, overlap):
     In case of long sequences, long_split_overlap() is more efficient
     but this function can handle potentially infinite iterables using deque().
     https://stackoverflow.com/questions/48381870/a-better-way-to-split-a-sequence-in-chunks-with-overlaps
-
     Warning: for range() and symilar, it behaves differently than split_overlap() and split_overlap_long()
     Examples:
         >>> list(itr_split_overlap(iterable=range(10),size=3,overlap=2))
@@ -2007,7 +1772,6 @@ def compare_patterns(pattA, pattB):
     Compare two arrays point by point. 
     Return a "raw similarity score". 
     You may want to center the two patterns before compare them.
-
     >>> a  = np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> a1 = np.array([n+0.1 for n in a])
     >>> a2 = np.array([n+1 for n in a])
@@ -2040,7 +1804,6 @@ def compare_bins(dict_A,dict_B):
     '''(dict,dict) => dict, dict, dict
     Compares two dicts of bins.
     Returns the shared elements, the unique elements of A and the unique elements of B.
-
     The dicts shape is supposed to be like this:
         OrderedDict([('1',
                       ['23280000-23290000',
@@ -2096,10 +1859,6 @@ def yield_file(infile):
 def sequence_from_coordinates(chromosome, strand, start, end, ref_genome=37):
     '''
     Download the nucleotide sequence from the gene_name.
-
-    In case of SSL error add the following to your script:
-        import ssl
-        ssl._create_default_https_context = ssl._create_unverified_context
     '''
     Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
     
@@ -2381,25 +2140,6 @@ def dice_coefficient(sequence_a, sequence_b):
     return score
 
 
-def levenshtein_distance(s1, s2):
-    '''
-    Return the "edit distance" of two sequences.
-    '''
-    if len(s1) > len(s2):
-        s1, s2 = s2, s1
-
-    distances = range(len(s1) + 1)
-    for i2, c2 in enumerate(s2):
-        distances_ = [i2+1]
-        for i1, c1 in enumerate(s1):
-            if c1 == c2:
-                distances_.append(distances[i1])
-            else:
-                distances_.append(1 + min((distances[i1], distances[i1 + 1], distances_[-1])))
-        distances = distances_
-    return distances[-1]
-
-
 def find_path(graph, start, end, path=[]):
     '''
     Find a path between two nodes in a graph.
@@ -2494,20 +2234,12 @@ def find_shortest_path(graph, start, end, path=[]):
 def gen_rnd_string(length):
     '''
     Return a string of uppercase and lowercase ascii letters.
-    DEPRECATED! Use randstr() instead
     '''
     
     s = [l for l in string.ascii_letters]
     random.shuffle(s)
     s = ''.join(s[:length])
     return s
-
-def randstr(length):
-    '''
-    Return a string of uppercase and lowercase ascii letters.
-    '''
-    return ''.join(random.choice(string.ascii_letters) \
-                   for i in range(length))
 
 def gene_synonyms(gene_name):
     '''str => list()
@@ -2861,9 +2593,9 @@ def extract_dgvMerged(infile, outfile):
 # annotate_fusion_genes(dataset_file)
 
 
-def fill_and_sort(pd_chrSeries):
-    '''incomplete pd.Series => complete and sorted pd.Series
-    Given a pd.Series in which the first argument is the chromosome name
+def fill_and_sort(pandas_chrSeries):
+    '''incomplete pandas.Series => complete and sorted pandas.Series
+    Given a pandas.Series in which the first argument is the chromosome name
     and the second argument is a count " [('1', 61), ('3', 28), ..., ('X', 29)]"
     This function returns a new (sorted by chromosome) series with the missing chromosome included as ('Chr_name',0).
     
@@ -2881,7 +2613,7 @@ def fill_and_sort(pd_chrSeries):
     CHROMOSOMES = [str(c) for c in range(1,23)]+['X','Y']
     chr_list = CHROMOSOMES[:]
     complete_series = []
-    for item in pd_chrSeries.iteritems():
+    for item in pandas_chrSeries.iteritems():
         chr_list.remove(item[0])
         complete_series.append(item)
     for item in chr_list:
@@ -2895,9 +2627,9 @@ def fill_and_sort(pd_chrSeries):
                 sorted_.append(_item[1])
     return pd.Series(sorted_, index=CHROMOSOMES)
 # counts = [50,9,45,6]
-# pd_chrSeries = pd.Series(counts, index=['1','4','X','10'])
-# print(pd_chrSeries)
-# good_series = fill_and_sort(pd_chrSeries)
+# pandas_chrSeries = pd.Series(counts, index=['1','4','X','10'])
+# print(pandas_chrSeries)
+# good_series = fill_and_sort(pandas_chrSeries)
 # print(good_series)
 
 
@@ -3462,7 +3194,6 @@ def kmers_finder_with_mismatches(sequence, motif_length, max_mismatches, most_co
     Find the most frequent k-mers with mismatches in a string.
     Input: A sequence and a pair of integers: motif_length (<=12) and max_mismatch (<= 3).
     Output: An OrderedDict containing all k-mers with up to d mismatches in string.
-
     Sample Input:   ACGTTGCATGTCGCATGATGCATGAGAGCT 4 1
     Sample Output:  OrderedDict([('ATGC', 5), ('ATGT', 5), ('GATG', 5),...])
     '''
@@ -3616,7 +3347,7 @@ def multi_threads_fusion_genes_annotation(folder_path, extension, max_simultaneo
 
 def pandize_dataset(annotated_dataset, verbose=True):
     '''
-    Prepares a dataset to be "pd ready".
+    Prepares a dataset to be "pandas ready".
     Takes a file path as input.
     '''
     # Parse
@@ -3859,6 +3590,37 @@ def run_pypy(code, interpr='pypy3'):
         for line in code.split('\n'):
             f.write(line+'\n')
     return check_output([interpr, 'tmp.py'])
+
+def sequence_from_coordinates(chromosome,strand,start,end): #beta hg19 only
+    '''
+    Download the nucleotide sequence from the gene_name.
+    '''
+    Entrez.email = "a.marcozzi@umcutrecht.nl" # Always tell NCBI who you are
+    
+    #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
+    NCBI_IDS = {'1':'NC_000001.10','2':'NC_000002.11','3':'NC_000003.11','4':'NC_000004.11',
+                '5':'NC_000005.9','6':'NC_000006.11','7':'NC_000007.13','8':'NC_000008.10',
+                '9':'NC_000009.11','10':'NC_000010.10','11':'NC_000011.9','12':'NC_000012.11',
+                '13':'NC_000013.10','14':'NC_000014.8','15':'NC_000015.9','16':'NC_000016.9',
+                '17':'NC_000017.10','18':'NC_000018.9','19':'NC_000019.9','20':'NC_000020.10',
+                '21':'NC_000021.8','22':'NC_000022.10','X':'NC_000023.10','Y':'NC_000024.9'}       
+  
+    try:        
+        handle = Entrez.efetch(db="nucleotide", 
+                               id=NCBI_IDS[str(chromosome)], 
+                               rettype="fasta", 
+                               strand=strand, #"1" for the plus strand and "2" for the minus strand.
+                               seq_start=start,
+                               seq_stop=end)
+        record = SeqIO.read(handle, "fasta")
+        handle.close()
+        sequence = str(record.seq)
+        return sequence
+    except ValueError:
+        print('ValueError: no sequence found in NCBI')
+        return False
+#a = sequence_from_coordinates(9,'-',21967751,21994490)
+#print(a)
 
 def sequence_from_gene(gene_name): #beta
     '''
