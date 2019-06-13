@@ -1,5 +1,5 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2018_07
+### version: 2019_06
 ### licence: MIT
 ### requires Python >= 3.6
 
@@ -43,6 +43,10 @@ from pyliftover import LiftOver
 from PIL import Image
 
 
+def jitter(n, mu=0, sigma=0.1):
+    '''Return a jittered version of n'''
+    return n + np.random.normal(mu, sigma, 1)
+    
 
 class TimeoutError(Exception):
     '''
