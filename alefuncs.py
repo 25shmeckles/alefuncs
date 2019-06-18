@@ -20,10 +20,12 @@ from pyensembl import EnsemblRelease
 
 from bs4 import BeautifulSoup
 
-from collections import OrderedDict
+from collections import OrderedDict, Set, Mapping, deque, Counter
 from operator import itemgetter
-from itertools import islice
+from itertools import islice, chain
 from threading import Thread
+from numbers import Number
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -46,7 +48,7 @@ from PIL import Image
 def jitter(n, mu=0, sigma=0.1):
     '''Return a jittered version of n'''
     return n + np.random.normal(mu, sigma, 1)
-    
+
 
 class TimeoutError(Exception):
     '''
@@ -923,6 +925,7 @@ def get_size(obj_0):
     Adapted from http://stackoverflow.com/questions/449560/how-do-i-determine-the-size-of-an-object-in-python
     '''
     def inner(obj, _seen_ids = set()):
+        zero_depth_bases = (str, bytes, Number, range, bytearray)
         obj_id = id(obj)
         if obj_id in _seen_ids:
             return 0
@@ -932,8 +935,8 @@ def get_size(obj_0):
             pass # bypass remaining control flow and return
         elif isinstance(obj, (tuple, list, Set, deque)):
             size += sum(inner(i) for i in obj)
-        elif isinstance(obj, Mapping) or hasattr(obj, iteritems):
-            size += sum(inner(k) + inner(v) for k, v in getattr(obj, iteritems)())
+        elif isinstance(obj, Mapping) or hasattr(obj, 'items'):
+            size += sum(inner(k) + inner(v) for k, v in getattr(obj, 'items')())
         # Check for custom object instances - may subclass above too
         if hasattr(obj, '__dict__'):
             size += inner(vars(obj))
@@ -1545,6 +1548,15 @@ def itr_split_overlap(iterable, size, overlap):
     yield rest
     
 
+def split_overlap_df(df, size, overlap):
+    '''(df,int,int) => generator
+    Split a pandas.DataFrame into chunks of a specific size and overlap.
+    '''       
+    if size < 1 or overlap < 0:
+        raise ValueError('size must be >= 1 and overlap >= 0')
+
+    for i in range(0, len(df) - overlap, size - overlap):            
+        yield df.iloc[i:i + size]
 
 
 def reorder_dict(d, keys):
@@ -2351,12 +2363,12 @@ def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@stu
 
 
     #GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
-    NCBI_IDS_GRCh37 = { 'NC_000001.10','NC_000002.11','NC_000003.11','NC_000004.11',
-                        'NC_000005.9','NC_000006.11','NC_000007.13','NC_000008.10',
-                        'NC_000009.11','NC_000010.10','NC_000011.9','NC_000012.11',
-                        'NC_000013.10','NC_000014.8','NC_000015.9','NC_000016.9',
-                        'NC_000017.10','NC_000018.9','NC_000019.9','NC_000020.10',
-                        'NC_000021.8','NC_000022.10','NC_000023.10','NC_000024.9'}
+    NCBI_IDS_GRCh37 = { '1':'NC_000001.10','2':'NC_000002.11','3':'NC_000003.11','4':'NC_000004.11',
+                        '5':'NC_000005.9','6':'NC_000006.11','7':'NC_000007.13','8':'NC_000008.10',
+                        '9':'NC_000009.11','10':'NC_000010.10','11':'NC_000011.9','12':'NC_000012.11',
+                        '13':'NC_000013.10','14':'NC_000014.8','15':'NC_000015.9','16':'NC_000016.9',
+                        '17':'NC_000017.10','18':'NC_000018.9','19':'NC_000019.9','20':'NC_000020.10',
+                        '21':'NC_000021.8','22':'NC_000022.10','X':'NC_000023.10','Y':'NC_000024.9'}
     
 
     CHR_LENGTHS_GRCh37 = {  '1':249250621,'2' :243199373,'3' :198022430,'4' :191154276,
@@ -2375,17 +2387,16 @@ def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@stu
         return False
 
 
-    idx = 0
-    for target_chromosome in NCBI_IDS:
-        length = CHR_LENGTHS[idx]
-        idx += 1
-
+    
+    for chromosome, nc_id in NCBI_IDS.items():
+        print(f'downloading {nc_id}')
+        length = CHR_LENGTHS[chromosome]
         sequence = False
 
         try:
                  # Always tell NCBI who you are
             handle = Entrez.efetch(db="nucleotide", 
-                                   id=target_chromosome, 
+                                   id=nc_id, 
                                    rettype="fasta", 
                                    strand=1, 
                                    seq_start=0, #this is to obtain actual start coordinates from the index
@@ -2397,7 +2408,7 @@ def download_human_genome(build='GRCh37', entrez_usr_email="A.E.vanvlimmeren@stu
         except ValueError:
             print('ValueError: no sequence found in NCBI')
 
-        with open('sequence_{}.txt'.format(target_chromosome), 'w') as f:
+        with open('sequence_{}.txt'.format(chromosome), 'w') as f:
             f.write(sequence)   
 
 
@@ -3810,3 +3821,12 @@ def yield_file(filepath):
             yield line
 # for line in yield_file('GRCh37_hg19_variants_2014-10-16.txt'):
 #   print(line[:20])
+
+def read_in_chunks(file_object, chunk_size=1024):
+    """Lazy function (generator) to read a file piece by piece.
+    Default chunk size: 1k."""
+    while True:
+        data = file_object.read(chunk_size)
+        if not data:
+            break
+        yield data
