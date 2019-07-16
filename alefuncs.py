@@ -820,10 +820,10 @@ def parse_fasta(fasta_file):
                 continue
             if line.startswith('>'):
                 if not _id:
-                    _id = line[1:].strip()
+                    _id = line.strip()[1:]
                 elif _id and seq:
                     d.update({_id:seq})
-                    _id = line[1:].strip()
+                    _id = line.strip()[1:]
                     seq = ''
             else:
                 seq += line.strip()
