@@ -1,5 +1,5 @@
 ### author:  alessio.marcozzi@gmail.com
-### version: 2019_03
+### version: 2019_07
 ### licence: MIT
 ### requires Python >= 3.6
 
