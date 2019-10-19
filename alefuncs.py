@@ -54,6 +54,31 @@ ale_palette = {'purple':"#9b59b6",
                'green':"#2ecc71"}
 
 
+def move_terminal_cursor(x, y):
+    '''
+    Move the terminal cursor to a specific position.
+    '''
+    print(f"\033[{y};{x}H")
+
+
+def print_at(x, y, txt):
+    '''
+    Print txt on a specific coordinate of the terminal screen.
+    '''
+    print(f"\033[{y};{x}H{txt}")
+
+
+def clear_terminal_output():
+    '''
+    Clear the terminal and reset the cursor at the top left corner.
+    '''
+    rows, columns = map(int,os.popen('stty size', 'r').read().split())
+    txt = ' '*columns
+    for r in range(rows):
+        print_at(0,r,txt)
+    move_terminal_cursor(0,0)
+
+
 def in_ipynb():
     '''
     Determine if the script is running on a notebook.
