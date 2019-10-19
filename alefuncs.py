@@ -54,6 +54,20 @@ ale_palette = {'purple':"#9b59b6",
                'green':"#2ecc71"}
 
 
+def in_ipynb():
+    '''
+    Determine if the script is running on a notebook.
+    '''
+    try:
+        cfg = get_ipython().config 
+        if cfg['IPKernelApp']['parent_appname'] == 'ipython-notebook':
+            return True
+        else:
+            return False
+    except NameError:
+        return False
+
+
 def compare_dict(d1, d2):
     d1_keys = set(d1.keys())
     d2_keys = set(d2.keys())
