@@ -132,6 +132,45 @@ def clear_terminal_output():
     move_terminal_cursor(0, 0)
 
 
+def move_terminal_cursor(x, y):
+    '''
+    Move the terminal cursor to a specific position.
+    '''
+    print(f"\033[{y};{x}H")
+
+
+def print_at(x, y, txt):
+    '''
+    Print txt on a specific coordinate of the terminal screen.
+    '''
+    print(f"\033[{y};{x}H{txt}")
+
+
+def clear_terminal_output():
+    '''
+    Clear the terminal and reset the cursor at the top left corner.
+    '''
+    rows, columns = map(int,os.popen('stty size', 'r').read().split())
+    txt = ' '*columns
+    for r in range(rows):
+        print_at(0,r,txt)
+    move_terminal_cursor(0,0)
+
+
+def in_ipynb():
+    '''
+    Determine if the script is running on a notebook.
+    '''
+    try:
+        cfg = get_ipython().config 
+        if cfg['IPKernelApp']['parent_appname'] == 'ipython-notebook':
+            return True
+        else:
+            return False
+    except NameError:
+        return False
+
+
 def compare_dict(d1, d2):
     d1_keys = set(d1.keys())
     d2_keys = set(d2.keys())
