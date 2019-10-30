@@ -55,12 +55,16 @@ ale_palette = {
 }
 
 
-def stretch(arr, factor=2):
+def stretch(arr, factor=False, length=False):
     '''
     Stretch an array along the x-axis.
     '''
+    assert factor or length, '"factor" or "length" must be specified.'
     n = len(arr)
-    return np.interp(np.linspace(0, n, factor*n), np.arange(n), arr)
+    if factor:
+        return np.interp(np.linspace(0, n, factor*n), np.arange(n), arr)
+    elif length:
+        return np.interp(np.linspace(0, n, length), np.arange(n), arr)
 
 
 def install_ssl_certificates():
