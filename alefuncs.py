@@ -55,6 +55,13 @@ ale_palette = {
 }
 
 
+def stretch(arr, factor=2):
+    '''
+    Stretch an array along the x-axis.
+    '''
+    n = len(arr)
+    return np.interp(np.linspace(0, n, factor*n), np.arange(n), arr)
+
 
 def install_ssl_certificates():
 	'''
