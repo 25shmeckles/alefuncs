@@ -4278,14 +4278,15 @@ def parse_blastXML(infile):
 
 
 def reverse(sequence):
-    r = ""
-    for i in range(len(sequence), 0, -1):
-        r += sequence[i - 1]
-    return r
+    return ''.join(list(reversed(sequence)))
 
 
 def complement(sequence):
-    d = {"A": "T", "a": "t", "T": "A", "t": "a", "C": "G", "c": "g", "G": "C", "g": "c"}
+    d = {
+    "A": "T", "a": "t", "T": "A", "t": "a",
+    "C": "G", "c": "g", "G": "C", "g": "c",
+    "N":"N", "n":"n"
+    }
     r = ""
     for b in sequence.upper():
         r += d[b]
