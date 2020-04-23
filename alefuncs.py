@@ -36,7 +36,7 @@ import pandas as pd
 import regex
 import re
 
-import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal, warnings
 import httplib2 as http
 
 from urllib.request import urlopen
@@ -53,6 +53,17 @@ ale_palette = {
     "black": "#34495e",
     "green": "#2ecc71",
 }
+
+
+def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
+    '''
+    Traceback Warnings
+    How to use: warnings.showwarning = warn_with_traceback
+    https://stackoverflow.com/questions/22373927/get-traceback-of-warnings
+    '''
+    log = file if hasattr(file,'write') else sys.stderr
+    traceback.print_stack(file=log)
+    log.write(warnings.formatwarning(message, category, filename, lineno, line))
 
 
 def stretch(arr, factor=False, length=False):
@@ -2849,130 +2860,171 @@ def dict_overview(dictionary, how_many_keys, indent=False):
             print(f"{k}\t{dictionary[k]}")
 
 
-def download_human_genome(
-    build="GRCh37", entrez_usr_email="A.E.vanvlimmeren@students.uu.nl"
-):  # beta: works properly only forGRCh37
+def download_human_genome(build="hg19"):
+    if build == "hg19":
+        run('wget -O hg19.fa.gz -r https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/latest/hg19.fa.gz', shell=True)
+    elif build == "hg38":
+        run('wget -O hg38.fa.gz -r https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/latest/hg38.fa.gz', shell=True)
+    print('Invalid build. Accepted values are: hg19, hg38')
+
+
+
+def download_human_genome_old(
+    build = "GRCh37",
+    entrez_usr_email = "a.marcozzi@umcutrecht.nl"
+): 
     """
     Download the Human genome from enterez.
-    Save each chromosome in a separate txt file.
     """
 
     Entrez.email = entrez_usr_email
 
     # Last available version
-    NCBI_IDS = {
-        "1": "NC_000001",
-        "2": "NC_000002",
-        "3": "NC_000003",
-        "4": "NC_000004",
-        "5": "NC_000005",
-        "6": "NC_000006",
-        "7": "NC_000007",
-        "8": "NC_000008",
-        "9": "NC_000009",
-        "10": "NC_000010",
-        "11": "NC_000011",
-        "12": "NC_000012",
-        "13": "NC_000013",
-        "14": "NC_000014",
-        "15": "NC_000015",
-        "16": "NC_000016",
-        "17": "NC_000017",
-        "18": "NC_000018",
-        "19": "NC_000019",
-        "20": "NC_000020",
-        "21": "NC_000021",
-        "22": "NC_000022",
-        "X": "NC_000023",
-        "Y": "NC_000024",
-    }
-
-    # GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
-    NCBI_IDS_GRCh37 = {
-        "1": "NC_000001.10",
-        "2": "NC_000002.11",
-        "3": "NC_000003.11",
-        "4": "NC_000004.11",
-        "5": "NC_000005.9",
-        "6": "NC_000006.11",
-        "7": "NC_000007.13",
-        "8": "NC_000008.10",
-        "9": "NC_000009.11",
-        "10": "NC_000010.10",
-        "11": "NC_000011.9",
-        "12": "NC_000012.11",
-        "13": "NC_000013.10",
-        "14": "NC_000014.8",
-        "15": "NC_000015.9",
-        "16": "NC_000016.9",
-        "17": "NC_000017.10",
-        "18": "NC_000018.9",
-        "19": "NC_000019.9",
-        "20": "NC_000020.10",
-        "21": "NC_000021.8",
-        "22": "NC_000022.10",
-        "X": "NC_000023.10",
-        "Y": "NC_000024.9",
-    }
-
-    CHR_LENGTHS_GRCh37 = {
-        "1": 249250621,
-        "2": 243199373,
-        "3": 198022430,
-        "4": 191154276,
-        "5": 180915260,
-        "6": 171115067,
-        "7": 159138663,
-        "8": 146364022,
-        "9": 141213431,
-        "10": 135534747,
-        "11": 135006516,
-        "12": 133851895,
-        "13": 115169878,
-        "14": 107349540,
-        "15": 102531392,
-        "16": 90354753,
-        "17": 81195210,
-        "18": 78077248,
-        "19": 59128983,
-        "20": 63025520,
-        "21": 48129895,
-        "22": 51304566,
-        "X": 155270560,
-        "Y": 59373566,
-    }
 
     if build == "GRCh37":
+        # GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
+        NCBI_IDS_GRCh37 = {
+            "1": "NC_000001.10",
+            "2": "NC_000002.11",
+            "3": "NC_000003.11",
+            "4": "NC_000004.11",
+            "5": "NC_000005.9",
+            "6": "NC_000006.11",
+            "7": "NC_000007.13",
+            "8": "NC_000008.10",
+            "9": "NC_000009.11",
+            "10": "NC_000010.10",
+            "11": "NC_000011.9",
+            "12": "NC_000012.11",
+            "13": "NC_000013.10",
+            "14": "NC_000014.8",
+            "15": "NC_000015.9",
+            "16": "NC_000016.9",
+            "17": "NC_000017.10",
+            "18": "NC_000018.9",
+            "19": "NC_000019.9",
+            "20": "NC_000020.10",
+            "21": "NC_000021.8",
+            "22": "NC_000022.10",
+            "X": "NC_000023.10",
+            "Y": "NC_000024.9",
+        }
+
+        CHR_LENGTHS_GRCh37 = {
+            "1": 249250621,
+            "2": 243199373,
+            "3": 198022430,
+            "4": 191154276,
+            "5": 180915260,
+            "6": 171115067,
+            "7": 159138663,
+            "8": 146364022,
+            "9": 141213431,
+            "10": 135534747,
+            "11": 135006516,
+            "12": 133851895,
+            "13": 115169878,
+            "14": 107349540,
+            "15": 102531392,
+            "16": 90354753,
+            "17": 81195210,
+            "18": 78077248,
+            "19": 59128983,
+            "20": 63025520,
+            "21": 48129895,
+            "22": 51304566,
+            "X": 155270560,
+            "Y": 59373566,
+        }
+
         NCBI_IDS = NCBI_IDS_GRCh37
         CHR_LENGTHS = CHR_LENGTHS_GRCh37
+
+    elif build == "GRCh38":
+        NCBI_IDS_GRCh38 = {
+            "1": "NC_000001.11",
+            "2": "NC_000002.12",
+            "3": "NC_000003.12",
+            "4": "NC_000004.12",
+            "5": "NC_000005.10",
+            "6": "NC_000006.12",
+            "7": "NC_000007.14",
+            "8": "NC_000008.11",
+            "9": "NC_000009.12",
+            "10": "NC_000010.11",
+            "11": "NC_000011.10",
+            "12": "NC_000012.12",
+            "13": "NC_000013.11",
+            "14": "NC_000014.9",
+            "15": "NC_000015.10",
+            "16": "NC_000016.10",
+            "17": "NC_000017.11",
+            "18": "NC_000018.10",
+            "19": "NC_000019.10",
+            "20": "NC_000020.11",
+            "21": "NC_000021.9",
+            "22": "NC_000022.11",
+            "X": "NC_000023.11",
+            "Y": "NC_000024.10",
+        }
+        CHR_LENGTHS_GRCh38 = {
+            "1": 248_956_422,
+            "2": 242_193_529,
+            "3": 198_295_559,
+            "4": 190_214_555,
+            "5": 181_538_259,
+            "6": 170_805_979,
+            "7": 159_345_973,
+            "8": 145_138_636,
+            "9": 138_394_717,
+            "10": 133_797_422,
+            "11": 135_086_622,
+            "12": 133_275_309,
+            "13": 114_364_328,
+            "14": 107_043_718,
+            "15": 101_991_189,
+            "16": 90_338_345,
+            "17": 83_257_441,
+            "18": 80_373_285,
+            "19": 58_617_616,
+            "20": 64_444_167,
+            "21": 46_709_983,
+            "22": 50_818_468,
+            "X": 156_040_895,
+            "Y": 57_227_415,
+        }
+
+    
+        NCBI_IDS = NCBI_IDS_GRCh38
+        CHR_LENGTHS = CHR_LENGTHS_GRCh38
     else:
-        print("This function only work with genome build GRCh37 fow now...")
+        print("This function only work with the genome builds GRCh37 & GRCh38 fow now...")
         return False
 
-    for chromosome, nc_id in NCBI_IDS.items():
-        print(f"downloading {nc_id}")
-        length = CHR_LENGTHS[chromosome]
-        sequence = False
+    with open(f"Homo_sapiens_assembly{build}.fasta", "w") as f:
+        for chromosome, nc_id in NCBI_IDS.items():
+            print(f"downloading {nc_id}")
+            length = CHR_LENGTHS[chromosome]
+            sequence = False
 
-        try:
-            # Always tell NCBI who you are
-            handle = Entrez.efetch(
-                db="nucleotide",
-                id=nc_id,
-                rettype="fasta",
-                strand=1,
-                seq_start=0,  # this is to obtain actual start coordinates from the index
-                seq_stop=length,
-            )  # this is the end of the chromosome
-            record = SeqIO.read(handle, "fasta")
-            handle.close()
-            sequence = str(record.seq)
+            try:
+                # Always tell NCBI who you are
+                handle = Entrez.efetch(
+                    db="nucleotide",
+                    id=nc_id,
+                    rettype="fasta",
+                    strand=1,
+                    seq_start=0,  # this is to obtain actual start coordinates from the index
+                    seq_stop=length,
+                )  # this is the end of the chromosome
+                record = SeqIO.read(handle, "fasta")
+                handle.close()
+                sequence = str(record.seq)
 
-        except ValueError:
-            print("ValueError: no sequence found in NCBI")
-
-        with open("sequence_{}.txt".format(chromosome), "w") as f:
-            f.write(sequence)
+                header = f'>{chromosome} dna:chromosome chromosome:{build}:{chromosome}:1:{length}:1'    
+                f.write(f'{header}\n{sequence}\n')
+            except ValueError:
+                print("ValueError: no sequence found in NCBI")
 
 
 def exponential_range(start=0, end=10000, base=10):
