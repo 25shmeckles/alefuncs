@@ -79,7 +79,7 @@ def stretch(arr, factor=False, length=False):
 
 
 def install_ssl_certificates():
-	'''
+    '''
     Fix for [SSL: CERTIFICATE_VERIFY_FAILED]
     '''
     # sample script to install or update a set of default Root Certificates
