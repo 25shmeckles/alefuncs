@@ -55,6 +55,38 @@ ale_palette = {
 }
 
 
+def rnd_candle(start):
+    """int => np.array
+    Return a random candle.
+    """
+    r = random.random
+    candle = [start]
+    for _ in range(3):
+        if r() > 0.5:
+            start += r()
+        else:
+            start -= r()
+        candle.append(start)
+    O = candle[0]
+    C = candle[-1]
+    H = max(candle)
+    L = min(candle)
+    return [O,H,L,C]
+
+
+def make rnd_walk_dandles(start):
+    """int => list_of_lists
+    Return a random walk path of [open, high, low, close] candles.
+    """
+
+    candles = []
+    for n in range(100):
+        c = rnd_candle(start)
+        candles.append(c)
+        start = c[-1]
+    return candles
+
+
 def stretch(arr, factor=False, length=False):
     '''
     Stretch an array along the x-axis.
@@ -68,7 +100,7 @@ def stretch(arr, factor=False, length=False):
 
 
 def install_ssl_certificates():
-	'''
+    '''
     Fix for [SSL: CERTIFICATE_VERIFY_FAILED]
     '''
     # sample script to install or update a set of default Root Certificates
