@@ -36,7 +36,7 @@ import pandas as pd
 import regex
 import re
 
-import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal, warnings
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal, warnings, decimal
 import httplib2 as http
 
 from urllib.request import urlopen
@@ -53,6 +53,16 @@ ale_palette = {
     "black": "#34495e",
     "green": "#2ecc71",
 }
+
+
+
+def float_range(start, stop, step):
+    '''
+    range()-like function with float steps.
+    '''
+    while start < stop:
+        yield float(start)
+        start += decimal.Decimal(step)
 
 
 def rnd_candle(start):
