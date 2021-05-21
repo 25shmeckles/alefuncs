@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 
 from collections import OrderedDict, Set, Mapping, deque, Counter
 from operator import itemgetter
-from itertools import islice, chain
+from itertools import islice, chain, tee
 from threading import Thread
 from numbers import Number
 
@@ -54,6 +54,11 @@ ale_palette = {
     "green": "#2ecc71",
 }
 
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 
 def is_int(txt):
