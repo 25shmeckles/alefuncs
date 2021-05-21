@@ -55,6 +55,45 @@ ale_palette = {
 }
 
 
+def is_int(txt):
+    '''
+    Determine if a string can interpreted as integer.
+    '''
+    try:
+        int(txt)
+        return True
+    except ValueError:
+        return False
+
+
+def count_atoms(formula):
+    '''
+    Count atoms in a chemical formula.
+    >>> atomize('C6H12O7')
+    Counter({'H': 12, 'O': 7, 'C': 6})
+    >>> atomize('C6H12O7MgCl2')
+    Counter({'H': 12, 'O': 7, 'C': 6, 'Cl': 2, 'Mg': 1})
+    '''
+    r = ''
+    c = Counter()
+    for i, letter in enumerate(formula):
+        if letter.isupper():
+            r += ' ' + letter
+        else:
+            r += letter
+    r = r.strip().split()
+    for g in r:
+        counted = False
+        for i,s in enumerate(g):
+            if is_int(s):
+                c.update({g[:i]:int(g[i:])})
+                counted = True
+                break
+        if not counted:
+            c.update({g:1})
+    return c
+
+
 def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
     '''
     Traceback Warnings
@@ -731,8 +770,8 @@ def merge_dict(dictA, dictB):
     r = {}
 
     common_k = [k for k in dictA if k in dictB]
-    common_k += [k for k in dictB if k in dictA]
-    common_k = set(common_k)
+    #common_k += [k for k in dictB if k in dictA]
+    #common_k = set(common_k)
 
     for k, v in dictA.items():
         # add unique k of dictA
@@ -1161,14 +1200,18 @@ def snp237(snp_number):
     """int => list
     Return the genomic position of a SNP on the GCRh37 reference genome.
     """
+
+    if type(snp_number) is str \
+    and snp_number.lower().startswith('rs'):
+        snp_number = snp_number[2:]
     query = f"https://www.snpedia.com/index.php/Rs{snp_number}"
     html = urlopen(query).read().decode("utf-8")
     for line in html.split("\n"):
-        if line.startswith('<tr><td width="90">Reference</td>'):
+        if line.startswith('<tbody><tr><td width="90">Reference</td>'):
             reference = line.split('"')[-2]
-        elif line.startswith('<tr><td width="90">Chromosome</td>'):
+        elif line.startswith('<tbody><tr><td width="90">Chromosome</td>'):
             chromosome = line.split("<td>")[1].split("<")[0]
-        elif line.startswith('<tr><td width="90">Position</td>'):
+        elif line.startswith('<tbody><tr><td width="90">Position</td>'):
             position = int(line.split("<td>")[1].split("<")[0])
             break
 
@@ -1800,24 +1843,23 @@ def get_hash(a_string, algorithm="md5"):
         raise ValueError("algorithm {} not found".format(algorithm))
 
 
-def get_first_transcript_by_gene_name(gene_name):
+def get_first_transcript_by_gene_name(gene_name, data=EnsemblRelease(75), genome_id=None):
     """str => str
     Return the id of the main trascript for a given gene.
     The data is from http://grch37.ensembl.org/
     """
-    data = EnsemblRelease(75)
+    assert genome_id in ['grch37','grch38'], 'please specify genome_id'
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(",")[0].split("=")[-1]
     gene_location = str(gene[0]).split("=")[-1].strip(")")
-    url = "http://grch37.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g={};r={}".format(
-        gene_id, gene_location
-    )
+    url = f"http://{genome_id}.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g={gene_id};r={gene_location}"
+
     for line in urlopen(url):
         if '<tbody><tr><td class="bold">' in line:
             return line.split('">')[2].split("</a>")[0]
 
 
-def get_exons_coord_by_gene_name(gene_name):
+def get_exons_coord_by_gene_name(gene_name, data=EnsemblRelease(75)):
     """str => OrderedDict({'exon_id':[coordinates]})
     Return an OrderedDict having as k the exon_id
     and as value a tuple containing the genomic coordinates ('chr',start,stop).        
@@ -1834,7 +1876,7 @@ def get_exons_coord_by_gene_name(gene_name):
     return table
 
 
-def get_exons_coord_by_gene_name(gene_name):
+def get_exons_coord_by_gene_name(gene_name, data=EnsemblRelease(75), genome_id=None):
     """string => OrderedDict
     .. code-block:: python
         >>> table = get_exons_coord_by_gene_name('TP53')
@@ -1842,14 +1884,14 @@ def get_exons_coord_by_gene_name(gene_name):
         ...    print(k,v)
             ENSE00002419584 ['7,579,721', '7,579,700']
     """
-    data = EnsemblRelease(75)
+    assert genome_id in ['grch37','grch38'], 'please specify genome_id'
+
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(",")[0].split("=")[-1]
     gene_location = str(gene[0]).split("=")[-1].strip(")")
     gene_transcript = get_first_transcript_by_gene_name(gene_name).split(".")[0]
-    url = "http://grch37.ensembl.org/Homo_sapiens/Transcript/Exons?db=core;g={};r={};t={}".format(
-        gene_id, gene_location, gene_transcript
-    )
+    url = f"http://{genome_id}.ensembl.org/Homo_sapiens/Transcript/Exons?db=core;g={gene_id};r={gene_location};t={gene_transcript}"
+
     str_html = get_html(url)
     html = ""
     for line in str_html.split("\n"):
@@ -3386,29 +3428,7 @@ def filter_out(word, infile, outfile):
 # filter_out('DUPLICATION',infile, outfile)
 
 
-def flatten2(l):
-    """
-    Flat an irregular iterable to a list.
-    Python >= 2.6 version.
-    """
-    for item in l:
-        if isinstance(item, collections.Iterable) and not isinstance(item, basestring):
-            for sub in flatten(item):
-                yield sub
-        else:
-            yield item
-
-
-def flatten(l):
-    """
-    Flat an irregular iterable to a list.
-    Python >= 3.3 version.
-    """
-    for item in l:
-        try:
-            yield from flatten(item)
-        except TypeError:
-            yield item
+flatten = lambda l: [item for sublist in l for item in sublist]
 
 
 def gene_synonyms(gene_name):
@@ -4558,61 +4578,6 @@ def run_pypy(code, interpr="pypy3"):
             f.write(line + "\n")
     return check_output([interpr, "tmp.py"])
 
-
-def sequence_from_coordinates(chromosome, strand, start, end):  # beta hg19 only
-    """
-    Download the nucleotide sequence from the gene_name.
-    """
-    Entrez.email = "a.marcozzi@umcutrecht.nl"  # Always tell NCBI who you are
-
-    # GRCh37 from http://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/#/def_asm_Primary_Assembly
-    NCBI_IDS = {
-        "1": "NC_000001.10",
-        "2": "NC_000002.11",
-        "3": "NC_000003.11",
-        "4": "NC_000004.11",
-        "5": "NC_000005.9",
-        "6": "NC_000006.11",
-        "7": "NC_000007.13",
-        "8": "NC_000008.10",
-        "9": "NC_000009.11",
-        "10": "NC_000010.10",
-        "11": "NC_000011.9",
-        "12": "NC_000012.11",
-        "13": "NC_000013.10",
-        "14": "NC_000014.8",
-        "15": "NC_000015.9",
-        "16": "NC_000016.9",
-        "17": "NC_000017.10",
-        "18": "NC_000018.9",
-        "19": "NC_000019.9",
-        "20": "NC_000020.10",
-        "21": "NC_000021.8",
-        "22": "NC_000022.10",
-        "X": "NC_000023.10",
-        "Y": "NC_000024.9",
-    }
-
-    try:
-        handle = Entrez.efetch(
-            db="nucleotide",
-            id=NCBI_IDS[str(chromosome)],
-            rettype="fasta",
-            strand=strand,  # "1" for the plus strand and "2" for the minus strand.
-            seq_start=start,
-            seq_stop=end,
-        )
-        record = SeqIO.read(handle, "fasta")
-        handle.close()
-        sequence = str(record.seq)
-        return sequence
-    except ValueError:
-        print("ValueError: no sequence found in NCBI")
-        return False
-
-
-# a = sequence_from_coordinates(9,'-',21967751,21994490)
-# print(a)
 
 
 def sequence_from_gene(gene_name):  # beta
