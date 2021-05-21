@@ -36,7 +36,7 @@ import pandas as pd
 import regex
 import re
 
-import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal, warnings
+import datetime, math, sys, hashlib, pickle, time, random, string, json, glob, os, signal, warnings, decimal
 import httplib2 as http
 
 from urllib.request import urlopen
@@ -53,6 +53,7 @@ ale_palette = {
     "black": "#34495e",
     "green": "#2ecc71",
 }
+
 
 
 def is_int(txt):
@@ -94,6 +95,47 @@ def count_atoms(formula):
     return c
 
 
+def float_range(start, stop, step):
+    '''
+    range()-like function with float steps.
+    '''
+    while start < stop:
+        yield float(start)
+        start += decimal.Decimal(step)
+
+
+def rnd_candle(start):
+    """int => np.array
+    Return a random candle.
+    """
+    r = random.random
+    candle = [start]
+    for _ in range(3):
+        if r() > 0.5:
+            start += r()
+        else:
+            start -= r()
+        candle.append(start)
+    O = candle[0]
+    C = candle[-1]
+    H = max(candle)
+    L = min(candle)
+    return [O,H,L,C]
+
+
+def make rnd_walk_dandles(start):
+    """int => list_of_lists
+    Return a random walk path of [open, high, low, close] candles.
+    """
+
+    candles = []
+    for n in range(100):
+        c = rnd_candle(start)
+        candles.append(c)
+        start = c[-1]
+    return candles
+
+
 def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
     '''
     Traceback Warnings
@@ -103,6 +145,7 @@ def warn_with_traceback(message, category, filename, lineno, file=None, line=Non
     log = file if hasattr(file,'write') else sys.stderr
     traceback.print_stack(file=log)
     log.write(warnings.formatwarning(message, category, filename, lineno, line))
+
 
 
 def stretch(arr, factor=False, length=False):
