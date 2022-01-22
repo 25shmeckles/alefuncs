@@ -54,17 +54,20 @@ ale_palette = {
     "green": "#2ecc71",
 }
 
+
 def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    """
+    s -> (s0,s1), (s1,s2), (s2, s3), ...
+    """
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
 
 
 def is_int(txt):
-    '''
+    """
     Determine if a string can interpreted as integer.
-    '''
+    """
     try:
         int(txt)
         return True
@@ -73,37 +76,37 @@ def is_int(txt):
 
 
 def count_atoms(formula):
-    '''
+    """
     Count atoms in a chemical formula.
     >>> atomize('C6H12O7')
     Counter({'H': 12, 'O': 7, 'C': 6})
     >>> atomize('C6H12O7MgCl2')
     Counter({'H': 12, 'O': 7, 'C': 6, 'Cl': 2, 'Mg': 1})
-    '''
-    r = ''
+    """
+    r = ""
     c = Counter()
     for i, letter in enumerate(formula):
         if letter.isupper():
-            r += ' ' + letter
+            r += " " + letter
         else:
             r += letter
     r = r.strip().split()
     for g in r:
         counted = False
-        for i,s in enumerate(g):
+        for i, s in enumerate(g):
             if is_int(s):
-                c.update({g[:i]:int(g[i:])})
+                c.update({g[:i]: int(g[i:])})
                 counted = True
                 break
         if not counted:
-            c.update({g:1})
+            c.update({g: 1})
     return c
 
 
 def float_range(start, stop, step):
-    '''
+    """
     range()-like function with float steps.
-    '''
+    """
     while start < stop:
         yield float(start)
         start += decimal.Decimal(step)
@@ -125,14 +128,13 @@ def rnd_candle(start):
     C = candle[-1]
     H = max(candle)
     L = min(candle)
-    return [O,H,L,C]
+    return [O, H, L, C]
 
 
-def make rnd_walk_dandles(start):
+def make_rnd_walk_dandles(start):
     """int => list_of_lists
     Return a random walk path of [open, high, low, close] candles.
     """
-
     candles = []
     for n in range(100):
         c = rnd_candle(start)
@@ -142,33 +144,32 @@ def make rnd_walk_dandles(start):
 
 
 def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
-    '''
+    """
     Traceback Warnings
     How to use: warnings.showwarning = warn_with_traceback
     https://stackoverflow.com/questions/22373927/get-traceback-of-warnings
-    '''
-    log = file if hasattr(file,'write') else sys.stderr
+    """
+    log = file if hasattr(file, "write") else sys.stderr
     traceback.print_stack(file=log)
     log.write(warnings.formatwarning(message, category, filename, lineno, line))
 
 
-
 def stretch(arr, factor=False, length=False):
-    '''
+    """
     Stretch an array along the x-axis.
-    '''
+    """
     assert factor or length, '"factor" or "length" must be specified.'
     n = len(arr)
     if factor:
-        return np.interp(np.linspace(0, n, factor*n), np.arange(n), arr)
+        return np.interp(np.linspace(0, n, factor * n), np.arange(n), arr)
     elif length:
         return np.interp(np.linspace(0, n, length), np.arange(n), arr)
 
 
 def install_ssl_certificates():
-    '''
+    """
     Fix for [SSL: CERTIFICATE_VERIFY_FAILED]
-    '''
+    """
     # sample script to install or update a set of default Root Certificates
     # for the ssl module.  Uses the certificates provided by the certifi package:
     # https://pypi.python.org/pypi/certifi
@@ -180,17 +181,25 @@ def install_ssl_certificates():
     import subprocess
     import sys
 
-    STAT_0o775 = ( stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR
-                 | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP
-                 | stat.S_IROTH |                stat.S_IXOTH )
-
+    STAT_0o775 = (
+        stat.S_IRUSR
+        | stat.S_IWUSR
+        | stat.S_IXUSR
+        | stat.S_IRGRP
+        | stat.S_IWGRP
+        | stat.S_IXGRP
+        | stat.S_IROTH
+        | stat.S_IXOTH
+    )
 
     openssl_dir, openssl_cafile = os.path.split(
-        ssl.get_default_verify_paths().openssl_cafile)
+        ssl.get_default_verify_paths().openssl_cafile
+    )
 
     print(" -- pip install --upgrade certifi")
-    subprocess.check_call([sys.executable,
-        "-E", "-s", "-m", "pip", "install", "--upgrade", "certifi"])
+    subprocess.check_call(
+        [sys.executable, "-E", "-s", "-m", "pip", "install", "--upgrade", "certifi"]
+    )
 
     import certifi
 
@@ -242,37 +251,37 @@ def clear_terminal_output():
 
 
 def move_terminal_cursor(x, y):
-    '''
+    """
     Move the terminal cursor to a specific position.
-    '''
+    """
     print(f"\033[{y};{x}H")
 
 
 def print_at(x, y, txt):
-    '''
+    """
     Print txt on a specific coordinate of the terminal screen.
-    '''
+    """
     print(f"\033[{y};{x}H{txt}")
 
 
 def clear_terminal_output():
-    '''
+    """
     Clear the terminal and reset the cursor at the top left corner.
-    '''
-    rows, columns = map(int,os.popen('stty size', 'r').read().split())
-    txt = ' '*columns
+    """
+    rows, columns = map(int, os.popen("stty size", "r").read().split())
+    txt = " " * columns
     for r in range(rows):
-        print_at(0,r,txt)
-    move_terminal_cursor(0,0)
+        print_at(0, r, txt)
+    move_terminal_cursor(0, 0)
 
 
 def in_ipynb():
-    '''
+    """
     Determine if the script is running on a notebook.
-    '''
+    """
     try:
-        cfg = get_ipython().config 
-        if cfg['IPKernelApp']['parent_appname'] == 'ipython-notebook':
+        cfg = get_ipython().config
+        if cfg["IPKernelApp"]["parent_appname"] == "ipython-notebook":
             return True
         else:
             return False
@@ -295,7 +304,7 @@ class DotNotDict:
     """
     Trasform a dictionary into a class so you can use
     the dot-notation to access the dictionary data.
-    
+
     Example:
         >> d = {'alpha':0,'beta':1,'gamma':3.5}
         >> d = DotNotDict(d)
@@ -400,7 +409,7 @@ def viterbi(pi, a, b, obs):
 
 
 def gauss_func(x, amp, x0, sigma):
-    return amp * np.exp(-(x - x0) ** 2.0 / (2.0 * sigma ** 2.0))
+    return amp * np.exp(-((x - x0) ** 2.0) / (2.0 * sigma ** 2.0))
 
 
 def call_python(Version, Module, Function, ArgumentList):
@@ -544,30 +553,30 @@ def find_min_max(array):
 def smooth(array, window_len=10, window="hanning"):
     """np.array, int, str => np.array
     Smooth the data using a window with requested size.
-    
+
     This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal 
+    The signal is prepared by introducing reflected copies of the signal
     (with the window size) in both ends so that transient parts are minimized
-    in the begining and end part of the output signal.
-    
+    in the beginning and end part of the output signal.
+
     input:
-        x: the input signal 
+        x: the input signal
         window_len: the dimension of the smoothing window; should be an odd integer
         window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
     output:
         the smoothed signal
-        
+
     example:
         t = linspace(-2,2,0.1)
         x = sin(t)+randn(len(t))*0.1
         y = smooth(x)
-    
-    see also: 
-    
+
+    see also:
+
     numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
     scipy.signal.lfilter
- 
+
     TODO: the window parameter could be the window itself if an array instead of a string
     NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
     """
@@ -583,7 +592,7 @@ def smooth(array, window_len=10, window="hanning"):
 
     if not window in ["flat", "hanning", "hamming", "bartlett", "blackman"]:
         raise ValueError(
-            "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+            "Window must be one of ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']"
         )
 
     s = np.r_[array[window_len - 1 : 0 : -1], array, array[-2 : -window_len - 1 : -1]]
@@ -624,24 +633,24 @@ def gen_ascii_symbols(input_file, chars):
     Return a dict of letters/numbers associated with
     the corresponding ascii-art representation.
     You can use http://www.network-science.de/ascii/ to generate the ascii-art for each symbol.
-        
+
     The input file looks like:
-    ,adPPYYba,  
-    ""     `Y8  
-    ,adPPPPP88  
-    88,    ,88  
-    `"8bbdP"Y8  
-    88           
-    88           
-    88           
-    88,dPPYba,   
-    88P'    "8a  
-    88       d8  
-    88b,   ,a8"  
+    ,adPPYYba,
+    ""     `Y8
+    ,adPPPPP88
+    88,    ,88
+    `"8bbdP"Y8
+    88
+    88
+    88
+    88,dPPYba,
+    88P'    "8a
+    88       d8
+    88b,   ,a8"
     8Y"Ybbd8"'
-    
+
     ...
-    
+
     Each symbol is separated by at least one empty line ("\n")
     """
     # input_file = 'ascii_symbols.txt'
@@ -667,9 +676,9 @@ def gen_ascii_captcha(symbols, length=6, max_h=10, noise_level=0, noise_char="."
     """
     Return a string of the specified length made by random symbols.
     Print the ascii-art representation of it.
-    
+
     Example:
-    
+
     symbols = gen_ascii_symbols(input_file='ascii_symbols.txt',
                                 chars = string.ascii_lowercase+string.ascii_uppercase+'0123456789')
     while True:
@@ -804,12 +813,12 @@ def merge_dict(dictA, dictB):
     """(dict, dict) => dict
     Merge two dicts, if they contain the same keys, it sums their values.
     Return the merged dict.
-    
+
     Example:
         dictA = {'any key':1, 'point':{'x':2, 'y':3}, 'something':'aaaa'}
         dictB = {'any key':1, 'point':{'x':2, 'y':3, 'z':0, 'even more nested':{'w':99}}, 'extra':8}
         merge_dict(dictA, dictB)
-        
+
         {'any key': 2,
          'point': {'x': 4, 'y': 6, 'z': 0, 'even more nested': {'w': 99}},
          'something': 'aaaa',
@@ -818,8 +827,8 @@ def merge_dict(dictA, dictB):
     r = {}
 
     common_k = [k for k in dictA if k in dictB]
-    #common_k += [k for k in dictB if k in dictA]
-    #common_k = set(common_k)
+    # common_k += [k for k in dictB if k in dictA]
+    # common_k = set(common_k)
 
     for k, v in dictA.items():
         # add unique k of dictA
@@ -1009,7 +1018,7 @@ def xna_calc(sequence, t="dsDNA", p=0):
     Arguments:
         t (type) :'ssDNA' or 'dsDNA'
         p (phosphates): 0,1,2
-        #in case if ssDNA having 3'P, you should pass 2 i.e., 2 phospates present in 1 dsDNA molecule 
+        #in case if ssDNA having 3'P, you should pass 2 i.e., 2 phospates present in 1 dsDNA molecule
     """
     r = {}
 
@@ -1249,8 +1258,7 @@ def snp237(snp_number):
     Return the genomic position of a SNP on the GCRh37 reference genome.
     """
 
-    if type(snp_number) is str \
-    and snp_number.lower().startswith('rs'):
+    if type(snp_number) is str and snp_number.lower().startswith("rs"):
         snp_number = snp_number[2:]
     query = f"https://www.snpedia.com/index.php/Rs{snp_number}"
     html = urlopen(query).read().decode("utf-8")
@@ -1314,6 +1322,19 @@ def parse_fasta(fasta_file):
             else:
                 seq += line.strip()
         d.update({_id: seq})
+    return d
+
+
+def parse_fastq(fastq_file):
+    """file_path => dict
+    Return a dict of id:[sequences, score].
+    """
+    d = {}
+    with open(fastq_file, "r") as f:
+        data = list(filter(None, [line.strip() for line in f.readlines()]))
+        for entry in split_overlap(data, 4, 0):
+            id, seq, plus, score = entry
+            d[id] = [seq, score]
     return d
 
 
@@ -1451,10 +1472,10 @@ def total_size(o, handlers={}, verbose=False):
     To search other containers, add handlers to iterate over their contents:
         handlers = {SomeContainerClass: iter,
                     OtherContainerClass: OtherContainerClass.get_elements}
-                    
+
     >>> d = dict(a=1, b=2, c=3, d=[4,5,6,7], e='a string of chars')
     >>> print(total_size(d, verbose=True))
-    
+
         796
         280 <type 'dict'> {'a': 1, 'c': 3, 'b': 2, 'e': 'a string of chars', 'd': [4, 5, 6, 7]}
         38 <type 'str'> 'a'
@@ -1505,7 +1526,7 @@ def total_size(o, handlers={}, verbose=False):
 
 def center(pattern):
     """np.array => np.array
-    Return the centered pattern, 
+    Return the centered pattern,
     which is given by [(value - mean) for value in pattern]
     >>> array = np.array([681.7, 682.489, 681.31, 682.001, 682.001, 682.499, 682.001])
     >>> center(array)
@@ -1605,7 +1626,7 @@ def gen_patterns(data, length, ptype="all"):
 
 def delta_percent(a, b, warnings=False):
     """(float, float) => float
-    Return the difference in percentage between a nd b. 
+    Return the difference in percentage between a nd b.
     If the result is 0.0 return 1e-09 instead.
     >>> delta_percent(20,22)
     10.0
@@ -1644,10 +1665,10 @@ def is_similar(array1, array2, t=0.1):
 
 
 def cluster_patterns(pattern_list, t):
-    """ ([array, array, ...], float) => dict
-    Return a dict having as keys the idx of patterns in pattern_list 
+    """([array, array, ...], float) => dict
+    Return a dict having as keys the idx of patterns in pattern_list
     and as values the idx of the similar patterns.
-    "t" is the inverse of a similarity threshold, 
+    "t" is the inverse of a similarity threshold,
     i.e. the max discrepancy between the value of array1[i] and array2[i].
     If no simalar patterns are found,value is assigned to an empty list.
     >>> a  = [1,2,3,4,5,6,5,4,3,2,1]
@@ -1780,11 +1801,11 @@ def quick_entropy(sequence):
 def percent_of(total, fraction):
     """(int_or_float,int_or_float) => float
     Return the percentage of 'fraction' in 'total'.
-    
+
     Examples:
         percent_of(150, 75)
         >>> 50.0
-        
+
         percent_of(30, 90)
         >>> 300.0
     """
@@ -1876,7 +1897,7 @@ def print_sbar(n, m, s="|#.|", size=30, message=""):
 def get_hash(a_string, algorithm="md5"):
     """str => str
     Return the hash of a string calculated using various algorithms.
-    
+
     .. code-block:: python
         >>> get_hash('prova','md5')
         '189bbbb00c5f1fb7fba9ad9285f193d1'
@@ -1891,12 +1912,14 @@ def get_hash(a_string, algorithm="md5"):
         raise ValueError("algorithm {} not found".format(algorithm))
 
 
-def get_first_transcript_by_gene_name(gene_name, data=EnsemblRelease(75), genome_id=None):
+def get_first_transcript_by_gene_name(
+    gene_name, data=EnsemblRelease(75), genome_id=None
+):
     """str => str
     Return the id of the main trascript for a given gene.
     The data is from http://grch37.ensembl.org/
     """
-    assert genome_id in ['grch37','grch38'], 'please specify genome_id'
+    assert genome_id in ["grch37", "grch38"], "please specify genome_id"
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(",")[0].split("=")[-1]
     gene_location = str(gene[0]).split("=")[-1].strip(")")
@@ -1910,7 +1933,7 @@ def get_first_transcript_by_gene_name(gene_name, data=EnsemblRelease(75), genome
 def get_exons_coord_by_gene_name(gene_name, data=EnsemblRelease(75)):
     """str => OrderedDict({'exon_id':[coordinates]})
     Return an OrderedDict having as k the exon_id
-    and as value a tuple containing the genomic coordinates ('chr',start,stop).        
+    and as value a tuple containing the genomic coordinates ('chr',start,stop).
     """
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(",")[0].split("=")[-1]
@@ -1932,7 +1955,7 @@ def get_exons_coord_by_gene_name(gene_name, data=EnsemblRelease(75), genome_id=N
         ...    print(k,v)
             ENSE00002419584 ['7,579,721', '7,579,700']
     """
-    assert genome_id in ['grch37','grch38'], 'please specify genome_id'
+    assert genome_id in ["grch37", "grch38"], "please specify genome_id"
 
     gene = data.genes_by_name(gene_name)
     gene_id = str(gene[0]).split(",")[0].split("=")[-1]
@@ -1965,8 +1988,8 @@ def split_overlap(seq, size, overlap, is_dataframe=False):
     Split a sequence into chunks of a specific size and overlap.
     Works also on strings!
     It is very efficient for short sequences (len(seq()) <= 100).
-    Set "is_dataframe=True" to split a pandas.DataFrame 
-    
+    Set "is_dataframe=True" to split a pandas.DataFrame
+
     Examples:
         >>> split_overlap(seq=list(range(10)),size=3,overlap=2)
         [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7], [6, 7, 8], [7, 8, 9]]
@@ -2295,8 +2318,8 @@ def query_encode(chromosome, start, end):
 
 def compare_patterns(pattA, pattB):
     """(np.array, np.array) => float
-    Compare two arrays point by point. 
-    Return a "raw similarity score". 
+    Compare two arrays point by point.
+    Return a "raw similarity score".
     You may want to center the two patterns before compare them.
     >>> a  = np.array([1,2,3,4,5,6,5,4,3,2,1])
     >>> a1 = np.array([n+0.1 for n in a])
@@ -2546,7 +2569,7 @@ def parse_RepeatMasker(infile="RepeatMasker.txt", rep_type="class"):
     """
     Parse RepeatMasker.txt and return a dict of bins for each chromosome
     and a set of repeats found on that bin.
-    
+
     dict = {'chromosome':{'bin':set(repeats)}}
     """
 
@@ -2952,17 +2975,21 @@ def dict_overview(dictionary, how_many_keys, indent=False):
 
 def download_human_genome(build="hg19"):
     if build == "hg19":
-        run('wget -O hg19.fa.gz -r https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/latest/hg19.fa.gz', shell=True)
+        run(
+            "wget -O hg19.fa.gz -r https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/latest/hg19.fa.gz",
+            shell=True,
+        )
     elif build == "hg38":
-        run('wget -O hg38.fa.gz -r https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/latest/hg38.fa.gz', shell=True)
-    print('Invalid build. Accepted values are: hg19, hg38')
-
+        run(
+            "wget -O hg38.fa.gz -r https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/latest/hg38.fa.gz",
+            shell=True,
+        )
+    print("Invalid build. Accepted values are: hg19, hg38")
 
 
 def download_human_genome_old(
-    build = "GRCh37",
-    entrez_usr_email = "a.marcozzi@umcutrecht.nl"
-): 
+    build="GRCh37", entrez_usr_email="a.marcozzi@umcutrecht.nl"
+):
     """
     Download the Human genome from enterez.
     """
@@ -3084,11 +3111,12 @@ def download_human_genome_old(
             "Y": 57_227_415,
         }
 
-    
         NCBI_IDS = NCBI_IDS_GRCh38
         CHR_LENGTHS = CHR_LENGTHS_GRCh38
     else:
-        print("This function only work with the genome builds GRCh37 & GRCh38 fow now...")
+        print(
+            "This function only work with the genome builds GRCh37 & GRCh38 fow now..."
+        )
         return False
 
     with open(f"Homo_sapiens_assembly{build}.fasta", "w") as f:
@@ -3111,8 +3139,8 @@ def download_human_genome_old(
                 handle.close()
                 sequence = str(record.seq)
 
-                header = f'>{chromosome} dna:chromosome chromosome:{build}:{chromosome}:1:{length}:1'    
-                f.write(f'{header}\n{sequence}\n')
+                header = f">{chromosome} dna:chromosome chromosome:{build}:{chromosome}:1:{length}:1"
+                f.write(f"{header}\n{sequence}\n")
             except ValueError:
                 print("ValueError: no sequence found in NCBI")
 
@@ -3173,7 +3201,7 @@ def extract_data(
     verbose=False,
 ):
     """
-    Extract data from a file. Returns a list of tuples. 
+    Extract data from a file. Returns a list of tuples.
     Each tuple contains the data extracted from one line of the file
     in the indicated columns and with the indicated order.
     """
@@ -3407,11 +3435,11 @@ def fill_and_sort(pandas_chrSeries):
     Given a pandas.Series in which the first argument is the chromosome name
     and the second argument is a count " [('1', 61), ('3', 28), ..., ('X', 29)]"
     This function returns a new (sorted by chromosome) series with the missing chromosome included as ('Chr_name',0).
-    
+
     This is useful when creating series out of subsets grouped by Chr.
     If the Chr does not contains any event, then it will be excluded from the subset.
     However, expecially for plotting reasons, you may want to have ('Chr',0) in you list instead of a missing Chr.
-    
+
     Example.
     > series = [('1', 61), ('3', 28), ..., ('X', 29)] # in this Series Chr_2 and Chr_Y are missing.
     > fill_and_sort(series)
@@ -3637,7 +3665,7 @@ def gen_gap_table(
     resolution=10000,
 ):
     """
-    Generates a file containing a list of coordinates 
+    Generates a file containing a list of coordinates
     for wich no brakpoints have been found in the input file.
     """
     # Global constants
@@ -3781,7 +3809,7 @@ def gen_multiple_controls(real_dataset, how_many):
 
 
 def gen_deletion_dataset_from_breaks(list_of_breaks, outfile, ID_already=False):
-    """Genrates a proper deletion dataset file out of a list of breaks """
+    """Genrates a proper deletion dataset file out of a list of breaks"""
     # Var names are not pythonic but I think it is better for readibility
     header = [
         "##ID",
@@ -4133,7 +4161,7 @@ def gen_rnd_single_break(
 def kmers_finder(sequence_dict, motif_length, min_repetition):
     """(dict, int, int) => OrderedDict(sorted(list))
     Find all the motifs long 'motif_length' and repeated at least 'min_repetition' times.
-    Return an OrderedDict having motif:repetition as key:value sorted by value. 
+    Return an OrderedDict having motif:repetition as key:value sorted by value.
     """
     motif_dict = {}
     for _id, sequence in sequence_dict.items():
@@ -4319,7 +4347,7 @@ def merge_sort(intervals):
 def multi_threads_fusion_genes_annotation(
     folder_path, extension, max_simultaneous_threads
 ):
-    """ Executes annotate_fusion_genes() for each dataset file in a folder.
+    """Executes annotate_fusion_genes() for each dataset file in a folder.
     Each execution run on a different thread."""
     global running_threads
     dataset_files = list_of_files(folder_path, extension)
@@ -4398,14 +4426,21 @@ def parse_blastXML(infile):
 
 
 def reverse(sequence):
-    return ''.join(list(reversed(sequence)))
+    return "".join(list(reversed(sequence)))
 
 
 def complement(sequence):
     d = {
-    "A": "T", "a": "t", "T": "A", "t": "a",
-    "C": "G", "c": "g", "G": "C", "g": "c",
-    "N":"N", "n":"n"
+        "A": "T",
+        "a": "t",
+        "T": "A",
+        "t": "a",
+        "C": "G",
+        "c": "g",
+        "G": "C",
+        "g": "c",
+        "N": "N",
+        "n": "n",
     }
     r = ""
     for b in sequence.upper():
@@ -4627,7 +4662,6 @@ def run_pypy(code, interpr="pypy3"):
     return check_output([interpr, "tmp.py"])
 
 
-
 def sequence_from_gene(gene_name):  # beta
     """
     Download the nucleotide sequence from the gene_name.
@@ -4808,9 +4842,7 @@ def substract_datasets(infile_1, infile_2, outfile, header=True):
         if line[0] != "#":  # skips comments
             if header == True:
                 header2 = True  # to use for the second file
-                header = (
-                    False
-                )  # set back header to false since the first line will be skipped
+                header = False  # set back header to false since the first line will be skipped
                 first_line = line
                 pass
             else:
@@ -4821,9 +4853,7 @@ def substract_datasets(infile_1, infile_2, outfile, header=True):
     for line in lines_2:
         if line[0] != "#":  # skips comments
             if header2 == True:
-                header2 = (
-                    False
-                )  # set back header to false since the first line will be skipped
+                header2 = False  # set back header to false since the first line will be skipped
                 pass
             else:
                 item = line_to_list(line, "\t")
