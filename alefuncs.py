@@ -1930,21 +1930,21 @@ def get_first_transcript_by_gene_name(
             return line.split('">')[2].split("</a>")[0]
 
 
-def get_exons_coord_by_gene_name(gene_name, data=EnsemblRelease(75)):
-    """str => OrderedDict({'exon_id':[coordinates]})
-    Return an OrderedDict having as k the exon_id
-    and as value a tuple containing the genomic coordinates ('chr',start,stop).
-    """
-    gene = data.genes_by_name(gene_name)
-    gene_id = str(gene[0]).split(",")[0].split("=")[-1]
-    gene_location = str(gene[0]).split("=")[-1].strip(")")
-    gene_transcript = get_first_transcript_by_gene_name(gene_name).split(".")[0]
-    table = OrderedDict()
-    for exon_id in data.exon_ids_of_gene_id(gene_id):
-        exon = data.exon_by_id(exon_id)
-        coordinates = (exon.contig, exon.start, exon.end)
-        table.update({exon_id: coordinates})
-    return table
+#def get_exons_coord_by_gene_name(gene_name, data=EnsemblRelease(75)):
+#    """str => OrderedDict({'exon_id':[coordinates]})
+#    Return an OrderedDict having as k the exon_id
+#    and as value a tuple containing the genomic coordinates ('chr',start,stop).
+#    """
+#    gene = data.genes_by_name(gene_name)
+#    gene_id = str(gene[0]).split(",")[0].split("=")[-1]
+#    gene_location = str(gene[0]).split("=")[-1].strip(")")
+#    gene_transcript = get_first_transcript_by_gene_name(gene_name).split(".")[0]
+#    table = OrderedDict()
+#    for exon_id in data.exon_ids_of_gene_id(gene_id):
+#        exon = data.exon_by_id(exon_id)
+#        coordinates = (exon.contig, exon.start, exon.end)
+#        table.update({exon_id: coordinates})
+#    return table
 
 
 def get_exons_coord_by_gene_name(gene_name, data=EnsemblRelease(75), genome_id=None):
